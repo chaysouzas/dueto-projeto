@@ -1,0 +1,189 @@
+/* ============================================================
+   DUETO — tarefas.css
+   Específico do módulo de tarefas
+============================================================ */
+
+/* ── Resumo no header ── */
+.tarefas-header__meta {
+  margin-left: auto;
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ── Abas (diárias / periódicas / pendentes) ── */
+.tarefas-tabs {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-4);
+}
+.tarefas-tab {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.tarefas-tab.active {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  border-color: rgba(232,132,154,0.3);
+}
+
+/* ── Acordeon de grupos ── */
+.grupo-acordeon {
+  margin-bottom: var(--space-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-bg-surface);
+}
+.grupo-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background var(--transition-fast);
+}
+.grupo-header:hover { background: rgba(232,132,154,0.04); }
+.grupo-header__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.grupo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.grupo-nome {
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+.grupo-badge {
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-surface-raised);
+  border-radius: var(--radius-full);
+  padding: 1px 7px;
+}
+.grupo-badge.completo {
+  color: var(--color-success);
+  background: rgba(122,186,122,0.12);
+}
+.grupo-chevron {
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+.grupo-chevron.open { transform: rotate(180deg); }
+
+.grupo-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.28s ease;
+}
+.grupo-body.open { max-height: 600px; }
+.grupo-body .task-item:first-child {
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* ── FAB ── */
+.fab {
+  position: fixed;
+  bottom: calc(72px + var(--space-5));
+  right: var(--space-5);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(232,132,154,0.4);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  z-index: 90;
+}
+.fab:hover {
+  background: var(--color-primary-dim);
+  transform: scale(1.06);
+  box-shadow: 0 6px 20px rgba(232,132,154,0.5);
+}
+.fab:active { transform: scale(0.95); }
+.fab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+/* ── Seletor de pontos (modal) ── */
+.pts-picker {
+  display: flex;
+  gap: var(--space-2);
+}
+.pts-opt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-3) var(--space-2);
+  background: var(--color-bg-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.pts-opt.active {
+  background: var(--color-primary-subtle);
+  border-color: rgba(232,132,154,0.4);
+}
+.pts-opt__val {
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+}
+.pts-opt__label {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+}
+
+/* ── Select customizado ── */
+.select-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2.5 4.5l3.5 3.5 3.5-3.5' stroke='%237A5060' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  padding-right: var(--space-8);
+  cursor: pointer;
+}
+
+
+/* ── Variantes de cor dos ícones de grupo ── */
+.grupo-icon--pink   { background: rgba(232,132,154,0.12); }
+.grupo-icon--amber  { background: rgba(212,149,106,0.12); }
+.grupo-icon--purple { background: rgba(155,138,234,0.12); }
+
+/* ── Notificação oculta inicialmente ── */
+.notif-validate--hidden {
+  display: none !important;
+  margin: 0 var(--space-4) var(--space-3);
+}

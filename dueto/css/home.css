@@ -1,0 +1,283 @@
+/* ============================================================
+   DUETO — home.css
+   Específico da tela inicial
+============================================================ */
+
+/* ── Header ── */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+}
+.home-header__greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-header__sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.home-header__name {
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+
+.partner-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.partner-btn:hover { background: var(--color-bg-surface-raised); }
+.partner-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-secondary-subtle);
+  border: 1.5px solid rgba(212,149,106,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+.partner-btn__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ── Corpo da home ── */
+.home-body {
+  flex: 1;
+  padding: 0 var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow-y: auto;
+  padding-bottom: 72px;
+}
+
+/* ── Card de perfil + saldo ── */
+.profile-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.my-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-primary-subtle);
+  border: 2px solid rgba(232,132,154,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.profile-info { flex: 1; }
+.profile-info__name {
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+.profile-info__sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+.saldo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.saldo-box__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+.saldo-box__val {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: var(--color-secondary);
+}
+
+/* ── Card de tarefas (resumo do dia) ── */
+.tasks-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.tasks-progress {
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tasks-progress__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+.tasks-progress__count {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+}
+.progress-bar {
+  height: 3px;
+  background: var(--color-bg-surface-raised);
+  margin: 0 var(--space-4) var(--space-3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.progress-bar__fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  width: 33%;
+  transition: width 0.4s ease;
+}
+.tasks-card__footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tasks-card__footer-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+.btn-ver-todas {
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  background: var(--color-primary-subtle);
+  border: none;
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background var(--transition-fast);
+}
+.btn-ver-todas:hover { background: var(--color-bg-surface-raised); }
+
+/* ── Cards de módulos ── */
+.modules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.module-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.module-card:hover {
+  background: var(--color-bg-surface-raised);
+  border-color: var(--color-border-default);
+}
+.module-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.module-card__title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  margin-bottom: 1px;
+}
+.module-card__sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
+}
+.module-card__badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-medium);
+  align-self: flex-start;
+}
+
+/* ── Card de streak (resumo) ── */
+.streak-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.streak-card:hover { background: var(--color-bg-surface-raised); }
+.streak-card__num {
+  font-size: 32px;
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.streak-card__info { flex: 1; }
+.streak-card__label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+.streak-card__sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ── Calendário mini (home apenas) ── */
+.cal-mini { display: flex; gap: 3px; }
+.cal-mini__day {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--color-bg-surface-raised);
+}
+.cal-mini__day.done  { background: var(--color-primary); opacity: 0.7; }
+.cal-mini__day.today { background: var(--color-primary); opacity: 1; }
+
+
+/* ── Variantes de cor dos cards de módulo ── */
+.module-card__icon--amber  { background: var(--color-secondary-subtle); }
+.module-card__icon--purple { background: rgba(155,138,234,0.15); }
+.module-card__icon--green  { background: rgba(122,186,122,0.12); }
+.module-card__icon--blue   { background: rgba(106,174,212,0.12); }
+
+.module-card__badge--amber  { background: var(--color-secondary-subtle); color: var(--color-secondary); }
+.module-card__badge--purple { background: rgba(155,138,234,0.12); color: #9B8AEA; }
+.module-card__badge--green  { background: rgba(122,186,122,0.10); color: #7ABA7A; }
+.module-card__badge--blue   { background: rgba(106,174,212,0.10); color: #6AAED4; }

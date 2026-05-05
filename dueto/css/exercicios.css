@@ -1,0 +1,366 @@
+/* ============================================================
+   DUETO — exercicios.css
+   Adicionar: <link rel="stylesheet" href="css/exercicios.css">
+============================================================ */
+
+/* ── Streaks lado a lado ── */
+.ex-streaks-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.ex-streak-card {
+  flex: 1;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ex-streak-card--you   { border-color: rgba(232,132,154,0.3); }
+.ex-streak-card--partner { border-color: rgba(212,149,106,0.2); }
+
+.ex-streak-card__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ex-streak-card__num {
+  font-size: 32px;
+  font-weight: var(--font-medium);
+  line-height: 1.1;
+}
+.ex-streak-card--you     .ex-streak-card__num { color: var(--color-primary); }
+.ex-streak-card--partner .ex-streak-card__num { color: var(--color-secondary); }
+
+.ex-streak-card__sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+.ex-streak-card__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 10px;
+  color: var(--color-success);
+  margin-top: var(--space-2);
+}
+.ex-streak-card__status--pending { color: var(--color-text-tertiary); }
+
+.ex-streak-divider {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Card de meta ── */
+.ex-meta-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.ex-meta-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ex-meta-card__title {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ex-meta-card__edit {
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  padding: 0;
+}
+.ex-meta-card__goal {
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+.ex-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.ex-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--color-bg-surface-raised);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.ex-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+.ex-progress-pct {
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+  min-width: 30px;
+  text-align: right;
+}
+.ex-meta-card__sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ── Calendário semanal ── */
+.ex-cal-section { margin-bottom: var(--space-4); }
+.ex-cal-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+}
+.ex-cal-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.ex-cal-legend__dot--done { background: var(--color-primary); }
+.ex-cal-legend__dot--miss { background: var(--color-error); opacity: 0.5; }
+
+.ex-cal-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.ex-cal-day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+.ex-cal-day__label {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+}
+.ex-cal-day__dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+.ex-cal-day__dot--done  { background: var(--color-primary-subtle); border-color: rgba(232,132,154,0.4); color: var(--color-primary); }
+.ex-cal-day__dot--today { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-text-on-primary); font-weight: var(--font-medium); }
+.ex-cal-day__dot--miss  { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.2); color: var(--color-error); opacity: 0.6; }
+.ex-cal-day__dot--future { opacity: 0.3; }
+
+/* ── Histórico mensal ── */
+.ex-history-section { margin-bottom: var(--space-4); }
+.ex-history-count {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+.ex-history-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: var(--space-2);
+}
+.ex-history-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+}
+.ex-history-dot--done  { background: var(--color-primary); border-color: var(--color-primary); opacity: 0.8; }
+.ex-history-dot--miss  { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.2); }
+.ex-history-dot--future { opacity: 0.2; }
+
+/* ── Badges ── */
+.ex-badges-row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.ex-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  opacity: 0.4;
+  min-width: 64px;
+}
+.ex-badge--earned {
+  opacity: 1;
+  border-color: rgba(232,132,154,0.3);
+  background: var(--color-primary-subtle);
+}
+.ex-badge__icon { font-size: 20px; }
+.ex-badge__name {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.3;
+}
+.ex-badge--earned .ex-badge__name { color: var(--color-primary); }
+
+/* ── Botão de check-in ── */
+.ex-checkin-wrap {
+  padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-primary);
+}
+.ex-checkin-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.ex-checkin-btn:hover  { background: var(--color-primary-dim); }
+.ex-checkin-btn:active { transform: scale(0.98); }
+
+.ex-checkin-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-success);
+}
+
+/* ── Overlay de celebração ── */
+.ex-celebrate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(18,10,15,0.88);
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+  animation: fadeIn 0.2s ease;
+}
+.ex-celebrate.show { display: flex; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ex-celebrate__card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  max-width: 280px;
+  width: 90%;
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.ex-celebrate__emoji {
+  font-size: 52px;
+  animation: bounce 0.6s ease 0.2s both;
+}
+
+@keyframes bounce {
+  0%   { transform: scale(0.5); }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.ex-celebrate__num {
+  font-size: 48px;
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+  line-height: 1;
+}
+.ex-celebrate__label {
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+.ex-celebrate__sub {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.ex-celebrate__btn {
+  margin-top: var(--space-2);
+  width: 100%;
+}
+
+/* ── Modal de meta ── */
+.ex-meta-opts {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.ex-meta-opt {
+  flex: 1;
+  min-width: 48px;
+  padding: var(--space-3);
+  background: var(--color-bg-surface-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  text-align: center;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+.ex-meta-opt.active {
+  background: var(--color-primary-subtle);
+  border-color: rgba(232,132,154,0.4);
+  color: var(--color-primary);
+}

@@ -1,0 +1,313 @@
+/* ============================================================
+   DUETO — cadastro.css
+   Específico do fluxo de cadastro (4 etapas)
+============================================================ */
+
+/* ── Indicador de etapas ── */
+.steps {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4) var(--space-5);
+  gap: var(--space-2);
+}
+.step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-bg-surface-raised);
+  transition: background var(--transition-fast), width var(--transition-fast);
+}
+.step-dot.active {
+  width: 24px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+}
+.step-dot.done { background: var(--color-primary); opacity: 0.4; }
+
+/* ── Painel de etapa ── */
+.step-panel { display: none; flex-direction: column; gap: var(--space-5); }
+.step-panel.visible { display: flex; }
+
+.step-title {
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+.step-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Força da senha ── */
+.strength-bar {
+  height: 4px;
+  background: var(--color-bg-surface-raised);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: 2px;
+}
+.strength-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  width: 0%;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+/* ── Avatar picker ── */
+.avatar-picker {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.avatar-opt {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  background: var(--color-bg-surface);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  flex-shrink: 0;
+}
+.avatar-opt:hover    { border-color: rgba(232,132,154,0.5); background: var(--color-bg-surface-raised); }
+.avatar-opt.selected { border-color: var(--color-primary); background: var(--color-primary-subtle); }
+
+/* ── Color picker ── */
+.color-picker { display: flex; gap: var(--space-2); }
+.color-opt {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+.color-opt:hover    { transform: scale(1.1); }
+.color-opt.selected { border-color: var(--color-text-primary); }
+
+/* ── Preview do perfil ── */
+.profile-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+}
+.preview-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+  border: 2px solid rgba(232,132,154,0.3);
+}
+.preview-info { flex: 1; }
+.preview-name {
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+.preview-sub { font-size: var(--text-xs); color: var(--color-text-tertiary); }
+
+/* ── Código de convite ── */
+.invite-box {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+.invite-code {
+  font-size: 32px;
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+  letter-spacing: 0.2em;
+}
+.invite-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  max-width: 260px;
+}
+.btn-copy {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  border: 1px solid rgba(232,132,154,0.3);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background var(--transition-fast);
+}
+.btn-copy:hover { background: var(--color-bg-surface-raised); }
+
+/* ── Linha "ou" do código de parceiro ── */
+.or-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+.or-line { flex: 1; height: 1px; background: var(--color-border-subtle); }
+.or-text { font-size: var(--text-xs); color: var(--color-text-tertiary); }
+
+.input-invite-row {
+  display: flex;
+  gap: var(--space-2);
+  width: 100%;
+}
+.input-code {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface-raised);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  outline: none;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  transition: border-color var(--transition-fast);
+}
+.input-code::placeholder { color: var(--color-text-tertiary); letter-spacing: 0; text-transform: none; }
+.input-code:focus        { border-color: var(--color-primary); }
+.btn-check {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-secondary-subtle);
+  color: var(--color-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  border: 1px solid rgba(212,149,106,0.3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+.btn-check:hover { background: rgba(212,149,106,0.2); }
+
+/* ── Parceiro encontrado ── */
+.partner-found {
+  display: none;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-success-bg);
+  border: 1px solid rgba(122,186,122,0.25);
+  border-radius: var(--radius-md);
+}
+.partner-found.show { display: flex; }
+.partner-found__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--color-success);
+  flex-shrink: 0;
+}
+.partner-found__name { font-size: var(--text-sm); color: var(--color-success); flex: 1; }
+
+.btn-skip {
+  width: 100%;
+  padding: var(--space-2);
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.btn-skip:hover { color: var(--color-text-secondary); }
+
+
+/* ── Bloco de sucesso (etapa 4) ── */
+.step-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  text-align: center;
+  padding-top: var(--space-8);
+}
+.step-success__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-medium);
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
+}
+.step-success__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  max-width: 260px;
+}
+.step-success__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 280px;
+}
+.step-success__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+}
+.step-success__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.step-success__icon--pink  { background: var(--color-primary-subtle); }
+.step-success__icon--amber { background: var(--color-secondary-subtle); }
+.step-success__item-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.step-success__check {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.step-success__btn {
+  max-width: 280px;
+  width: 100%;
+}
+
+/* ── Label do invite-box ── */
+.invite-box__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

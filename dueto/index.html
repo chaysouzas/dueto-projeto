@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#120A0F">
+  <meta name="description" content="Dueto — app de casal com gamificação">
+  <title>Dueto</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/cadastro.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/tarefas.css">
+  <link rel="stylesheet" href="css/exercicios.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA DE LOGIN
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela ativa" id="tela-login">
+
+    <main class="login-screen" aria-labelledby="login-titulo">
+      <h1 id="login-titulo" class="visually-hidden">Entrar no Dueto</h1>
+
+      <div class="login-logo">
+        <svg aria-hidden="true" width="72" height="72" viewBox="0 0 100 100" fill="none" class="logo-svg">
+          <path d="M50 18 L34 18 Q20 18 20 50 Q20 82 34 82 L50 82 L50 72 L36 72 Q30 72 30 50 Q30 28 36 28 L50 28 Z" fill="#E8849A"/>
+          <path d="M50 18 L66 18 Q80 18 80 50 Q80 82 66 82 L50 82 L50 72 L64 72 Q70 72 70 50 Q70 28 64 28 L50 28 Z" fill="#D4956A"/>
+          <rect x="46" y="18" width="8" height="64" rx="4" fill="#F0E8C8" opacity="0.9"/>
+        </svg>
+        <div class="login-logo__name">Dueto</div>
+        <div class="login-logo__tagline">a rotina de vocês dois, em sincronia</div>
+      </div>
+
+      <form class="login-form" onsubmit="handleLogin(event)" aria-label="Formulário de login">
+
+        <input class="input" type="email" id="email"
+               placeholder="seu e-mail" autocomplete="email" required
+               aria-label="seu e-mail">
+
+        <input class="input" type="password" id="senha"
+               placeholder="senha" autocomplete="current-password" required
+               aria-label="senha">
+
+        <button class="forgot-link" type="button" data-action="abrir-recuperar">
+          esqueci minha senha
+        </button>
+
+        <button class="btn-primary" type="submit">entrar</button>
+
+        <button class="btn-secondary" type="button" data-action="ir-cadastro">
+          criar conta
+        </button>
+
+        <div class="divider-or">
+          <div class="divider-or__line"></div>
+          <span class="divider-or__text">ou</span>
+          <div class="divider-or__line"></div>
+        </div>
+
+        <button class="btn-google" type="button" data-action="login-google">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+            <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+          </svg>
+          continuar com Google
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Modal recuperar senha -->
+    <div class="modal-backdrop" id="modalRecuperar" role="dialog" aria-labelledby="modalRecuperarTitulo" aria-modal="true" data-action="fechar-modal-recuperar-fora">
+      <div class="modal">
+        <div class="modal__title" id="modalRecuperarTitulo">recuperar senha</div>
+        <div class="modal__desc">
+          Digite seu e-mail e enviaremos um link para criar uma nova senha.
+        </div>
+        <input class="input" type="email" id="emailRecuperar"
+               placeholder="seu e-mail" autocomplete="email">
+        <div class="modal__actions">
+          <button class="btn-ghost" type="button" data-action="fechar-modal-recuperar">cancelar</button>
+          <button class="btn-modal-send" type="button" data-action="enviar-recuperacao">enviar link</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA DE CADASTRO
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela" id="tela-cadastro">
+
+    <div class="screen" role="main" aria-labelledby="topTitle">
+
+      <!-- Top bar -->
+      <div class="top-bar">
+        <button class="btn-back" data-action="voltar-cadastro" aria-label="Voltar">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8l5 5" stroke="#C8A0B0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <h1 class="top-bar__title" id="topTitle">criar conta</h1>
+      </div>
+
+      <!-- Indicador de etapas -->
+      <div class="steps" id="stepsRow" role="progressbar" aria-label="Progresso do cadastro" aria-valuemin="1" aria-valuemax="4" aria-valuenow="1">
+        <div class="step-dot active" id="dot0"></div>
+        <div class="step-dot"        id="dot1"></div>
+        <div class="step-dot"        id="dot2"></div>
+        <div class="step-dot"        id="dot3"></div>
+      </div>
+
+      <div class="screen__body">
+
+        <!-- ETAPA 0 — Conta -->
+        <div class="step-panel visible" id="step0">
+          <div>
+            <div class="step-title">seus dados de acesso</div>
+            <div class="step-desc">Crie sua conta individual. Depois você conecta ao parceiro.</div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="nome">nome</label>
+            <input class="input" type="text" id="nome"
+                   placeholder="como você quer ser chamado" autocomplete="given-name">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="emailCadastro">e-mail</label>
+            <input class="input" type="email" id="emailCadastro"
+                   placeholder="seu e-mail" autocomplete="email"
+                   oninput="validarEmailCadastro()">
+            <span class="field-hint" id="emailHint"></span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="senhaCadastro">senha</label>
+            <input class="input" type="password" id="senhaCadastro"
+                   placeholder="mínimo 6 caracteres" autocomplete="new-password"
+                   oninput="verificarForca()">
+            <div class="strength-bar">
+              <div class="strength-bar__fill" id="strengthFill"></div>
+            </div>
+            <span class="field-hint" id="senhaHint"></span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="confirmar">confirmar senha</label>
+            <input class="input" type="password" id="confirmar"
+                   placeholder="repita a senha" autocomplete="new-password"
+                   oninput="verificarConfirmacao()">
+            <span class="field-hint" id="confirmarHint"></span>
+          </div>
+
+          <div class="divider-or">
+            <div class="divider-or__line"></div>
+            <span class="divider-or__text">ou cadastre com</span>
+            <div class="divider-or__line"></div>
+          </div>
+
+          <button class="btn-google" type="button" data-action="cadastro-google">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+              <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+              <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+              <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+            </svg>
+            continuar com Google
+          </button>
+
+          <button class="btn-primary" data-action="avancar" data-etapa="0">continuar</button>
+        </div>
+
+        <!-- ETAPA 1 — Perfil -->
+        <div class="step-panel" id="step1">
+          <div>
+            <div class="step-title">personalize seu perfil</div>
+            <div class="step-desc">Escolha um avatar e uma cor. Seu parceiro vai ver isso.</div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">avatar</div>
+            <div class="avatar-picker" id="avatarPicker">
+              <div class="avatar-opt selected" data-emoji="🌸" data-action="selecionar-avatar">🌸</div>
+              <div class="avatar-opt" data-emoji="🌙" data-action="selecionar-avatar">🌙</div>
+              <div class="avatar-opt" data-emoji="🌿" data-action="selecionar-avatar">🌿</div>
+              <div class="avatar-opt" data-emoji="⚡" data-action="selecionar-avatar">⚡</div>
+              <div class="avatar-opt" data-emoji="🔥" data-action="selecionar-avatar">🔥</div>
+              <div class="avatar-opt" data-emoji="🦋" data-action="selecionar-avatar">🦋</div>
+              <div class="avatar-opt" data-emoji="🐾" data-action="selecionar-avatar">🐾</div>
+              <div class="avatar-opt" data-emoji="✨" data-action="selecionar-avatar">✨</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">cor do perfil</div>
+            <div class="color-picker" id="colorPicker">
+              <div class="color-opt selected" data-color="#E8849A" style="background:#E8849A;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#D4956A" style="background:#D4956A;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#9B8AEA" style="background:#9B8AEA;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#7ABA7A" style="background:#7ABA7A;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#6AAED4" style="background:#6AAED4;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#F0C070" style="background:#F0C070;" data-action="selecionar-cor"></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">pré-visualização</div>
+            <div class="profile-preview">
+              <div class="preview-avatar" id="previewAvatar"
+                   style="background: rgba(232,132,154,0.15);">🌸</div>
+              <div class="preview-info">
+                <div class="preview-name" id="previewNome">seu nome</div>
+                <div class="preview-sub">é assim que seu parceiro vai te ver</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-primary" data-action="avancar" data-etapa="1">continuar</button>
+        </div>
+
+        <!-- ETAPA 2 — Conectar casal -->
+        <div class="step-panel" id="step2">
+          <div>
+            <div class="step-title">conectar com seu parceiro</div>
+            <div class="step-desc">Compartilhe seu código com o parceiro — ou insira o código dele para se conectar agora.</div>
+          </div>
+
+          <div class="invite-box">
+            <div class="invite-box__label">seu código</div>
+            <div class="invite-code" id="inviteCode">DU·0000</div>
+            <div class="invite-desc">Envie esse código para seu parceiro. Ele vai usá-lo para se conectar a você.</div>
+            <button class="btn-copy" data-action="copiar-codigo">
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="#E8849A" stroke-width="1.2"/>
+                <path d="M4 3V2.5A1.5 1.5 0 0 1 5.5 1H11a1.5 1.5 0 0 1 1.5 1.5V9A1.5 1.5 0 0 1 11 10.5H10" stroke="#E8849A" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              copiar código
+            </button>
+          </div>
+
+          <div class="or-row">
+            <div class="or-line"></div>
+            <span class="or-text">ou insira o código do parceiro</span>
+            <div class="or-line"></div>
+          </div>
+
+          <div class="input-invite-row">
+            <input class="input-code" type="text" id="codigoParceiro"
+                   placeholder="ex: DU·0000" maxlength="7"
+                   oninput="formatarCodigo(this)">
+            <button class="btn-check" data-action="verificar-parceiro">verificar</button>
+          </div>
+
+          <div class="partner-found" id="partnerFound">
+            <div class="partner-found__dot"></div>
+            <div class="partner-found__name" id="partnerName"></div>
+          </div>
+
+          <button class="btn-primary" id="btnConectar" data-action="avancar" data-etapa="2">conectar e entrar</button>
+          <button class="btn-skip" data-action="avancar" data-etapa="2" data-pular="true">fazer isso depois</button>
+        </div>
+
+        <!-- ETAPA 3 — Sucesso -->
+        <div class="step-panel" id="step3">
+          <div class="step-success">
+
+            <svg aria-hidden="true" width="80" height="80" viewBox="0 0 100 100" fill="none" class="logo-svg">
+              <path d="M50 18 L34 18 Q20 18 20 50 Q20 82 34 82 L50 82 L50 72 L36 72 Q30 72 30 50 Q30 28 36 28 L50 28 Z" fill="#E8849A"/>
+              <path d="M50 18 L66 18 Q80 18 80 50 Q80 82 66 82 L50 82 L50 72 L64 72 Q70 72 70 50 Q70 28 64 28 L50 28 Z" fill="#D4956A"/>
+              <rect x="46" y="18" width="8" height="64" rx="4" fill="#F0E8C8" opacity="0.9"/>
+            </svg>
+
+            <div>
+              <div class="step-success__title">
+                tudo pronto<span id="nomeSuccesso"></span>
+              </div>
+              <div class="step-success__desc">
+                Bem-vindo ao Dueto. Sua rotina a dois começa agora.
+              </div>
+            </div>
+
+            <div class="step-success__items">
+              <div class="step-success__item">
+                <div class="step-success__icon step-success__icon--pink" id="successAvatar">🌸</div>
+                <div class="step-success__item-text">perfil criado com sucesso</div>
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" class="step-success__check">
+                  <circle cx="7" cy="7" r="5.5" stroke="#7ABA7A" stroke-width="1.2"/>
+                  <path d="M4.5 7l2 2 3-3" stroke="#7ABA7A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="step-success__item">
+                <div class="step-success__icon step-success__icon--amber">
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M7 2c2.8 0 5 2.2 5 5s-2.2 5-5 5-5-2.2-5-5 2.2-5 5-5z" stroke="#D4956A" stroke-width="1.2"/>
+                    <path d="M7 5v3l2 1" stroke="#D4956A" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="step-success__item-text" id="successConexao">parceiro a conectar</div>
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" class="step-success__check" id="successConexaoIcon">
+                  <circle cx="7" cy="7" r="5.5" stroke="#7A5060" stroke-width="1.2"/>
+                  <path d="M7 4v4" stroke="#7A5060" stroke-width="1.2" stroke-linecap="round"/>
+                  <circle cx="7" cy="9.5" r="0.4" fill="#7A5060"/>
+                </svg>
+              </div>
+            </div>
+
+            <button class="btn-primary step-success__btn" data-action="ir-home">
+              entrar no Dueto
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA HOME
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela" id="tela-home">
+
+  <div class="screen" role="main" aria-labelledby="home-titulo">
+ 
+  <!-- ── Header ── -->
+  <header class="home-header">
+    <div class="home-header__greeting">
+      <span class="home-header__sub">bom dia</span>
+      <h1 class="home-header__name" id="homeNome">Ana</h1>
+    </div>
+    <button class="partner-btn" data-action="ver-parceiro">
+      <div class="partner-avatar">🌙</div>
+      <span class="partner-btn__label">parceiro</span>
+      <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M4.5 3l3 3-3 3" stroke="#7A5060" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </header>
+ 
+  <div class="home-body">
+ 
+    <!-- ── Perfil + saldo ── -->
+    <div class="profile-card">
+      <div class="my-avatar">🌸</div>
+      <div class="profile-info">
+        <div class="profile-info__name" id="profileNome">Ana</div>
+        <div class="profile-info__sub">membro desde mai. 2026</div>
+      </div>
+      <div class="saldo-box">
+        <span class="saldo-box__label">saldo</span>
+        <div class="saldo-box__val">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="5.5" stroke="#D4956A" stroke-width="1.2"/>
+            <text x="7" y="10.5" text-anchor="middle" font-size="7" font-weight="500" fill="#D4956A">$</text>
+          </svg>
+          <span id="saldoVal">420</span>
+        </div>
+      </div>
+    </div>
+ 
+ 
+    <!-- ── Tarefas do dia ── -->
+    <div>
+      <div class="section-header">
+        <span class="section-title">tarefas de hoje</span>
+        <button class="section-link" data-action="ir-tarefas">ver todas</button>
+      </div>
+ 
+      <div class="tasks-card">
+        <div class="tasks-progress">
+          <span class="tasks-progress__label">progresso do dia</span>
+          <span class="tasks-progress__count" id="progressCount">1 de 3</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar__fill" id="progressFill"></div>
+        </div>
+ 
+        <div class="task-item" data-action="toggle-task">
+          <div class="task-check done">
+            <svg aria-hidden="true" width="8" height="8" viewBox="0 0 8 8" fill="none">
+              <path d="M1.5 4l2 2 3-3" stroke="#E8849A" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="task-item__info">
+            <div class="task-item__name done">Fazer a cama</div>
+            <div class="task-item__tag">limpeza</div>
+          </div>
+          <span class="task-item__pts">+15</span>
+
+        </div>
+ 
+        <div class="task-item" data-action="toggle-task">
+          <div class="task-check"></div>
+          <div class="task-item__info">
+            <div class="task-item__name">Lavar a louça</div>
+            <div class="task-item__tag">limpeza</div>
+          </div>
+          <span class="task-item__pts">+15</span>
+        </div>
+ 
+        <div class="task-item" data-action="toggle-task">
+          <div class="task-check"></div>
+          <div class="task-item__info">
+            <div class="task-item__name">Pagar boletos</div>
+            <div class="task-item__tag">finanças</div>
+          </div>
+          <span class="task-item__pts">+50</span>
+        </div>
+ 
+        <div class="tasks-card__footer">
+          <span class="tasks-card__footer-label">2 pendentes</span>
+          <button class="btn-ver-todas" data-action="ir-tarefas">ver todas as tarefas</button>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ── Streak de exercícios ── -->
+    <div>
+      <div class="section-header">
+        <span class="section-title">exercícios</span>
+        <button class="section-link" data-action="ir-exercicios">detalhes</button>
+      </div>
+ 
+      <div class="streak-card" data-action="ir-exercicios">
+        <div class="streak-card__num">12</div>
+        <div class="streak-card__info">
+          <div class="streak-card__label">dias em sequência</div>
+          <div class="streak-card__sub">meta: 30 dias · 40% concluído</div>
+        </div>
+        <div class="cal-mini">
+          <div class="cal-mini__day done"></div>
+          <div class="cal-mini__day done"></div>
+          <div class="cal-mini__day done"></div>
+          <div class="cal-mini__day done"></div>
+          <div class="cal-mini__day done"></div>
+          <div class="cal-mini__day today"></div>
+          <div class="cal-mini__day"></div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ── Cards de módulos ── -->
+    <div>
+      <div class="section-header">
+        <span class="section-title">explorar</span>
+      </div>
+ 
+      <div class="modules-grid">
+ 
+        <div class="module-card" data-action="ir-loja">
+          <div class="module-card__icon module-card__icon--amber">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="7.5" stroke="#D4956A" stroke-width="1.3"/>
+              <text x="10" y="14" text-anchor="middle" font-size="9" font-weight="500" fill="#D4956A">$</text>
+            </svg>
+          </div>
+          <div>
+            <div class="module-card__title">loja</div>
+            <div class="module-card__sub">troque moedas por recompensas</div>
+          </div>
+          <div class="module-card__badge module-card__badge--amber">
+            420 moedas
+          </div>
+        </div>
+ 
+        <div class="module-card" data-action="toast" data-msg="em breve: filmes">
+          <div class="module-card__icon module-card__icon--purple">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="3" y="5" width="14" height="10" rx="2" stroke="#9B8AEA" stroke-width="1.3"/>
+              <path d="M8 8l5 2.5L8 13V8z" fill="#9B8AEA"/>
+            </svg>
+          </div>
+          <div>
+            <div class="module-card__title">filmes</div>
+            <div class="module-card__sub">lista para assistir juntos</div>
+          </div>
+          <div class="module-card__badge module-card__badge--purple">
+            em breve
+          </div>
+        </div>
+ 
+        <div class="module-card" data-action="toast" data-msg="em breve: receitas">
+          <div class="module-card__icon module-card__icon--green">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M6 4v5a4 4 0 0 0 8 0V4" stroke="#7ABA7A" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M10 13v3M7 16h6" stroke="#7ABA7A" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="module-card__title">receitas</div>
+            <div class="module-card__sub">o que cozinhar juntos</div>
+          </div>
+          <div class="module-card__badge module-card__badge--green">
+            em breve
+          </div>
+        </div>
+ 
+        <div class="module-card" data-action="toast" data-msg="em breve: lugares">
+          <div class="module-card__icon module-card__icon--blue">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 3c-3 0-5.5 2.5-5.5 5.5C4.5 12.5 10 18 10 18s5.5-5.5 5.5-9.5C15.5 5.5 13 3 10 3z" stroke="#6AAED4" stroke-width="1.3"/>
+              <circle cx="10" cy="8.5" r="2" stroke="#6AAED4" stroke-width="1.2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="module-card__title">lugares</div>
+            <div class="module-card__sub">onde conhecer juntos</div>
+          </div>
+          <div class="module-card__badge module-card__badge--blue">
+            em breve
+          </div>
+        </div>
+ 
+      </div>
+    </div>
+ 
+  </div>
+</div>
+
+  </div><!-- fim tela-home -->
+
+  <!-- ════════════════════════════════════════════════════════
+     TELA DE TAREFAS — adicionar ao index.html
+     Substituir: <div class="tela" id="tela-tarefas">
+     Posição: após o fechamento de tela-home
+════════════════════════════════════════════════════════ -->
+<div class="tela" id="tela-tarefas">
+  <div class="screen" role="main" aria-labelledby="tarefas-titulo">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <button class="btn-back" data-action="ir-home" aria-label="Voltar">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="#C8A0B0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h1 class="top-bar__title" id="tarefas-titulo">tarefas</h1>
+      <div class="tarefas-header__meta" id="tarefasResumoDia"></div>
+    </div>
+
+    <!-- Abas de tipo -->
+    <nav class="tarefas-tabs" aria-label="Filtrar tarefas">
+      <button class="tarefas-tab active" data-tipo="diarias"    data-action="filtrar-tipo">diárias</button>
+      <button class="tarefas-tab"        data-tipo="periodicas" data-action="filtrar-tipo">periódicas</button>
+      <button class="tarefas-tab"        data-tipo="pendentes"  data-action="filtrar-tipo">pendentes</button>
+    </nav>
+
+
+    <!-- Lista de grupos (acordeon) -->
+    <div class="screen__body" id="tarefasLista">
+
+      <!-- GRUPO: Limpeza -->
+      <div class="grupo-acordeon" id="grupo-limpeza">
+        <button class="grupo-header" data-action="toggle-grupo" data-grupo="limpeza">
+          <div class="grupo-header__left">
+            <div class="grupo-icon grupo-icon--pink">
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11l2-5h4l2 5H3z" stroke="#E8849A" stroke-width="1.1" stroke-linejoin="round"/>
+                <path d="M7 6V3M5 3h4" stroke="#E8849A" stroke-width="1.1" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span class="grupo-nome">limpeza</span>
+            <span class="grupo-badge" id="badge-limpeza">1/3</span>
+          </div>
+          <svg aria-hidden="true" class="grupo-chevron" id="chevron-limpeza" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3.5 5.5l3.5 3.5 3.5-3.5" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="grupo-body open" id="body-limpeza">
+          <div class="task-item" data-action="toggle-task" data-pts="15" data-grupo="limpeza">
+            <div class="task-check done">
+              <svg aria-hidden="true" width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="#E8849A" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <div class="task-item__info">
+              <div class="task-item__name done">Fazer a cama</div>
+            </div>
+            <span class="task-item__pts">+15</span>
+
+          </div>
+          <div class="task-item" data-action="toggle-task" data-pts="15" data-grupo="limpeza">
+            <div class="task-check"></div>
+            <div class="task-item__info">
+              <div class="task-item__name">Lavar a louça</div>
+            </div>
+            <span class="task-item__pts">+15</span>
+          </div>
+          <div class="task-item" data-action="toggle-task" data-pts="20" data-grupo="limpeza">
+            <div class="task-check"></div>
+            <div class="task-item__info">
+              <div class="task-item__name">Tirar o lixo</div>
+            </div>
+            <span class="task-item__pts">+20</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRUPO: Pets -->
+      <div class="grupo-acordeon" id="grupo-pets">
+        <button class="grupo-header" data-action="toggle-grupo" data-grupo="pets">
+          <div class="grupo-header__left">
+            <div class="grupo-icon grupo-icon--amber">
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 9c-2 0-4 1-4 2.5h8C11 10 9 9 7 9z" stroke="#D4956A" stroke-width="1.1" stroke-linejoin="round"/>
+                <circle cx="5" cy="5.5" r="1" fill="#D4956A"/>
+                <circle cx="9" cy="5.5" r="1" fill="#D4956A"/>
+                <path d="M5 3c0-1 .5-1.5 1-1.5M9 3c0-1-.5-1.5-1-1.5" stroke="#D4956A" stroke-width="1" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span class="grupo-nome">pets</span>
+            <span class="grupo-badge" id="badge-pets">0/2</span>
+          </div>
+          <svg aria-hidden="true" class="grupo-chevron open" id="chevron-pets" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3.5 5.5l3.5 3.5 3.5-3.5" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="grupo-body" id="body-pets">
+          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="pets">
+            <div class="task-check"></div>
+            <div class="task-item__info">
+              <div class="task-item__name">Dar comida ao pet</div>
+            </div>
+            <span class="task-item__pts">+10</span>
+          </div>
+          <div class="task-item" data-action="toggle-task" data-pts="20" data-grupo="pets">
+            <div class="task-check"></div>
+            <div class="task-item__info">
+              <div class="task-item__name">Passear com o pet</div>
+            </div>
+            <span class="task-item__pts">+20</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRUPO: Organização -->
+      <div class="grupo-acordeon" id="grupo-organizacao">
+        <button class="grupo-header" data-action="toggle-grupo" data-grupo="organizacao">
+          <div class="grupo-header__left">
+            <div class="grupo-icon grupo-icon--purple">
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="2" y="2" width="4" height="4" rx="1" stroke="#9B8AEA" stroke-width="1.1"/>
+                <rect x="8" y="2" width="4" height="4" rx="1" stroke="#9B8AEA" stroke-width="1.1"/>
+                <rect x="2" y="8" width="4" height="4" rx="1" stroke="#9B8AEA" stroke-width="1.1"/>
+                <rect x="8" y="8" width="4" height="4" rx="1" stroke="#9B8AEA" stroke-width="1.1"/>
+              </svg>
+            </div>
+            <span class="grupo-nome">organização</span>
+            <span class="grupo-badge" id="badge-organizacao">0/1</span>
+          </div>
+          <svg aria-hidden="true" class="grupo-chevron open" id="chevron-organizacao" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3.5 5.5l3.5 3.5 3.5-3.5" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="grupo-body" id="body-organizacao">
+          <div class="task-item" data-action="toggle-task" data-pts="50" data-grupo="organizacao">
+            <div class="task-check"></div>
+            <div class="task-item__info">
+              <div class="task-item__name">Pagar boletos</div>
+            </div>
+            <span class="task-item__pts">+50</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- fim screen__body -->
+  </div><!-- fim screen -->
+
+  <!-- FAB — criar nova tarefa -->
+  <button class="fab" id="fabNovaTarefa" data-action="abrir-nova-tarefa" aria-label="Nova tarefa">
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M11 4v14M4 11h14" stroke="#2A1020" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- Modal nova tarefa -->
+  <div class="modal-backdrop" id="modalNovaTarefa" role="dialog" aria-labelledby="novaTarefaTitulo" aria-modal="true" data-action="fechar-nova-tarefa-fora">
+    <div class="modal modal--bottom">
+      <div class="modal__handle"></div>
+      <div class="modal__title" id="novaTarefaTitulo">nova tarefa</div>
+
+      <div class="field">
+        <label class="field-label" for="novaTarefaNome">nome da tarefa</label>
+        <input class="input" type="text" id="novaTarefaNome" placeholder="ex: lavar a louça" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="novaTarefaGrupo">grupo</label>
+        <select class="input select-input" id="novaTarefaGrupo">
+          <option value="limpeza">limpeza</option>
+          <option value="pets">pets</option>
+          <option value="organizacao">organização</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="novaTarefaPts">pontos</label>
+        <div class="pts-picker" id="ptsPicker">
+          <button class="pts-opt active" data-pts="15" data-action="selecionar-pontos">
+            <span class="pts-opt__val">15</span>
+            <span class="pts-opt__label">rápida</span>
+          </button>
+          <button class="pts-opt" data-pts="50" data-action="selecionar-pontos">
+            <span class="pts-opt__val">50</span>
+            <span class="pts-opt__label">média</span>
+          </button>
+          <button class="pts-opt" data-pts="100" data-action="selecionar-pontos">
+            <span class="pts-opt__val">100</span>
+            <span class="pts-opt__label">pesada</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal__actions">
+        <button class="btn-ghost" data-action="fechar-nova-tarefa">cancelar</button>
+        <button class="btn-modal-send" data-action="criar-tarefa">criar tarefa</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- fim tela-tarefas -->
+
+<!--TELA DE EXERCÍCIOS-->
+<div class="tela" id="tela-exercicios">
+  <div class="screen" role="main" aria-labelledby="exercicios-titulo">
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <button class="btn-back" data-action="ir-home" aria-label="Voltar">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 3L5 8l5 5" stroke="#C8A0B0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h1 class="top-bar__title" id="exercicios-titulo">exercícios</h1>
+    </div>
+
+    <div class="screen__body">
+
+      <!-- Streaks lado a lado -->
+      <div class="ex-streaks-row">
+
+        <div class="ex-streak-card ex-streak-card--you">
+          <div class="ex-streak-card__label">você</div>
+          <div class="ex-streak-card__num" id="streakVoce">12</div>
+          <div class="ex-streak-card__sub">dias seguidos</div>
+          <div class="ex-streak-card__status" id="streakVoceStatus">
+            <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <circle cx="5" cy="5" r="4" stroke="#E8849A" stroke-width="1"/>
+              <path d="M3 5l1.5 1.5L7 3.5" stroke="#E8849A" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            feito hoje
+          </div>
+        </div>
+
+        <div class="ex-streak-divider">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 4C7.2 4 5 6.2 5 9c0 4 5 8 5 8s5-4 5-8c0-2.8-2.2-5-5-5z" fill="#3A1F2E" stroke="#E8849A" stroke-width="1"/>
+          </svg>
+        </div>
+
+        <div class="ex-streak-card ex-streak-card--partner">
+          <div class="ex-streak-card__label">parceiro</div>
+          <div class="ex-streak-card__num" id="streakParceiro">10</div>
+          <div class="ex-streak-card__sub">dias seguidos</div>
+          <div class="ex-streak-card__status ex-streak-card__status--pending" id="streakParceiroStatus">
+            <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <circle cx="5" cy="5" r="4" stroke="#7A5060" stroke-width="1"/>
+              <path d="M5 3v3" stroke="#7A5060" stroke-width="1" stroke-linecap="round"/>
+              <circle cx="5" cy="7.5" r="0.4" fill="#7A5060"/>
+            </svg>
+            aguardando
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Meta e progresso -->
+      <div class="ex-meta-card">
+        <div class="ex-meta-card__header">
+          <span class="ex-meta-card__title">meta atual</span>
+          <button class="ex-meta-card__edit" data-action="abrir-meta">editar</button>
+        </div>
+        <div class="ex-meta-card__goal" id="exMetaLabel">30 dias seguidos</div>
+        <div class="ex-progress-wrap">
+          <div class="ex-progress-bar">
+            <div class="ex-progress-fill" id="exProgressFill"></div>
+          </div>
+          <span class="ex-progress-pct" id="exProgressPct">40%</span>
+        </div>
+        <div class="ex-meta-card__sub" id="exMetaSub">faltam 18 dias para bater a meta</div>
+      </div>
+
+      <!-- Calendário semanal -->
+      <div class="ex-cal-section">
+        <div class="section-header">
+          <span class="section-title">esta semana</span>
+          <span class="ex-cal-legend">
+            <span class="ex-cal-legend__dot ex-cal-legend__dot--done"></span>feito
+            <span class="ex-cal-legend__dot ex-cal-legend__dot--miss"></span>perdido
+          </span>
+        </div>
+        <div class="ex-cal-row" id="exCalRow">
+          <!-- Gerado pelo JS -->
+        </div>
+      </div>
+
+      <!-- Histórico mensal compacto -->
+      <div class="ex-history-section">
+        <div class="section-header">
+          <span class="section-title">maio 2026</span>
+          <span class="ex-history-count" id="exHistoryCount">12 de 5 dias</span>
+        </div>
+        <div class="ex-history-grid" id="exHistoryGrid">
+          <!-- Gerado pelo JS -->
+        </div>
+      </div>
+
+      <!-- Conquistas -->
+      <div>
+        <div class="section-header">
+          <span class="section-title">conquistas</span>
+        </div>
+        <div class="ex-badges-row">
+          <div class="ex-badge ex-badge--earned">
+            <div class="ex-badge__icon">🔥</div>
+            <div class="ex-badge__name">7 dias</div>
+          </div>
+          <div class="ex-badge ex-badge--earned">
+            <div class="ex-badge__icon">⚡</div>
+            <div class="ex-badge__name">dupla em chamas</div>
+          </div>
+          <div class="ex-badge">
+            <div class="ex-badge__icon">🏅</div>
+            <div class="ex-badge__name">30 dias</div>
+          </div>
+          <div class="ex-badge">
+            <div class="ex-badge__icon">🤝</div>
+            <div class="ex-badge__name">maratonistas</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- fim screen__body -->
+
+    <!-- Botão de check-in -->
+    <div class="ex-checkin-wrap" id="exCheckinWrap">
+      <button class="ex-checkin-btn" id="exCheckinBtn" data-action="fazer-checkin">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M4 11l5 5 9-9" stroke="#2A1020" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        marcar hoje como feito
+      </button>
+      <div class="ex-checkin-done is-hidden" id="exCheckinDone">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="7" stroke="#7ABA7A" stroke-width="1.3"/>
+          <path d="M5 8l2.5 2.5L11 5.5" stroke="#7ABA7A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        exercício feito hoje
+      </div>
+    </div>
+
+  </div><!-- fim screen -->
+
+  <!-- Overlay de celebração -->
+  <div class="ex-celebrate" id="exCelebrate" role="alertdialog" aria-labelledby="exCelebrateTitulo" aria-hidden="true">
+    <div class="ex-celebrate__card">
+      <div class="ex-celebrate__emoji" id="exCelebrateEmoji">🔥</div>
+      <div class="ex-celebrate__num" id="exCelebrateNum">13</div>
+      <div id="exCelebrateTitulo" class="visually-hidden">Streak alcançado</div>
+      <div class="ex-celebrate__label">dias seguidos!</div>
+      <div class="ex-celebrate__sub" id="exCelebrateSub">continue assim</div>
+      <button class="btn-primary ex-celebrate__btn" data-action="fechar-celebracao">incrível!</button>
+    </div>
+  </div>
+
+  <!-- Modal editar meta -->
+  <div class="modal-backdrop" id="modalMeta" role="dialog" aria-labelledby="modalMetaTitulo" aria-modal="true" data-action="fechar-meta-fora">
+    <div class="modal modal--bottom">
+      <div class="modal__handle"></div>
+      <div class="modal__title" id="modalMetaTitulo">editar meta</div>
+      <div class="field">
+        <div class="field-label">dias de sequência</div>
+        <div class="ex-meta-opts" id="exMetaOpts">
+          <button class="ex-meta-opt" data-dias="7"  data-action="selecionar-meta">7</button>
+          <button class="ex-meta-opt" data-dias="14" data-action="selecionar-meta">14</button>
+          <button class="ex-meta-opt active" data-dias="30" data-action="selecionar-meta">30</button>
+          <button class="ex-meta-opt" data-dias="60" data-action="selecionar-meta">60</button>
+          <button class="ex-meta-opt" data-dias="90" data-action="selecionar-meta">90</button>
+        </div>
+      </div>
+      <div class="modal__actions">
+        <button class="btn-ghost" data-action="fechar-meta">cancelar</button>
+        <button class="btn-modal-send" data-action="salvar-meta">salvar</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- fim tela-exercicios -->
+
+<!-- ── Nav bar ── -->
+<nav class="nav-bar" aria-label="Navegação principal">
+  <button class="nav-item active" data-action="ir-home" aria-current="page" aria-label="Início">
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M3 9.5L10 3l7 6.5V17a1 1 0 0 1-1 1h-4v-4h-4v4H4a1 1 0 0 1-1-1V9.5z" stroke="#E8849A" stroke-width="1.3" stroke-linejoin="round"/>
+    </svg>
+    início
+  </button>
+  <button class="nav-item" data-action="ir-tarefas" aria-label="Tarefas">
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="4" y="4" width="12" height="12" rx="2" stroke="#7A5060" stroke-width="1.3"/>
+      <path d="M7 10h6M10 7v6" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    tarefas
+  </button>
+  <button class="nav-item" data-action="ir-exercicios" aria-label="Exercícios">
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <circle cx="10" cy="10" r="7" stroke="#7A5060" stroke-width="1.3"/>
+      <path d="M10 7v4l2.5 1.5" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    exercícios
+  </button>
+  <button class="nav-item" data-action="ir-loja" aria-label="Loja">
+    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M4 17l2.5-7h7L16 17H4z" stroke="#7A5060" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M7 10V7a3 3 0 0 1 6 0v3" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round"/>
+    </svg>
+    loja
+  </button>
+</nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+</div><!-- fim app-shell -->
+
+  <script src="js/app.js" defer></script>
+</body>
+</html>
