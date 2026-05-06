@@ -117,6 +117,8 @@
   cursor: pointer;
 }
 .btn-modal-send:hover { background: var(--color-primary-dim); }
+.btn-modal-send--danger { background: var(--color-error); color: #fff; }
+.btn-modal-send--danger:hover { background: #e05252; }
 
 /* ── Top bar (com botão voltar) ── */
 .top-bar {

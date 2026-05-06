@@ -308,11 +308,19 @@ function fecharResgatarCasal() {
 
 // ── Excluir item ─────────────────────────────────────────────
 function excluirItem(id) {
-  lojaEstado.individuais = lojaEstado.individuais.filter(i => i.id !== id);
-  lojaEstado.casal       = lojaEstado.casal.filter(i => i.id !== id);
-  salvarLoja();
-  renderizarLoja();
-  mostrarToast('item removido');
+  const item = [...lojaEstado.individuais, ...lojaEstado.casal].find(i => i.id === id);
+  const nome = item?.nome || 'item';
+  abrirModalConfirmar(
+    'remover item?',
+    `"${nome}" será removido da loja.`,
+    () => {
+      lojaEstado.individuais = lojaEstado.individuais.filter(i => i.id !== id);
+      lojaEstado.casal       = lojaEstado.casal.filter(i => i.id !== id);
+      salvarLoja();
+      renderizarLoja();
+      mostrarToast('item removido');
+    }
+  );
 }
 
 // ── Adicionar item ────────────────────────────────────────────
@@ -393,6 +401,26 @@ function fecharModal(id) {
   if (!temModalAberto) {
     document.querySelector('.app-shell')?.classList.remove('modal-open');
   }
+}
+
+// ── Modal de confirmação de exclusão ─────────────────────────
+let acaoPendente = null;
+
+function abrirModalConfirmar(titulo, desc, callback) {
+  document.getElementById('confirmarTitulo').textContent = titulo;
+  document.getElementById('confirmarDesc').textContent   = desc;
+  acaoPendente = callback;
+  abrirModal('modalConfirmar');
+}
+
+function fecharModalConfirmar() {
+  fecharModal('modalConfirmar');
+  acaoPendente = null;
+}
+
+function confirmarExclusao() {
+  if (acaoPendente) acaoPendente();
+  fecharModalConfirmar();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -862,14 +890,18 @@ function toggleTaskHome(item) {
   function excluirTarefa(taskId) {
     const item = document.querySelector(`[data-task-id="${taskId}"]`);
     if (!item) return;
-    const nome = item.querySelector('.task-item__name')?.textContent || 'Tarefa';
+    const nome  = item.querySelector('.task-item__name')?.textContent || 'tarefa';
     const grupo = item.dataset.grupo;
-    item.remove();
-    atualizarBadgeGrupo(grupo);
-    atualizarResumoDia();
-    // Notificação ao parceiro (simulada — TODO: Firebase push notification)
-    mostrarToast(`"${nome}" excluída — parceiro notificado`);
-    // TODO: enviar notificação real via Firestore/FCM
+    abrirModalConfirmar(
+      'remover tarefa?',
+      `"${nome}" será removida da lista.`,
+      () => {
+        item.remove();
+        atualizarBadgeGrupo(grupo);
+        atualizarResumoDia();
+        mostrarToast(`"${nome}" excluída`);
+      }
+    );
   }
 
   function calcularProxData(dias) {
@@ -1191,6 +1223,10 @@ function salvarMeta() {
 
     // Excluir tarefa
     'excluir-tarefa':               (el) => excluirTarefa(el.dataset.taskId),
+
+    // Modal de confirmação de exclusão
+    'fechar-confirmar':             () => fecharModalConfirmar(),
+    'confirmar-exclusao':           () => confirmarExclusao(),
 
     // Tipo de tarefa
     'selecionar-tipo':              (el) => selecionarTipo(el),

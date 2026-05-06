@@ -1049,6 +1049,18 @@
 
 
 
+<!-- Modal: confirmar exclusão -->
+<div class="modal-backdrop" id="modalConfirmar" role="dialog" aria-modal="true" aria-labelledby="confirmarTitulo">
+  <div class="modal">
+    <h2 class="modal__title" id="confirmarTitulo">remover?</h2>
+    <p class="modal__desc" id="confirmarDesc"></p>
+    <div class="modal__actions">
+      <button class="btn-ghost" data-action="fechar-confirmar">cancelar</button>
+      <button class="btn-modal-send btn-modal-send--danger" data-action="confirmar-exclusao">remover</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Nav bar ── -->
 <nav class="nav-bar" aria-label="Navegação principal">
   <button class="nav-item active" data-action="ir-home" aria-current="page" aria-label="Início">
