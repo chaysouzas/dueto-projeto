@@ -39,6 +39,12 @@
   transition: background var(--transition-fast);
 }
 .partner-btn:hover { background: var(--color-bg-surface-raised); }
+
+.partner-avatar .ph,
+.partner-avatar [class^="ph-"] {
+  color: var(--color-secondary);
+  font-size: 14px;
+}
 .partner-avatar {
   width: 26px;
   height: 26px;

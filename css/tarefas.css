@@ -309,3 +309,32 @@
 
 .grupo-icon--blue   { background: rgba(106, 174, 212, 0.15); }
 .grupo-icon--blue   .ph { color: #6AAED4; }
+
+
+/* ── Botão excluir tarefa ── */
+.task-item__del {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+.task-item:hover .task-item__del  { opacity: 1; }
+.task-item__del:hover {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+.task-item__del .ph { font-size: 13px; }
+
+/* Mobile: sempre visível (sem hover) */
+@media (hover: none) {
+  .task-item__del { opacity: 1; }
+}

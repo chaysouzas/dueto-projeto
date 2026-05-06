@@ -382,6 +382,19 @@ function atualizarSaldo() {
 
 
 
+// Controla overflow do app-shell para modais não serem cortados no desktop
+function abrirModal(id) {
+  document.getElementById(id)?.classList.add('open');
+  document.querySelector('.app-shell')?.classList.add('modal-open');
+}
+function fecharModal(id) {
+  document.getElementById(id)?.classList.remove('open');
+  const temModalAberto = document.querySelector('.modal-backdrop.open, .modal--bottom.open');
+  if (!temModalAberto) {
+    document.querySelector('.app-shell')?.classList.remove('modal-open');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // ════════════════════════════════════════════════════════
@@ -660,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // TELA DE TAREFAS
   // ════════════════════════════════════════════════════════
 
-  let pontosSelecionados = 15;
+  let pontosSelecionados = 10;
   let tipoSelecionado = 'diaria';
 
   function selecionarTipo(btn) {
@@ -767,7 +780,7 @@ function toggleTaskHome(item) {
 
     // Reset pontos
     document.querySelectorAll('.pts-opt').forEach(o => o.classList.remove('active'));
-    const ptsDefault = document.querySelector('.pts-opt[data-pts="15"]');
+    const ptsDefault = document.querySelector('.pts-opt[data-pts="10"]');
     if (ptsDefault) ptsDefault.classList.add('active');
     pontosSelecionados = 15;
 
@@ -814,6 +827,8 @@ function toggleTaskHome(item) {
       ? `a cada ${cicloDias} dia${cicloDias > 1 ? 's' : ''}`
       : 'diária';
 
+    const taskId = 'task-' + Date.now();
+    item.dataset.taskId = taskId;
     item.innerHTML = `
       <div class="task-check"></div>
       <div class="task-item__info">
@@ -821,6 +836,10 @@ function toggleTaskHome(item) {
         <div class="task-item__tag">${tagTexto}</div>
       </div>
       <span class="task-item__pts">+${pontosSelecionados}</span>
+      <button class="task-item__del" data-action="excluir-tarefa"
+              data-task-id="${taskId}" aria-label="Excluir tarefa">
+        <i class="ph ph-trash" aria-hidden="true"></i>
+      </button>
     `;
 
     const body = document.getElementById('body-' + grupo);
@@ -839,6 +858,20 @@ function toggleTaskHome(item) {
   }
 
   // Calcula a próxima data baseada no ciclo (em dias)
+
+  function excluirTarefa(taskId) {
+    const item = document.querySelector(`[data-task-id="${taskId}"]`);
+    if (!item) return;
+    const nome = item.querySelector('.task-item__name')?.textContent || 'Tarefa';
+    const grupo = item.dataset.grupo;
+    item.remove();
+    atualizarBadgeGrupo(grupo);
+    atualizarResumoDia();
+    // Notificação ao parceiro (simulada — TODO: Firebase push notification)
+    mostrarToast(`"${nome}" excluída — parceiro notificado`);
+    // TODO: enviar notificação real via Firestore/FCM
+  }
+
   function calcularProxData(dias) {
     const d = new Date();
     d.setDate(d.getDate() + dias);
@@ -1109,19 +1142,6 @@ function salvarMeta() {
   // ============================================================
 
 
-  // Controla overflow do app-shell para modais não serem cortados no desktop
-  function abrirModal(id) {
-    document.getElementById(id)?.classList.add('open');
-    document.querySelector('.app-shell')?.classList.add('modal-open');
-  }
-  function fecharModal(id) {
-    document.getElementById(id)?.classList.remove('open');
-    // Só remove modal-open se não há mais modais abertos
-    const temModalAberto = document.querySelector('.modal-backdrop.open, .modal--bottom.open');
-    if (!temModalAberto) {
-      document.querySelector('.app-shell')?.classList.remove('modal-open');
-    }
-  }
 
   // Mapa de ações: cada data-action aponta para sua função
   const acoes = {
@@ -1168,6 +1188,9 @@ function salvarMeta() {
     'salvar-meta':                  () => salvarMeta(),
     'fazer-checkin':                () => fazerCheckin(),
     'fechar-celebracao':            () => fecharCelebracao(),
+
+    // Excluir tarefa
+    'excluir-tarefa':               (el) => excluirTarefa(el.dataset.taskId),
 
     // Tipo de tarefa
     'selecionar-tipo':              (el) => selecionarTipo(el),
