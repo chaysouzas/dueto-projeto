@@ -30,8 +30,15 @@ if ("serviceWorker" in navigator) {
 
 // ── 3. Navegação entre telas ───────────────────────────────
 function navegar(id) {
+  const tela = document.getElementById('tela-' + id);
+  if (!tela) { mostrarToast('em breve'); return; }
   document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
-  document.getElementById('tela-' + id).classList.add('ativa');
+  tela.classList.add('ativa');
+  // Atualizar nav-bar
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.action === 'ir-' + id);
+    b.setAttribute('aria-current', b.dataset.action === 'ir-' + id ? 'page' : 'false');
+  });
 }
 
 // ── Constantes globais ─────────────────────────────────────
@@ -47,6 +54,333 @@ function mostrarToast(msg) {
 }
 
 // ── 5. Lógica das telas ────────────────────────────────────
+// ============================================================
+// LOJA — estado e funções
+// ============================================================
+
+// Estado persistido em localStorage (TODO: Firestore na Fase 2)
+const LOJA_KEY = 'dueto_loja';
+
+const ITENS_DEFAULT = {
+  individuais: [
+    { id: 'i1', nome: 'Dia livre de tarefas',  custo: 200, resgatado: false },
+    { id: 'i2', nome: 'Escolher o jantar',      custo: 100, resgatado: false },
+    { id: 'i3', nome: 'Filme da sua escolha',   custo: 80,  resgatado: false },
+    { id: 'i4', nome: 'Dormir mais 30min',      custo: 60,  resgatado: false },
+    { id: 'i5', nome: 'Massagem nos pés',       custo: 150, resgatado: false },
+  ],
+  casal: [
+    { id: 'c1', nome: 'Jantar fora',              custo: 400, confirmadoPor: [] },
+    { id: 'c2', nome: 'Final de semana diferente', custo: 800, confirmadoPor: [] },
+    { id: 'c3', nome: 'Pedir delivery especial',  custo: 300, confirmadoPor: [] },
+    { id: 'c4', nome: 'Passeio surpresa',          custo: 500, confirmadoPor: [] },
+    { id: 'c5', nome: 'Noite de jogos',            custo: 200, confirmadoPor: [] },
+  ]
+};
+
+let lojaEstado = carregarLoja();
+let lojaAbaAtiva = 'individuais';
+let tipoItemSelecionado = 'individuais';
+let itemResgatandoId = null;
+
+function carregarLoja() {
+  try {
+    const raw = localStorage.getItem(LOJA_KEY);
+    return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(ITENS_DEFAULT));
+  } catch {
+    return JSON.parse(JSON.stringify(ITENS_DEFAULT));
+  }
+}
+
+function salvarLoja() {
+  localStorage.setItem(LOJA_KEY, JSON.stringify(lojaEstado));
+}
+
+// ── Inicialização ────────────────────────────────────────────
+function inicializarLoja() {
+  lojaAbaAtiva = 'individuais';
+  tipoItemSelecionado = 'individuais';
+
+  // Atualizar saldo no header da loja
+  const saldoEl = document.getElementById('lojaSaldo');
+  if (saldoEl) saldoEl.textContent = saldoAtual;
+
+  renderizarLoja();
+  ativarAbaLoja('individuais');
+}
+
+// ── Abas ────────────────────────────────────────────────────
+function ativarAbaLoja(aba) {
+  lojaAbaAtiva = aba;
+  document.querySelectorAll('.loja-tab').forEach(t => {
+    const bate = t.dataset.aba === aba;
+    t.classList.toggle('active', bate);
+    t.setAttribute('aria-selected', bate);
+  });
+  const desc = document.getElementById('lojaDesc');
+  if (desc) {
+    desc.textContent = aba === 'individuais'
+      ? 'recompensas só suas — pagas com seu saldo'
+      : 'recompensas para os dois — cada um contribui metade';
+  }
+  renderizarLoja();
+}
+
+// ── Renderização ─────────────────────────────────────────────
+function renderizarLoja() {
+  const lista = document.getElementById('lojaLista');
+  if (!lista) return;
+
+  const itens = lojaEstado[lojaAbaAtiva] || [];
+
+  if (itens.length === 0) {
+    lista.innerHTML = `
+      <li class="loja-vazia">
+        <i class="ph ph-storefront" aria-hidden="true"></i>
+        <span>nenhum item ainda</span>
+        <span class="loja-vazia__sub">toque em + para adicionar</span>
+      </li>`;
+    return;
+  }
+
+  lista.innerHTML = itens.map(item => {
+    if (lojaAbaAtiva === 'individuais') {
+      return renderItemIndividual(item);
+    } else {
+      return renderItemCasal(item);
+    }
+  }).join('');
+}
+
+function renderItemIndividual(item) {
+  const resgatado = item.resgatado;
+  return `
+    <li class="loja-item ${resgatado ? 'loja-item--resgatado' : ''}"
+        data-id="${item.id}" aria-label="${item.nome}">
+      <div class="loja-item__info">
+        <span class="loja-item__nome">${item.nome}</span>
+        <span class="loja-item__custo">
+          <i class="ph ph-coin" aria-hidden="true"></i> ${item.custo}
+        </span>
+      </div>
+      <div class="loja-item__actions">
+        ${resgatado
+          ? `<span class="loja-item__tag loja-item__tag--done">
+               <i class="ph ph-check-circle" aria-hidden="true"></i> resgatado
+             </span>`
+          : `<button class="loja-item__btn" data-action="iniciar-resgatar"
+                     data-id="${item.id}" aria-label="Resgatar ${item.nome}">
+               resgatar
+             </button>`
+        }
+        <button class="loja-item__del" data-action="excluir-item"
+                data-id="${item.id}" aria-label="Excluir ${item.nome}">
+          <i class="ph ph-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    </li>`;
+}
+
+function renderItemCasal(item) {
+  const voceConfirmou = item.confirmadoPor.includes('voce');
+  const parceiroConfirmou = item.confirmadoPor.includes('parceiro');
+  const resgatado = voceConfirmou && parceiroConfirmou;
+  const aguardando = voceConfirmou && !parceiroConfirmou;
+  const metade = Math.ceil(item.custo / 2);
+
+  let statusHtml = '';
+  if (resgatado) {
+    statusHtml = `<span class="loja-item__tag loja-item__tag--done">
+      <i class="ph ph-check-circle" aria-hidden="true"></i> resgatado
+    </span>`;
+  } else if (aguardando) {
+    statusHtml = `<span class="loja-item__tag loja-item__tag--wait">
+      <i class="ph ph-hourglass" aria-hidden="true"></i> aguardando parceiro
+    </span>`;
+  } else {
+    statusHtml = `<button class="loja-item__btn" data-action="iniciar-resgatar-casal"
+                          data-id="${item.id}" aria-label="Resgatar ${item.nome}">
+      resgatar
+    </button>`;
+  }
+
+  return `
+    <li class="loja-item ${resgatado ? 'loja-item--resgatado' : ''} ${aguardando ? 'loja-item--aguardando' : ''}"
+        data-id="${item.id}" aria-label="${item.nome}">
+      <div class="loja-item__info">
+        <span class="loja-item__nome">${item.nome}</span>
+        <div class="loja-item__custo-casal">
+          <i class="ph ph-coin" aria-hidden="true"></i>
+          <span>${item.custo} total</span>
+          <span class="loja-item__metade">(${metade} cada)</span>
+        </div>
+      </div>
+      <div class="loja-item__actions">
+        ${statusHtml}
+        <button class="loja-item__del" data-action="excluir-item"
+                data-id="${item.id}" aria-label="Excluir ${item.nome}">
+          <i class="ph ph-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    </li>`;
+}
+
+// ── Resgatar individual ───────────────────────────────────────
+function iniciarResgatar(id) {
+  const item = lojaEstado.individuais.find(i => i.id === id);
+  if (!item || item.resgatado) return;
+  if (saldoAtual < item.custo) {
+    mostrarToast('saldo insuficiente');
+    return;
+  }
+  itemResgatandoId = id;
+  document.getElementById('resgatarCusto').textContent = item.custo;
+  document.getElementById('modalResgatar').classList.add('open');
+}
+
+function confirmarResgatar() {
+  const item = lojaEstado.individuais.find(i => i.id === itemResgatandoId);
+  if (!item) return;
+  item.resgatado = true;
+  saldoAtual -= item.custo;
+  salvarLoja();
+  atualizarSaldo();
+  fecharModalResgatar();
+  renderizarLoja();
+  mostrarToast('recompensa resgatada!');
+}
+
+function fecharModalResgatar() {
+  document.getElementById('modalResgatar').classList.remove('open');
+  itemResgatandoId = null;
+}
+
+// ── Resgatar casal ────────────────────────────────────────────
+function iniciarResgatarCasal(id) {
+  const item = lojaEstado.casal.find(i => i.id === id);
+  if (!item) return;
+  const metade = Math.ceil(item.custo / 2);
+  if (saldoAtual < metade) {
+    mostrarToast('saldo insuficiente para sua parte');
+    return;
+  }
+  itemResgatandoId = id;
+
+  // Atualizar status no modal
+  const voceConfirmou = item.confirmadoPor.includes('voce');
+  const parceiroConfirmou = item.confirmadoPor.includes('parceiro');
+
+  document.getElementById('resgatarCasalMetade').textContent = metade;
+  document.getElementById('casalStatusVoce').innerHTML =
+    `<i class="ph ${voceConfirmou ? 'ph-check-circle' : 'ph-circle'}" aria-hidden="true"></i><span>você</span>`;
+  document.getElementById('casalStatusParceiro').innerHTML =
+    `<i class="ph ${parceiroConfirmou ? 'ph-check-circle' : 'ph-circle'}" aria-hidden="true"></i><span>parceiro</span>`;
+
+  document.getElementById('casalStatusVoce').classList.toggle('loja-casal-status__item--done', voceConfirmou);
+  document.getElementById('casalStatusParceiro').classList.toggle('loja-casal-status__item--done', parceiroConfirmou);
+
+  document.getElementById('modalResgatarCasal').classList.add('open');
+}
+
+function confirmarResgatarCasal() {
+  const item = lojaEstado.casal.find(i => i.id === itemResgatandoId);
+  if (!item) return;
+
+  if (!item.confirmadoPor.includes('voce')) {
+    item.confirmadoPor.push('voce');
+    saldoAtual -= Math.ceil(item.custo / 2);
+    atualizarSaldo();
+  }
+
+  // Simular parceiro confirmando (TODO: Firebase)
+  const ambosConfirmaram = item.confirmadoPor.length >= 2;
+  salvarLoja();
+  fecharResgatarCasal();
+  renderizarLoja();
+  mostrarToast(ambosConfirmaram ? 'recompensa resgatada por vocês dois!' : 'confirmado — aguardando parceiro');
+}
+
+function fecharResgatarCasal() {
+  document.getElementById('modalResgatarCasal').classList.remove('open');
+  itemResgatandoId = null;
+}
+
+// ── Excluir item ─────────────────────────────────────────────
+function excluirItem(id) {
+  lojaEstado.individuais = lojaEstado.individuais.filter(i => i.id !== id);
+  lojaEstado.casal       = lojaEstado.casal.filter(i => i.id !== id);
+  salvarLoja();
+  renderizarLoja();
+  mostrarToast('item removido');
+}
+
+// ── Adicionar item ────────────────────────────────────────────
+function abrirNovoItem() {
+  tipoItemSelecionado = 'individuais';
+  document.querySelectorAll('[data-tipo-item]').forEach(b => {
+    b.classList.toggle('active', b.dataset.tipoItem === 'individuais');
+  });
+  document.getElementById('novoItemNome').value = '';
+  document.getElementById('novoItemCusto').value = 100;
+  document.getElementById('modalNovoItem').classList.add('open');
+}
+
+function fecharNovoItem() {
+  document.getElementById('modalNovoItem').classList.remove('open');
+}
+
+function fecharNovoItemFora(e) {
+  if (e.target === document.getElementById('modalNovoItem')) fecharNovoItem();
+}
+
+function selecionarTipoItem(btn) {
+  tipoItemSelecionado = btn.dataset.tipoItem;
+  document.querySelectorAll('[data-tipo-item]').forEach(b => {
+    b.classList.toggle('active', b.dataset.tipoItem === tipoItemSelecionado);
+  });
+}
+
+function ajustarItemCusto(delta) {
+  const input = document.getElementById('novoItemCusto');
+  if (!input) return;
+  const novo = Math.max(10, Math.min(9999, (parseInt(input.value) || 100) + delta));
+  input.value = novo;
+}
+
+function salvarNovoItem() {
+  const nome  = document.getElementById('novoItemNome').value.trim();
+  const custo = parseInt(document.getElementById('novoItemCusto').value) || 100;
+  if (!nome) { mostrarToast('dê um nome ao item'); return; }
+
+  const id = tipoItemSelecionado[0] + Date.now();
+
+  if (tipoItemSelecionado === 'individuais') {
+    lojaEstado.individuais.push({ id, nome, custo, resgatado: false });
+  } else {
+    lojaEstado.casal.push({ id, nome, custo, confirmadoPor: [] });
+  }
+
+  salvarLoja();
+  fecharNovoItem();
+
+  if (lojaAbaAtiva !== tipoItemSelecionado) {
+    ativarAbaLoja(tipoItemSelecionado);
+  } else {
+    renderizarLoja();
+  }
+
+  mostrarToast('item adicionado');
+}
+
+function atualizarSaldo() {
+  // Atualizar todos os lugares que mostram saldo
+  document.querySelectorAll('#saldoVal, #lojaSaldo').forEach(el => {
+    if (el) el.textContent = saldoAtual;
+  });
+}
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // ════════════════════════════════════════════════════════
@@ -310,7 +644,8 @@ document.addEventListener('DOMContentLoaded', () => {
  function irParaExercicios() { navegar('exercicios'); inicializarExercicios(); }
 
   function irParaLoja() {
-    navegar('loja'); // TODO: criar tela da loja
+    navegar('loja');
+    inicializarLoja();
   }
 
   // Saudação dinâmica por hora
@@ -326,6 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let pontosSelecionados = 15;
   let tipoSelecionado = 'diaria';
+  let saldoAtual = 420;
 
   function selecionarTipo(btn) {
     document.querySelectorAll('.tipo-opt').forEach(o => o.classList.remove('active'));
@@ -822,6 +1158,23 @@ function salvarMeta() {
     'selecionar-tipo':              (el) => selecionarTipo(el),
     'ciclo-mais':                   () => ajustarCiclo(1),
     'ciclo-menos':                  () => ajustarCiclo(-1),
+
+    // Loja
+    'loja-aba':                     (el) => ativarAbaLoja(el.dataset.aba),
+    'abrir-novo-item':              () => abrirNovoItem(),
+    'fechar-novo-item':             () => fecharNovoItem(),
+    'fechar-novo-item-fora':        (el, e) => fecharNovoItemFora(e),
+    'salvar-novo-item':             () => salvarNovoItem(),
+    'selecionar-tipo-item':         (el) => selecionarTipoItem(el),
+    'item-custo-mais':              () => ajustarItemCusto(50),
+    'item-custo-menos':             () => ajustarItemCusto(-50),
+    'iniciar-resgatar':             (el) => iniciarResgatar(el.dataset.id),
+    'iniciar-resgatar-casal':       (el) => iniciarResgatarCasal(el.dataset.id),
+    'confirmar-resgatar':           () => confirmarResgatar(),
+    'fechar-resgatar':              () => fecharModalResgatar(),
+    'confirmar-resgatar-casal':     () => confirmarResgatarCasal(),
+    'fechar-resgatar-casal':        () => fecharResgatarCasal(),
+    'excluir-item':                 (el) => excluirItem(el.dataset.id),
   };
 
   // Delegação única de cliques — captura todos os data-action

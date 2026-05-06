@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="css/home.css">
   <link rel="stylesheet" href="css/tarefas.css">
   <link rel="stylesheet" href="css/exercicios.css">
+  <link rel="stylesheet" href="css/loja.css">
 </head>
 <body>
 
@@ -908,6 +909,99 @@
   </div>
 
 </div><!-- fim tela-exercicios -->
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA DA LOJA
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela" id="tela-loja">
+    <div class="screen">
+      <div class="top-bar" role="banner">
+        <button class="btn-back" data-action="ir-home" aria-label="Voltar para início">
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="top-bar__title">loja</h1>
+        <div class="loja-saldo" aria-label="Seu saldo">
+          <i class="ph ph-coin" aria-hidden="true"></i>
+          <span id="lojaSaldo">420</span>
+        </div>
+      </div>
+      <div class="loja-tabs" role="tablist" aria-label="Tipo de recompensa">
+        <button class="loja-tab active" role="tab" aria-selected="true"
+                data-action="loja-aba" data-aba="individuais">individuais</button>
+        <button class="loja-tab" role="tab" aria-selected="false"
+                data-action="loja-aba" data-aba="casal">do casal</button>
+      </div>
+      <p class="loja-desc" id="lojaDesc">recompensas só suas — pagas com seu saldo</p>
+      <div class="screen__body">
+        <ul class="loja-lista" id="lojaLista" aria-label="Itens da loja"></ul>
+      </div>
+    </div>
+    <button class="fab" id="fabNovoItem" data-action="abrir-novo-item" aria-label="Adicionar novo item">
+      <i class="ph-bold ph-plus icon-xl" aria-hidden="true"></i>
+    </button>
+  </div><!-- fim tela-loja -->
+
+  <!-- Modal: adicionar item -->
+  <div class="modal-backdrop" id="modalNovoItem" role="dialog" aria-modal="true" aria-labelledby="novoItemTitulo" data-action="fechar-novo-item-fora">
+    <div class="modal modal--bottom">
+      <div class="modal__handle"></div>
+      <h2 class="modal__title" id="novoItemTitulo">novo item</h2>
+      <div class="field">
+        <label class="field-label" for="novoItemNome">nome da recompensa</label>
+        <input class="input" type="text" id="novoItemNome" placeholder="ex: massagem, filme, jantar…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label class="field-label" for="novoItemCusto">custo em moedas</label>
+        <div class="ciclo-row">
+          <button class="ciclo-btn" data-action="item-custo-menos" aria-label="Diminuir custo">−</button>
+          <input class="input ciclo-input" type="number" id="novoItemCusto" value="100" min="10" max="9999" inputmode="numeric">
+          <button class="ciclo-btn" data-action="item-custo-mais" aria-label="Aumentar custo">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">tipo</div>
+        <div class="tipo-picker">
+          <button class="tipo-opt active" data-tipo-item="individuais" data-action="selecionar-tipo-item"><span>individual</span><span class="tipo-opt__sub">só você paga</span></button>
+          <button class="tipo-opt" data-tipo-item="casal" data-action="selecionar-tipo-item"><span>do casal</span><span class="tipo-opt__sub">cada um paga metade</span></button>
+        </div>
+      </div>
+      <div class="modal__actions">
+        <button class="btn-ghost" data-action="fechar-novo-item">cancelar</button>
+        <button class="btn-modal-send" data-action="salvar-novo-item">adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: resgatar individual -->
+  <div class="modal-backdrop" id="modalResgatar" role="dialog" aria-modal="true" aria-labelledby="resgatarTitulo">
+    <div class="modal">
+      <h2 class="modal__title" id="resgatarTitulo">resgatar recompensa</h2>
+      <p class="modal__desc">isso vai descontar <strong id="resgatarCusto">100</strong> moedas do seu saldo.</p>
+      <div class="modal__actions">
+        <button class="btn-ghost" data-action="fechar-resgatar">cancelar</button>
+        <button class="btn-modal-send" data-action="confirmar-resgatar">confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: resgatar casal -->
+  <div class="modal-backdrop" id="modalResgatarCasal" role="dialog" aria-modal="true" aria-labelledby="resgatarCasalTitulo">
+    <div class="modal">
+      <h2 class="modal__title" id="resgatarCasalTitulo">recompensa do casal</h2>
+      <p class="modal__desc">você vai contribuir com <strong id="resgatarCasalMetade">100</strong> moedas. o parceiro precisa confirmar também.</p>
+      <div class="loja-casal-status">
+        <div class="loja-casal-status__item" id="casalStatusVoce"><i class="ph ph-circle" aria-hidden="true"></i><span>você</span></div>
+        <div class="loja-casal-status__sep">+</div>
+        <div class="loja-casal-status__item" id="casalStatusParceiro"><i class="ph ph-circle" aria-hidden="true"></i><span>parceiro</span></div>
+      </div>
+      <div class="modal__actions">
+        <button class="btn-ghost" data-action="fechar-resgatar-casal">cancelar</button>
+        <button class="btn-modal-send" data-action="confirmar-resgatar-casal">confirmar minha parte</button>
+      </div>
+    </div>
+  </div>
+
+
 
 <!-- ── Nav bar ── -->
 <nav class="nav-bar" aria-label="Navegação principal">

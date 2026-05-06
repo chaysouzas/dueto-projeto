@@ -291,4 +291,16 @@
 
 /* Ícones Phosphor de moeda no saldo */
 .saldo-box__val .ph,
-.saldo-box__val [class^="ph-"] { font-size: 14px; color: var(--color-secondary); }  
+.saldo-box__val [class^="ph-"] { font-size: 14px; color: var(--color-secondary); }
+
+
+/* ── Loja: saldo no header da loja ── */
+.loja-saldo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-secondary);
+}
+.loja-saldo .ph { font-size: 14px; }
