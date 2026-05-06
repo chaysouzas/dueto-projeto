@@ -7,6 +7,7 @@
   <meta name="description" content="Dueto — app de casal com gamificação">
   <title>Dueto</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
@@ -35,11 +36,7 @@
       <h1 id="login-titulo" class="visually-hidden">Entrar no Dueto</h1>
 
       <div class="login-logo">
-        <svg aria-hidden="true" width="72" height="72" viewBox="0 0 100 100" fill="none" class="logo-svg">
-          <path d="M50 18 L34 18 Q20 18 20 50 Q20 82 34 82 L50 82 L50 72 L36 72 Q30 72 30 50 Q30 28 36 28 L50 28 Z" fill="#FF2B00"/>
-          <path d="M50 18 L66 18 Q80 18 80 50 Q80 82 66 82 L50 82 L50 72 L64 72 Q70 72 70 50 Q70 28 64 28 L50 28 Z" fill="#DB8E02"/>
-          <rect x="46" y="18" width="8" height="64" rx="4" fill="#F5E6C8" opacity="0.9"/>
-        </svg>
+        <img src="assets/icons/logo.png" alt="Logo Dueto" class="logo-img" width="80" height="80">
         <div class="login-logo__name">Dueto</div>
         <div class="login-logo__tagline">a rotina de vocês dois, em sincronia</div>
       </div>
@@ -276,11 +273,7 @@
         <div class="step-panel" id="step3">
           <div class="step-success">
 
-            <svg aria-hidden="true" width="80" height="80" viewBox="0 0 100 100" fill="none" class="logo-svg">
-              <path d="M50 18 L34 18 Q20 18 20 50 Q20 82 34 82 L50 82 L50 72 L36 72 Q30 72 30 50 Q30 28 36 28 L50 28 Z" fill="#FF2B00"/>
-              <path d="M50 18 L66 18 Q80 18 80 50 Q80 82 66 82 L50 82 L50 72 L64 72 Q70 72 70 50 Q70 28 64 28 L50 28 Z" fill="#DB8E02"/>
-              <rect x="46" y="18" width="8" height="64" rx="4" fill="#F5E6C8" opacity="0.9"/>
-            </svg>
+            <img src="assets/icons/logo.png" alt="Logo Dueto" class="logo-img" width="80" height="80">
 
             <div>
               <div class="step-success__title">
@@ -664,6 +657,36 @@
         <div class="grupo-body" id="body-outros"></div>
       </div>
 
+      <!-- GRUPO: Cozinha -->
+      <div class="grupo-acordeon" id="grupo-cozinha">
+        <button class="grupo-header" data-action="toggle-grupo" data-grupo="cozinha">
+          <div class="grupo-header__left">
+            <div class="grupo-icon grupo-icon--amber">
+              <i class="ph ph-cooking-pot" aria-hidden="true"></i>
+            </div>
+            <span class="grupo-nome">cozinha</span>
+            <span class="grupo-badge" id="badge-cozinha">0/0</span>
+          </div>
+          <i class="ph ph-caret-down grupo-chevron" id="chevron-cozinha" aria-hidden="true"></i>
+        </button>
+        <div class="grupo-body" id="body-cozinha"></div>
+      </div>
+
+      <!-- GRUPO: Banheiro -->
+      <div class="grupo-acordeon" id="grupo-banheiro">
+        <button class="grupo-header" data-action="toggle-grupo" data-grupo="banheiro">
+          <div class="grupo-header__left">
+            <div class="grupo-icon grupo-icon--purple">
+              <i class="ph ph-bathtub" aria-hidden="true"></i>
+            </div>
+            <span class="grupo-nome">banheiro</span>
+            <span class="grupo-badge" id="badge-banheiro">0/0</span>
+          </div>
+          <i class="ph ph-caret-down grupo-chevron" id="chevron-banheiro" aria-hidden="true"></i>
+        </button>
+        <div class="grupo-body" id="body-banheiro"></div>
+      </div>
+
     </div><!-- fim screen__body -->
   </div><!-- fim screen -->
 
@@ -691,6 +714,8 @@
           <option value="organizacao">organização</option>
           <option value="roupas">roupas</option>
           <option value="outros">outros</option>
+          <option value="cozinha">cozinha</option>
+          <option value="banheiro">banheiro</option>
           
         </select>
       </div>

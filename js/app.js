@@ -82,6 +82,7 @@ let lojaEstado = carregarLoja();
 let lojaAbaAtiva = 'individuais';
 let tipoItemSelecionado = 'individuais';
 let itemResgatandoId = null;
+let saldoAtual = 420;
 
 function carregarLoja() {
   try {
@@ -235,7 +236,7 @@ function iniciarResgatar(id) {
   }
   itemResgatandoId = id;
   document.getElementById('resgatarCusto').textContent = item.custo;
-  document.getElementById('modalResgatar').classList.add('open');
+  abrirModal('modalResgatar');
 }
 
 function confirmarResgatar() {
@@ -251,7 +252,7 @@ function confirmarResgatar() {
 }
 
 function fecharModalResgatar() {
-  document.getElementById('modalResgatar').classList.remove('open');
+  fecharModal('modalResgatar');
   itemResgatandoId = null;
 }
 
@@ -279,7 +280,7 @@ function iniciarResgatarCasal(id) {
   document.getElementById('casalStatusVoce').classList.toggle('loja-casal-status__item--done', voceConfirmou);
   document.getElementById('casalStatusParceiro').classList.toggle('loja-casal-status__item--done', parceiroConfirmou);
 
-  document.getElementById('modalResgatarCasal').classList.add('open');
+  abrirModal('modalResgatarCasal');
 }
 
 function confirmarResgatarCasal() {
@@ -301,7 +302,7 @@ function confirmarResgatarCasal() {
 }
 
 function fecharResgatarCasal() {
-  document.getElementById('modalResgatarCasal').classList.remove('open');
+  fecharModal('modalResgatarCasal');
   itemResgatandoId = null;
 }
 
@@ -322,11 +323,11 @@ function abrirNovoItem() {
   });
   document.getElementById('novoItemNome').value = '';
   document.getElementById('novoItemCusto').value = 100;
-  document.getElementById('modalNovoItem').classList.add('open');
+  abrirModal('modalNovoItem');
 }
 
 function fecharNovoItem() {
-  document.getElementById('modalNovoItem').classList.remove('open');
+  fecharModal('modalNovoItem');
 }
 
 function fecharNovoItemFora(e) {
@@ -661,7 +662,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let pontosSelecionados = 15;
   let tipoSelecionado = 'diaria';
-  let saldoAtual = 420;
 
   function selecionarTipo(btn) {
     document.querySelectorAll('.tipo-opt').forEach(o => o.classList.remove('active'));
@@ -736,7 +736,7 @@ function toggleTaskHome(item) {
   }
 
   function inicializarBadges() {
-    ['limpeza', 'pets', 'organizacao', 'roupas', 'outros'].forEach(atualizarBadgeGrupo);
+    ['limpeza', 'pets', 'organizacao', 'roupas', 'outros', 'cozinha', 'banheiro'].forEach(atualizarBadgeGrupo);
   }
 
   function atualizarResumoDia() {
@@ -748,12 +748,12 @@ function toggleTaskHome(item) {
   }
 
   function abrirModalNovaTarefa() {
-    document.getElementById('modalNovaTarefa').classList.add('open');
+    abrirModal('modalNovaTarefa');
     document.getElementById('novaTarefaNome').focus();
   }
 
   function fecharModalNovaTarefa() {
-    document.getElementById('modalNovaTarefa').classList.remove('open');
+    fecharModal('modalNovaTarefa');
     document.getElementById('novaTarefaNome').value = '';
 
     // Reset tipo
@@ -1107,6 +1107,21 @@ function salvarMeta() {
   // SUBSTITUIR todo o bloco "// EXPOR FUNÇÕES AO HTML"
   // no final do DOMContentLoaded por este código.
   // ============================================================
+
+
+  // Controla overflow do app-shell para modais não serem cortados no desktop
+  function abrirModal(id) {
+    document.getElementById(id)?.classList.add('open');
+    document.querySelector('.app-shell')?.classList.add('modal-open');
+  }
+  function fecharModal(id) {
+    document.getElementById(id)?.classList.remove('open');
+    // Só remove modal-open se não há mais modais abertos
+    const temModalAberto = document.querySelector('.modal-backdrop.open, .modal--bottom.open');
+    if (!temModalAberto) {
+      document.querySelector('.app-shell')?.classList.remove('modal-open');
+    }
+  }
 
   // Mapa de ações: cada data-action aponta para sua função
   const acoes = {

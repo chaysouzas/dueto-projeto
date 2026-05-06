@@ -197,6 +197,7 @@
 .grupo-icon--purple .ph { color: #9B8AEA; }
 
 
+
 /* ── Seletor de tipo (diária / pontual) ── */
 .tipo-picker {
   display: flex;
@@ -289,4 +290,22 @@
   .fab {
     position: absolute;
   }
-} 
+}
+
+.grupo-icon .ph,
+.grupo-icon [class^="ph-"] { font-size: 14px; }
+
+.grupo-icon--pink   { background: rgba(255, 43, 0, 0.12); }
+.grupo-icon--pink   .ph { color: var(--color-primary); }
+
+.grupo-icon--amber  { background: rgba(219, 142, 2, 0.12); }
+.grupo-icon--amber  .ph { color: var(--color-secondary); }
+
+.grupo-icon--purple { background: rgba(77, 111, 154, 0.12); }
+.grupo-icon--purple .ph { color: #9B8AEA; }
+
+.grupo-icon--green  { background: rgba(122, 186, 122, 0.15); }
+.grupo-icon--green  .ph { color: #7ABA7A; }
+
+.grupo-icon--blue   { background: rgba(106, 174, 212, 0.15); }
+.grupo-icon--blue   .ph { color: #6AAED4; }

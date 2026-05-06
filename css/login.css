@@ -60,3 +60,12 @@
   transition: color var(--transition-fast);
 }
 .forgot-link:hover { color: var(--color-primary); }
+
+/* ── Logo imagem ── */
+.logo-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 22.5%;
+  object-fit: cover;
+  display: block;
+}

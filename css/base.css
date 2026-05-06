@@ -471,6 +471,13 @@
   .ex-celebrate { position: absolute; }
 }
 
+/* Quando modal está aberto — remove overflow:hidden para modais aparecerem */
+@media (min-width: 768px) {
+  .app-shell.modal-open {
+    overflow: visible;
+  }
+}
+
 /* Telas maiores: sombra mais profunda */
 @media (min-width: 1200px) {
   body {
@@ -486,4 +493,16 @@
       0 0 0 1px var(--color-border-subtle),
       0 40px 100px rgba(0, 0, 0, 0.55);
   }
+}
+
+
+/* ── Ícone do botão voltar — cor explícita ── */
+.btn-back .ph,
+.btn-back [class^="ph-"] {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+}
+.btn-back:hover .ph,
+.btn-back:hover [class^="ph-"] {
+  color: var(--color-primary);
 }

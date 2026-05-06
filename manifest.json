@@ -1,14 +1,23 @@
 {
   "name": "Dueto",
   "short_name": "Dueto",
-  "description": "App de casal com gamificação",
-  "start_url": "/",
+  "description": "A rotina de vocês dois, em sincronia",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#120A0F",
-  "theme_color": "#120A0F",
+  "theme_color": "#E8849A",
   "orientation": "portrait",
   "icons": [
-    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
   ]
 }
