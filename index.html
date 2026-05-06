@@ -547,29 +547,37 @@
           <i class="ph ph-caret-down grupo-chevron" id="chevron-limpeza" aria-hidden="true"></i>
         </button>
         <div class="grupo-body open" id="body-limpeza">
-          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="limpeza">
+          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="limpeza" data-task-id="task-static-1">
             <div class="task-check done">
               <i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>
             </div>
             <div class="task-item__info">
               <div class="task-item__name done">Fazer a cama</div>
             </div>
-            <span class="task-item__pts">+15</span>
-
+            <span class="task-item__pts">+10</span>
+            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-1" aria-label="Excluir tarefa">
+              <i class="ph ph-trash" aria-hidden="true"></i>
+            </button>
           </div>
-          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="limpeza">
+          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="limpeza" data-task-id="task-static-2">
             <div class="task-check"></div>
             <div class="task-item__info">
               <div class="task-item__name">Lavar a louça</div>
             </div>
-            <span class="task-item__pts">+15</span>
+            <span class="task-item__pts">+10</span>
+            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-2" aria-label="Excluir tarefa">
+              <i class="ph ph-trash" aria-hidden="true"></i>
+            </button>
           </div>
-          <div class="task-item" data-action="toggle-task" data-pts="20" data-grupo="limpeza">
+          <div class="task-item" data-action="toggle-task" data-pts="20" data-grupo="limpeza" data-task-id="task-static-3">
             <div class="task-check"></div>
             <div class="task-item__info">
               <div class="task-item__name">Tirar o lixo</div>
             </div>
             <span class="task-item__pts">+20</span>
+            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-3" aria-label="Excluir tarefa">
+              <i class="ph ph-trash" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -587,19 +595,25 @@
           <i class="ph ph-caret-down grupo-chevron open" id="chevron-pets" aria-hidden="true"></i>
         </button>
         <div class="grupo-body" id="body-pets">
-          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="pets">
+          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="pets" data-task-id="task-static-4">
             <div class="task-check"></div>
             <div class="task-item__info">
               <div class="task-item__name">Dar comida ao pet</div>
             </div>
             <span class="task-item__pts">+10</span>
+            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-4" aria-label="Excluir tarefa">
+              <i class="ph ph-trash" aria-hidden="true"></i>
+            </button>
           </div>
-          <div class="task-item" data-action="toggle-task" data-pts="20" data-grupo="pets">
+          <div class="task-item" data-action="toggle-task" data-pts="20" data-grupo="pets" data-task-id="task-static-5">
             <div class="task-check"></div>
             <div class="task-item__info">
               <div class="task-item__name">Passear com o pet</div>
             </div>
             <span class="task-item__pts">+20</span>
+            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-5" aria-label="Excluir tarefa">
+              <i class="ph ph-trash" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -617,12 +631,15 @@
           <i class="ph ph-caret-down grupo-chevron open" id="chevron-organizacao" aria-hidden="true"></i>
         </button>
         <div class="grupo-body" id="body-organizacao">
-          <div class="task-item" data-action="toggle-task" data-pts="50" data-grupo="organizacao">
+          <div class="task-item" data-action="toggle-task" data-pts="50" data-grupo="organizacao" data-task-id="task-static-6">
             <div class="task-check"></div>
             <div class="task-item__info">
               <div class="task-item__name">Pagar boletos</div>
             </div>
             <span class="task-item__pts">+50</span>
+            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-6" aria-label="Excluir tarefa">
+              <i class="ph ph-trash" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -749,8 +766,12 @@
         <label class="field-label" for="novaTarefaPts">pontos</label>
         <div class="pts-picker" id="ptsPicker">
           <button class="pts-opt active" data-pts="10" data-action="selecionar-pontos">
-            <span class="pts-opt__val">15</span>
+            <span class="pts-opt__val">10</span>
             <span class="pts-opt__label">rápida</span>
+          </button>
+          <button class="pts-opt" data-pts="20" data-action="selecionar-pontos">
+            <span class="pts-opt__val">20</span>
+            <span class="pts-opt__label">fácil</span>
           </button>
           <button class="pts-opt" data-pts="50" data-action="selecionar-pontos">
             <span class="pts-opt__val">50</span>

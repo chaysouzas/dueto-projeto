@@ -425,19 +425,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modalRecuperar').classList.add('open');
   }
 
-  function fecharModal() {
+  function fecharModalRecuperar() {
     document.getElementById('modalRecuperar').classList.remove('open');
   }
 
   function fecharModalFora(e) {
-    if (e.target === document.getElementById('modalRecuperar')) fecharModal();
+    if (e.target === document.getElementById('modalRecuperar')) fecharModalRecuperar();
   }
 
   function enviarRecuperacao() {
     const email = document.getElementById('emailRecuperar').value;
     if (!email) return;
     // TODO: auth.sendPasswordResetEmail(email)
-    fecharModal();
+    fecharModalRecuperar();
     mostrarToast('link enviado para ' + email);
   }
 
@@ -782,7 +782,7 @@ function toggleTaskHome(item) {
     document.querySelectorAll('.pts-opt').forEach(o => o.classList.remove('active'));
     const ptsDefault = document.querySelector('.pts-opt[data-pts="10"]');
     if (ptsDefault) ptsDefault.classList.add('active');
-    pontosSelecionados = 15;
+    pontosSelecionados = 10;
 
     // Reset grupo
     const select = document.getElementById('novaTarefaGrupo');
@@ -1149,7 +1149,7 @@ function salvarMeta() {
     'abrir-recuperar':              () => abrirRecuperarSenha(),
     'ir-cadastro':                  () => irParaCadastro(),
     'login-google':                 () => loginGoogle(),
-    'fechar-modal-recuperar':       () => fecharModal(),
+    'fechar-modal-recuperar':       () => fecharModalRecuperar(),
     'fechar-modal-recuperar-fora':  (el, e) => fecharModalFora(e),
     'enviar-recuperacao':           () => enviarRecuperacao(),
 
