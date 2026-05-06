@@ -44,7 +44,7 @@
   height: 26px;
   border-radius: 50%;
   background: var(--color-secondary-subtle);
-  border: 1.5px solid rgba(212,149,106,0.4);
+  border: 1.5px solid rgba(219, 142, 2,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,8 +62,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  overflow-y: auto;
-  padding-bottom: 72px;
 }
 
 /* ── Card de perfil + saldo ── */
@@ -81,7 +79,7 @@
   height: 52px;
   border-radius: 50%;
   background: var(--color-primary-subtle);
-  border: 2px solid rgba(232,132,154,0.4);
+  border: 2px solid rgba(255, 43, 0,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -273,11 +271,24 @@
 
 /* ── Variantes de cor dos cards de módulo ── */
 .module-card__icon--amber  { background: var(--color-secondary-subtle); }
-.module-card__icon--purple { background: rgba(155,138,234,0.15); }
-.module-card__icon--green  { background: rgba(122,186,122,0.12); }
-.module-card__icon--blue   { background: rgba(106,174,212,0.12); }
+.module-card__icon--purple { background: rgba(77, 111, 154,0.15); }
+.module-card__icon--green  { background: rgba(122, 186, 122,0.12); }
+.module-card__icon--blue   { background: rgba(77, 111, 154,0.12); }
 
 .module-card__badge--amber  { background: var(--color-secondary-subtle); color: var(--color-secondary); }
-.module-card__badge--purple { background: rgba(155,138,234,0.12); color: #9B8AEA; }
-.module-card__badge--green  { background: rgba(122,186,122,0.10); color: #7ABA7A; }
-.module-card__badge--blue   { background: rgba(106,174,212,0.10); color: #6AAED4; }
+.module-card__badge--purple { background: rgba(77, 111, 154,0.12); color: #4D6F9A; }
+.module-card__badge--green  { background: rgba(122, 186, 122,0.10); color: #7ABA7A; }
+.module-card__badge--blue   { background: rgba(77, 111, 154,0.10); color: #4D6F9A; }
+
+
+/* ── Ícones Phosphor nos cards de módulo ── */
+.module-card__icon .ph,
+.module-card__icon [class^="ph-"] { font-size: 20px; }
+.module-card__icon--amber  .ph { color: var(--color-secondary); }
+.module-card__icon--purple .ph { color: #9B8AEA; }
+.module-card__icon--green  .ph { color: var(--color-success); }
+.module-card__icon--blue   .ph { color: #6AAED4; }
+
+/* Ícones Phosphor de moeda no saldo */
+.saldo-box__val .ph,
+.saldo-box__val [class^="ph-"] { font-size: 14px; color: var(--color-secondary); }  

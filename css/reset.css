@@ -23,8 +23,6 @@ body {
   background-color: var(--color-bg-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  display: flex;
-  justify-content: center;
 }
 
 /* ── Sistema de telas (SPA) ── */

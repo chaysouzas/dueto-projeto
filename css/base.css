@@ -68,7 +68,7 @@
   cursor: pointer;
   transition: background var(--transition-fast), border-color var(--transition-fast);
 }
-.btn-secondary:hover  { background: var(--color-primary-subtle); border-color: rgba(232,132,154,0.5); }
+.btn-secondary:hover  { background: var(--color-primary-subtle); border-color: rgba(255, 43, 0,0.5); }
 .btn-secondary:active { transform: scale(0.98); }
 
 .btn-google {
@@ -88,7 +88,7 @@
   gap: var(--space-3);
   transition: background var(--transition-fast), border-color var(--transition-fast);
 }
-.btn-google:hover  { background: var(--color-bg-surface-raised); border-color: rgba(232,132,154,0.3); }
+.btn-google:hover  { background: var(--color-bg-surface-raised); border-color: rgba(255, 43, 0,0.3); }
 .btn-google:active { transform: scale(0.98); }
 
 .btn-ghost {
@@ -274,19 +274,7 @@
   background: var(--color-primary);
 }
 
-/* ── Layout de tela (mobile-first) ── */
-.screen {
-  max-width: 430px;
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-.screen__body {
-  flex: 1;
-  padding: 0 var(--space-4) var(--space-6);
-  overflow-y: auto;
-}
+
 
 /* ── Section header (compartilhado: home, exercícios) ── */
 .section-header {
@@ -323,7 +311,7 @@
   transition: background var(--transition-fast);
 }
 .task-item:first-child { border-top: none; }
-.task-item:hover { background: rgba(232,132,154,0.04); }
+.task-item:hover { background: rgba(255, 43, 0,0.04); }
 .task-check {
   width: 20px;
   height: 20px;
@@ -391,123 +379,83 @@
 /* ── Utilitárias ── */
 .is-hidden { display: none; }
 
+/* ============================================================
+   LAYOUT DE TELA
+============================================================ */
+
+.screen {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.screen__body {
+  flex: 1;
+  padding: 0 var(--space-4) var(--space-6);
+}
 
 /* ============================================================
    APP SHELL — frame que contém o app
-   No mobile ocupa 100% da viewport.
-   No desktop simula um smartphone centralizado.
 ============================================================ */
 
 .app-shell {
   width: 100%;
-  min-height: 100vh;
   position: relative;
 }
 
-/* ── Small tablets (768px - 991px) ────────────────────────── */
-@media (min-width: 768px) and (max-width: 991px) {
-  body {
-    background:
-      radial-gradient(ellipse at top, rgba(232,132,154,0.04) 0%, transparent 50%),
-      var(--color-bg-primary);
-  }
-
-  .app-shell {
-    width: 430px;
-    min-height: auto;
-    height: calc(100vh - var(--space-16));
-    max-height: 900px;
-    margin-block: var(--space-8);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow:
-      0 0 0 1px var(--color-border-subtle),
-      0 20px 60px rgba(0, 0, 0, 0.4);
-  }
+/* ── Mobile: tela em fluxo normal, nav fixa em baixo ── */
+.tela.ativa {
+  min-height: 100vh;
+  padding-bottom: 76px; /* espaço para nav-bar fixa */
 }
 
-/* ── Large tablets (992px - 1199px) ───────────────────────── */
-@media (min-width: 992px) and (max-width: 1199px) {
+/* Login não tem nav-bar — sem padding-bottom */
+#tela-login.ativa {
+  padding-bottom: 0;
+}
+
+/* ── Desktop: shell vira frame centralizado (>= 768px) ── */
+@media (min-width: 768px) {
   body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: var(--space-8) 0;
+    min-height: 100vh;
     background:
-      radial-gradient(ellipse at top, rgba(232,132,154,0.05) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom, rgba(212,149,106,0.03) 0%, transparent 60%),
+      radial-gradient(ellipse at top, rgba(255, 43, 0, 0.04) 0%, transparent 50%),
       var(--color-bg-primary);
   }
 
   .app-shell {
+    position: relative;       /* contexto de posicionamento explícito */
     width: 430px;
-    min-height: auto;
-    height: calc(100vh - var(--space-24));
+    height: calc(100vh - var(--space-16));
     max-height: 900px;
-    margin-block: var(--space-12);
     border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow:
       0 0 0 1px var(--color-border-subtle),
       0 30px 80px rgba(0, 0, 0, 0.5);
   }
-}
 
-/* ── Desktops (1200px - 1919px) ───────────────────────────── */
-@media (min-width: 1200px) and (max-width: 1919px) {
-  body {
-    background:
-      radial-gradient(ellipse at top, rgba(232,132,154,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom, rgba(212,149,106,0.04) 0%, transparent 60%),
-      var(--color-bg-primary);
-  }
-
-  .app-shell {
-    width: 430px;
+  /* No desktop, a tela ocupa toda altura do shell e tem scroll interno */
+  .tela.ativa {
+    height: 100%;
     min-height: auto;
-    height: calc(100vh - 96px);
-    max-height: 900px;
-    margin-block: var(--space-12);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow:
-      0 0 0 1px var(--color-border-subtle),
-      0 40px 100px rgba(0, 0, 0, 0.5);
-  }
-}
-
-/* ── Ultra-wide (1920px+) ──────────────────────────────────── */
-@media (min-width: 1920px) {
-  body {
-    background:
-      radial-gradient(ellipse at top, rgba(232,132,154,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom, rgba(212,149,106,0.04) 0%, transparent 60%),
-      var(--color-bg-primary);
+    overflow-y: auto;
+    padding-bottom: 76px;
   }
 
-  .app-shell {
-    width: 430px;
+  /* Login no desktop também pode rolar internamente se for grande */
+  #tela-login.ativa {
+    height: 100%;
     min-height: auto;
-    height: calc(100vh - 96px);
-    max-height: 1000px;
-    margin-block: var(--space-12);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow:
-      0 0 0 1px var(--color-border-subtle),
-      0 50px 120px rgba(0, 0, 0, 0.55);
-  }
-}
-
-/* ── Ajustes globais para frame em desktop (a partir de 768px) ── */
-@media (min-width: 768px) {
-  /* Nav-bar e elementos fixos passam a ser absolutos dentro do shell */
-  .nav-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    max-width: none;
-    transform: none;
+    padding-bottom: 0;
+    overflow-y: auto;
   }
 
-  /* Modais bottom-sheet */
+  /* Nav-bar e elementos fixos viram absolute dentro do frame */
+  .nav-bar,
   .modal--bottom {
     position: absolute;
     bottom: 0;
@@ -517,26 +465,25 @@
     transform: none;
   }
 
-  /* Toast respeita o frame */
-  .toast {
-    position: absolute;
-    bottom: 88px;
-  }
-
-  /* FAB */
-  .fab {
-    position: absolute;
-  }
-
-  /* Overlays cobrem só o frame */
+  .toast        { position: absolute; bottom: 88px; }
+  .fab          { position: absolute; }
   .modal-backdrop,
-  .ex-celebrate {
-    position: absolute;
+  .ex-celebrate { position: absolute; }
+}
+
+/* Telas maiores: sombra mais profunda */
+@media (min-width: 1200px) {
+  body {
+    padding: var(--space-12) 0;
+    background:
+      radial-gradient(ellipse at top, rgba(255, 43, 0, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(219, 142, 2, 0.04) 0%, transparent 60%),
+      var(--color-bg-primary);
   }
 
-  /* Scroll do conteúdo dentro do shell */
-  .tela.ativa {
-    height: 100%;
-    overflow-y: auto;
+  .app-shell {
+    box-shadow:
+      0 0 0 1px var(--color-border-subtle),
+      0 40px 100px rgba(0, 0, 0, 0.55);
   }
 }

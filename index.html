@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#120A0F">
+  <meta name="theme-color" content="#14130B">
   <meta name="description" content="Dueto — app de casal com gamificação">
   <title>Dueto</title>
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap">
 
   <link rel="stylesheet" href="css/tokens.css">
@@ -34,9 +35,9 @@
 
       <div class="login-logo">
         <svg aria-hidden="true" width="72" height="72" viewBox="0 0 100 100" fill="none" class="logo-svg">
-          <path d="M50 18 L34 18 Q20 18 20 50 Q20 82 34 82 L50 82 L50 72 L36 72 Q30 72 30 50 Q30 28 36 28 L50 28 Z" fill="#E8849A"/>
-          <path d="M50 18 L66 18 Q80 18 80 50 Q80 82 66 82 L50 82 L50 72 L64 72 Q70 72 70 50 Q70 28 64 28 L50 28 Z" fill="#D4956A"/>
-          <rect x="46" y="18" width="8" height="64" rx="4" fill="#F0E8C8" opacity="0.9"/>
+          <path d="M50 18 L34 18 Q20 18 20 50 Q20 82 34 82 L50 82 L50 72 L36 72 Q30 72 30 50 Q30 28 36 28 L50 28 Z" fill="#FF2B00"/>
+          <path d="M50 18 L66 18 Q80 18 80 50 Q80 82 66 82 L50 82 L50 72 L64 72 Q70 72 70 50 Q70 28 64 28 L50 28 Z" fill="#DB8E02"/>
+          <rect x="46" y="18" width="8" height="64" rx="4" fill="#F5E6C8" opacity="0.9"/>
         </svg>
         <div class="login-logo__name">Dueto</div>
         <div class="login-logo__tagline">a rotina de vocês dois, em sincronia</div>
@@ -110,9 +111,7 @@
       <!-- Top bar -->
       <div class="top-bar">
         <button class="btn-back" data-action="voltar-cadastro" aria-label="Voltar">
-          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 3L5 8l5 5" stroke="#C8A0B0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
         </button>
         <h1 class="top-bar__title" id="topTitle">criar conta</h1>
       </div>
@@ -196,34 +195,33 @@
           <div class="field">
             <div class="field-label">avatar</div>
             <div class="avatar-picker" id="avatarPicker">
-              <div class="avatar-opt selected" data-emoji="🌸" data-action="selecionar-avatar">🌸</div>
-              <div class="avatar-opt" data-emoji="🌙" data-action="selecionar-avatar">🌙</div>
-              <div class="avatar-opt" data-emoji="🌿" data-action="selecionar-avatar">🌿</div>
-              <div class="avatar-opt" data-emoji="⚡" data-action="selecionar-avatar">⚡</div>
-              <div class="avatar-opt" data-emoji="🔥" data-action="selecionar-avatar">🔥</div>
-              <div class="avatar-opt" data-emoji="🦋" data-action="selecionar-avatar">🦋</div>
-              <div class="avatar-opt" data-emoji="🐾" data-action="selecionar-avatar">🐾</div>
-              <div class="avatar-opt" data-emoji="✨" data-action="selecionar-avatar">✨</div>
+              <div class="avatar-opt selected" data-emoji="ph-flower" data-action="selecionar-avatar"><i class="ph ph-flower" aria-hidden="true"></i></div>
+              <div class="avatar-opt" data-emoji="ph-moon" data-action="selecionar-avatar"><i class="ph ph-moon" aria-hidden="true"></i></div>
+              <div class="avatar-opt" data-emoji="ph-leaf" data-action="selecionar-avatar"><i class="ph ph-leaf" aria-hidden="true"></i></div>
+              <div class="avatar-opt" data-emoji="ph-lightning" data-action="selecionar-avatar"><i class="ph ph-lightning" aria-hidden="true"></i></div>
+              <div class="avatar-opt" data-emoji="ph-fire" data-action="selecionar-avatar"><i class="ph ph-fire" aria-hidden="true"></i></div>
+              <div class="avatar-opt" data-emoji="ph-butterfly" data-action="selecionar-avatar"><i class="ph ph-butterfly" aria-hidden="true"></i></div>
+              <div class="avatar-opt" data-emoji="ph-paw-print" data-action="selecionar-avatar"><i class="ph ph-paw-print" aria-hidden="true"></i></div>
+              <div class="avatar-opt" data-emoji="ph-sparkle" data-action="selecionar-avatar"><i class="ph ph-sparkle" aria-hidden="true"></i></div>
             </div>
           </div>
 
           <div class="field">
             <div class="field-label">cor do perfil</div>
             <div class="color-picker" id="colorPicker">
-              <div class="color-opt selected" data-color="#E8849A" style="background:#E8849A;" data-action="selecionar-cor"></div>
-              <div class="color-opt" data-color="#D4956A" style="background:#D4956A;" data-action="selecionar-cor"></div>
-              <div class="color-opt" data-color="#9B8AEA" style="background:#9B8AEA;" data-action="selecionar-cor"></div>
+              <div class="color-opt selected" data-color="#FF2B00" style="background:#FF2B00;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#DB8E02" style="background:#DB8E02;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#4D6F9A" style="background:#4D6F9A;" data-action="selecionar-cor"></div>
               <div class="color-opt" data-color="#7ABA7A" style="background:#7ABA7A;" data-action="selecionar-cor"></div>
-              <div class="color-opt" data-color="#6AAED4" style="background:#6AAED4;" data-action="selecionar-cor"></div>
-              <div class="color-opt" data-color="#F0C070" style="background:#F0C070;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#4D6F9A" style="background:#4D6F9A;" data-action="selecionar-cor"></div>
+              <div class="color-opt" data-color="#DB8E02" style="background:#DB8E02;" data-action="selecionar-cor"></div>
             </div>
           </div>
 
           <div class="field">
             <div class="field-label">pré-visualização</div>
             <div class="profile-preview">
-              <div class="preview-avatar" id="previewAvatar"
-                   style="background: rgba(232,132,154,0.15);">🌸</div>
+              <div class="preview-avatar" id="previewAvatar" data-emoji="ph-flower"><i class="ph ph-flower" aria-hidden="true"></i></div>
               <div class="preview-info">
                 <div class="preview-name" id="previewNome">seu nome</div>
                 <div class="preview-sub">é assim que seu parceiro vai te ver</div>
@@ -246,10 +244,7 @@
             <div class="invite-code" id="inviteCode">DU·0000</div>
             <div class="invite-desc">Envie esse código para seu parceiro. Ele vai usá-lo para se conectar a você.</div>
             <button class="btn-copy" data-action="copiar-codigo">
-              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="#E8849A" stroke-width="1.2"/>
-                <path d="M4 3V2.5A1.5 1.5 0 0 1 5.5 1H11a1.5 1.5 0 0 1 1.5 1.5V9A1.5 1.5 0 0 1 11 10.5H10" stroke="#E8849A" stroke-width="1.2" stroke-linecap="round"/>
-              </svg>
+              <i class="ph ph-copy" aria-hidden="true"></i>
               copiar código
             </button>
           </div>
@@ -281,9 +276,9 @@
           <div class="step-success">
 
             <svg aria-hidden="true" width="80" height="80" viewBox="0 0 100 100" fill="none" class="logo-svg">
-              <path d="M50 18 L34 18 Q20 18 20 50 Q20 82 34 82 L50 82 L50 72 L36 72 Q30 72 30 50 Q30 28 36 28 L50 28 Z" fill="#E8849A"/>
-              <path d="M50 18 L66 18 Q80 18 80 50 Q80 82 66 82 L50 82 L50 72 L64 72 Q70 72 70 50 Q70 28 64 28 L50 28 Z" fill="#D4956A"/>
-              <rect x="46" y="18" width="8" height="64" rx="4" fill="#F0E8C8" opacity="0.9"/>
+              <path d="M50 18 L34 18 Q20 18 20 50 Q20 82 34 82 L50 82 L50 72 L36 72 Q30 72 30 50 Q30 28 36 28 L50 28 Z" fill="#FF2B00"/>
+              <path d="M50 18 L66 18 Q80 18 80 50 Q80 82 66 82 L50 82 L50 72 L64 72 Q70 72 70 50 Q70 28 64 28 L50 28 Z" fill="#DB8E02"/>
+              <rect x="46" y="18" width="8" height="64" rx="4" fill="#F5E6C8" opacity="0.9"/>
             </svg>
 
             <div>
@@ -297,7 +292,7 @@
 
             <div class="step-success__items">
               <div class="step-success__item">
-                <div class="step-success__icon step-success__icon--pink" id="successAvatar">🌸</div>
+                <div class="step-success__icon step-success__icon--pink" id="successAvatar"><i class="ph ph-flower" aria-hidden="true"></i></div>
                 <div class="step-success__item-text">perfil criado com sucesso</div>
                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" class="step-success__check">
                   <circle cx="7" cy="7" r="5.5" stroke="#7ABA7A" stroke-width="1.2"/>
@@ -307,15 +302,15 @@
               <div class="step-success__item">
                 <div class="step-success__icon step-success__icon--amber">
                   <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M7 2c2.8 0 5 2.2 5 5s-2.2 5-5 5-5-2.2-5-5 2.2-5 5-5z" stroke="#D4956A" stroke-width="1.2"/>
-                    <path d="M7 5v3l2 1" stroke="#D4956A" stroke-width="1.2" stroke-linecap="round"/>
+                    <path d="M7 2c2.8 0 5 2.2 5 5s-2.2 5-5 5-5-2.2-5-5 2.2-5 5-5z" stroke="#DB8E02" stroke-width="1.2"/>
+                    <path d="M7 5v3l2 1" stroke="#DB8E02" stroke-width="1.2" stroke-linecap="round"/>
                   </svg>
                 </div>
                 <div class="step-success__item-text" id="successConexao">parceiro a conectar</div>
                 <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" class="step-success__check" id="successConexaoIcon">
-                  <circle cx="7" cy="7" r="5.5" stroke="#7A5060" stroke-width="1.2"/>
-                  <path d="M7 4v4" stroke="#7A5060" stroke-width="1.2" stroke-linecap="round"/>
-                  <circle cx="7" cy="9.5" r="0.4" fill="#7A5060"/>
+                  <circle cx="7" cy="7" r="5.5" stroke="#7E5A48" stroke-width="1.2"/>
+                  <path d="M7 4v4" stroke="#7E5A48" stroke-width="1.2" stroke-linecap="round"/>
+                  <circle cx="7" cy="9.5" r="0.4" fill="#7E5A48"/>
                 </svg>
               </div>
             </div>
@@ -346,11 +341,9 @@
       <h1 class="home-header__name" id="homeNome">Ana</h1>
     </div>
     <button class="partner-btn" data-action="ver-parceiro">
-      <div class="partner-avatar">🌙</div>
+      <div class="partner-avatar"><i class="ph ph-moon" aria-hidden="true"></i></div>
       <span class="partner-btn__label">parceiro</span>
-      <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M4.5 3l3 3-3 3" stroke="#7A5060" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <i class="ph ph-caret-right" aria-hidden="true"></i>
     </button>
   </header>
  
@@ -358,7 +351,7 @@
  
     <!-- ── Perfil + saldo ── -->
     <div class="profile-card">
-      <div class="my-avatar">🌸</div>
+      <div class="my-avatar"><i class="ph ph-flower" aria-hidden="true"></i></div>
       <div class="profile-info">
         <div class="profile-info__name" id="profileNome">Ana</div>
         <div class="profile-info__sub">membro desde mai. 2026</div>
@@ -366,10 +359,7 @@
       <div class="saldo-box">
         <span class="saldo-box__label">saldo</span>
         <div class="saldo-box__val">
-          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="5.5" stroke="#D4956A" stroke-width="1.2"/>
-            <text x="7" y="10.5" text-anchor="middle" font-size="7" font-weight="500" fill="#D4956A">$</text>
-          </svg>
+          <i class="ph ph-coin" aria-hidden="true"></i>
           <span id="saldoVal">420</span>
         </div>
       </div>
@@ -394,9 +384,7 @@
  
         <div class="task-item" data-action="toggle-task">
           <div class="task-check done">
-            <svg aria-hidden="true" width="8" height="8" viewBox="0 0 8 8" fill="none">
-              <path d="M1.5 4l2 2 3-3" stroke="#E8849A" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
+            <i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>
           </div>
           <div class="task-item__info">
             <div class="task-item__name done">Fazer a cama</div>
@@ -466,10 +454,7 @@
  
         <div class="module-card" data-action="ir-loja">
           <div class="module-card__icon module-card__icon--amber">
-            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="7.5" stroke="#D4956A" stroke-width="1.3"/>
-              <text x="10" y="14" text-anchor="middle" font-size="9" font-weight="500" fill="#D4956A">$</text>
-            </svg>
+            <i class="ph ph-coins icon-lg" aria-hidden="true"></i>
           </div>
           <div>
             <div class="module-card__title">loja</div>
@@ -482,10 +467,7 @@
  
         <div class="module-card" data-action="toast" data-msg="em breve: filmes">
           <div class="module-card__icon module-card__icon--purple">
-            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="3" y="5" width="14" height="10" rx="2" stroke="#9B8AEA" stroke-width="1.3"/>
-              <path d="M8 8l5 2.5L8 13V8z" fill="#9B8AEA"/>
-            </svg>
+            <i class="ph ph-film-strip icon-lg" aria-hidden="true"></i>
           </div>
           <div>
             <div class="module-card__title">filmes</div>
@@ -498,10 +480,7 @@
  
         <div class="module-card" data-action="toast" data-msg="em breve: receitas">
           <div class="module-card__icon module-card__icon--green">
-            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M6 4v5a4 4 0 0 0 8 0V4" stroke="#7ABA7A" stroke-width="1.3" stroke-linecap="round"/>
-              <path d="M10 13v3M7 16h6" stroke="#7ABA7A" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
+            <i class="ph ph-cooking-pot icon-lg" aria-hidden="true"></i>
           </div>
           <div>
             <div class="module-card__title">receitas</div>
@@ -514,10 +493,7 @@
  
         <div class="module-card" data-action="toast" data-msg="em breve: lugares">
           <div class="module-card__icon module-card__icon--blue">
-            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M10 3c-3 0-5.5 2.5-5.5 5.5C4.5 12.5 10 18 10 18s5.5-5.5 5.5-9.5C15.5 5.5 13 3 10 3z" stroke="#6AAED4" stroke-width="1.3"/>
-              <circle cx="10" cy="8.5" r="2" stroke="#6AAED4" stroke-width="1.2"/>
-            </svg>
+            <i class="ph ph-map-pin icon-lg" aria-hidden="true"></i>
           </div>
           <div>
             <div class="module-card__title">lugares</div>
@@ -547,9 +523,7 @@
     <!-- Top bar -->
     <div class="top-bar">
       <button class="btn-back" data-action="ir-home" aria-label="Voltar">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M10 3L5 8l5 5" stroke="#C8A0B0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <i class="ph ph-caret-left" aria-hidden="true"></i>
       </button>
       <h1 class="top-bar__title" id="tarefas-titulo">tarefas</h1>
       <div class="tarefas-header__meta" id="tarefasResumoDia"></div>
@@ -571,22 +545,17 @@
         <button class="grupo-header" data-action="toggle-grupo" data-grupo="limpeza">
           <div class="grupo-header__left">
             <div class="grupo-icon grupo-icon--pink">
-              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M3 11l2-5h4l2 5H3z" stroke="#E8849A" stroke-width="1.1" stroke-linejoin="round"/>
-                <path d="M7 6V3M5 3h4" stroke="#E8849A" stroke-width="1.1" stroke-linecap="round"/>
-              </svg>
+              <i class="ph ph-broom" aria-hidden="true"></i>
             </div>
-            <span class="grupo-nome">limpeza</span>
+            <span class="grupo-nome">limpeza da casa</span>
             <span class="grupo-badge" id="badge-limpeza">1/3</span>
           </div>
-          <svg aria-hidden="true" class="grupo-chevron" id="chevron-limpeza" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3.5 5.5l3.5 3.5 3.5-3.5" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <i class="ph ph-caret-down grupo-chevron" id="chevron-limpeza" aria-hidden="true"></i>
         </button>
         <div class="grupo-body open" id="body-limpeza">
           <div class="task-item" data-action="toggle-task" data-pts="15" data-grupo="limpeza">
             <div class="task-check done">
-              <svg aria-hidden="true" width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="#E8849A" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>
             </div>
             <div class="task-item__info">
               <div class="task-item__name done">Fazer a cama</div>
@@ -616,19 +585,12 @@
         <button class="grupo-header" data-action="toggle-grupo" data-grupo="pets">
           <div class="grupo-header__left">
             <div class="grupo-icon grupo-icon--amber">
-              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M7 9c-2 0-4 1-4 2.5h8C11 10 9 9 7 9z" stroke="#D4956A" stroke-width="1.1" stroke-linejoin="round"/>
-                <circle cx="5" cy="5.5" r="1" fill="#D4956A"/>
-                <circle cx="9" cy="5.5" r="1" fill="#D4956A"/>
-                <path d="M5 3c0-1 .5-1.5 1-1.5M9 3c0-1-.5-1.5-1-1.5" stroke="#D4956A" stroke-width="1" stroke-linecap="round"/>
-              </svg>
+              <i class="ph ph-paw-print" aria-hidden="true"></i>
             </div>
             <span class="grupo-nome">pets</span>
             <span class="grupo-badge" id="badge-pets">0/2</span>
           </div>
-          <svg aria-hidden="true" class="grupo-chevron open" id="chevron-pets" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3.5 5.5l3.5 3.5 3.5-3.5" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <i class="ph ph-caret-down grupo-chevron open" id="chevron-pets" aria-hidden="true"></i>
         </button>
         <div class="grupo-body" id="body-pets">
           <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="pets">
@@ -653,19 +615,12 @@
         <button class="grupo-header" data-action="toggle-grupo" data-grupo="organizacao">
           <div class="grupo-header__left">
             <div class="grupo-icon grupo-icon--purple">
-              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <rect x="2" y="2" width="4" height="4" rx="1" stroke="#9B8AEA" stroke-width="1.1"/>
-                <rect x="8" y="2" width="4" height="4" rx="1" stroke="#9B8AEA" stroke-width="1.1"/>
-                <rect x="2" y="8" width="4" height="4" rx="1" stroke="#9B8AEA" stroke-width="1.1"/>
-                <rect x="8" y="8" width="4" height="4" rx="1" stroke="#9B8AEA" stroke-width="1.1"/>
-              </svg>
+              <i class="ph ph-squares-four" aria-hidden="true"></i>
             </div>
             <span class="grupo-nome">organização</span>
             <span class="grupo-badge" id="badge-organizacao">0/1</span>
           </div>
-          <svg aria-hidden="true" class="grupo-chevron open" id="chevron-organizacao" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3.5 5.5l3.5 3.5 3.5-3.5" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <i class="ph ph-caret-down grupo-chevron open" id="chevron-organizacao" aria-hidden="true"></i>
         </button>
         <div class="grupo-body" id="body-organizacao">
           <div class="task-item" data-action="toggle-task" data-pts="50" data-grupo="organizacao">
@@ -678,14 +633,42 @@
         </div>
       </div>
 
+      <!-- GRUPO: Roupas -->
+      <div class="grupo-acordeon" id="grupo-roupas">
+        <button class="grupo-header" data-action="toggle-grupo" data-grupo="roupas">
+          <div class="grupo-header__left">
+            <div class="grupo-icon grupo-icon--green">
+              <i class="ph ph-t-shirt" aria-hidden="true"></i>
+            </div>
+            <span class="grupo-nome">roupas</span>
+            <span class="grupo-badge" id="badge-roupas">0/0</span>
+          </div>
+          <i class="ph ph-caret-down grupo-chevron open" id="chevron-roupas" aria-hidden="true"></i>
+        </button>
+        <div class="grupo-body" id="body-roupas"></div>
+      </div>
+
+      <!-- GRUPO: Outros -->
+      <div class="grupo-acordeon" id="grupo-outros">
+        <button class="grupo-header" data-action="toggle-grupo" data-grupo="outros">
+          <div class="grupo-header__left">
+            <div class="grupo-icon grupo-icon--blue">
+              <i class="ph ph-dots-three-circle" aria-hidden="true"></i>
+            </div>
+            <span class="grupo-nome">outros</span>
+            <span class="grupo-badge" id="badge-outros">0/0</span>
+          </div>
+          <i class="ph ph-caret-down grupo-chevron open" id="chevron-outros" aria-hidden="true"></i>
+        </button>
+        <div class="grupo-body" id="body-outros"></div>
+      </div>
+
     </div><!-- fim screen__body -->
   </div><!-- fim screen -->
 
   <!-- FAB — criar nova tarefa -->
   <button class="fab" id="fabNovaTarefa" data-action="abrir-nova-tarefa" aria-label="Nova tarefa">
-    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <path d="M11 4v14M4 11h14" stroke="#2A1020" stroke-width="2" stroke-linecap="round"/>
-    </svg>
+    <i class="ph-bold ph-plus icon-xl" aria-hidden="true"></i>
   </button>
 
   <!-- Modal nova tarefa -->
@@ -702,10 +685,38 @@
       <div class="field">
         <label class="field-label" for="novaTarefaGrupo">grupo</label>
         <select class="input select-input" id="novaTarefaGrupo">
-          <option value="limpeza">limpeza</option>
+          <option value="limpeza">limpeza da casa</option>
           <option value="pets">pets</option>
           <option value="organizacao">organização</option>
+          <option value="roupas">roupas</option>
+          <option value="outros">outros</option>
+          
         </select>
+      </div>
+      <div class="field">
+        <div class="field-label">tipo</div>
+        <div class="tipo-picker">
+          <button class="tipo-opt active" data-tipo="diaria" data-action="selecionar-tipo">
+            <i class="ph ph-calendar-check icon-md" aria-hidden="true"></i>
+            <span>diária</span>
+            <span class="tipo-opt__sub">todos os dias</span>
+          </button>
+          <button class="tipo-opt" data-tipo="pontual" data-action="selecionar-tipo">
+            <i class="ph ph-clock-counter-clockwise icon-md" aria-hidden="true"></i>
+            <span>pontual</span>
+            <span class="tipo-opt__sub">repete em ciclo</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field is-hidden" id="cicloField">
+        <label class="field-label" for="cicloDias">a cada quantos dias?</label>
+        <div class="ciclo-row">
+          <button class="ciclo-btn" data-action="ciclo-menos" aria-label="Diminuir ciclo">−</button>
+          <input class="input ciclo-input" type="number" id="cicloDias" value="3" min="1" max="365" inputmode="numeric">
+          <button class="ciclo-btn" data-action="ciclo-mais" aria-label="Aumentar ciclo">+</button>
+        </div>
+        <span class="field-hint">ex: a cada 7 dias = uma vez por semana</span>
       </div>
 
       <div class="field">
@@ -744,9 +755,7 @@
     <!-- Top bar -->
     <div class="top-bar">
       <button class="btn-back" data-action="ir-home" aria-label="Voltar">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M10 3L5 8l5 5" stroke="#C8A0B0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <i class="ph ph-caret-left" aria-hidden="true"></i>
       </button>
       <h1 class="top-bar__title" id="exercicios-titulo">exercícios</h1>
     </div>
@@ -761,18 +770,13 @@
           <div class="ex-streak-card__num" id="streakVoce">12</div>
           <div class="ex-streak-card__sub">dias seguidos</div>
           <div class="ex-streak-card__status" id="streakVoceStatus">
-            <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <circle cx="5" cy="5" r="4" stroke="#E8849A" stroke-width="1"/>
-              <path d="M3 5l1.5 1.5L7 3.5" stroke="#E8849A" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <i class="ph ph-check-circle icon-xs" aria-hidden="true"></i>
             feito hoje
           </div>
         </div>
 
         <div class="ex-streak-divider">
-          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M10 4C7.2 4 5 6.2 5 9c0 4 5 8 5 8s5-4 5-8c0-2.8-2.2-5-5-5z" fill="#3A1F2E" stroke="#E8849A" stroke-width="1"/>
-          </svg>
+          <i class="ph-fill ph-heart icon-md" aria-hidden="true"></i>
         </div>
 
         <div class="ex-streak-card ex-streak-card--partner">
@@ -780,11 +784,7 @@
           <div class="ex-streak-card__num" id="streakParceiro">10</div>
           <div class="ex-streak-card__sub">dias seguidos</div>
           <div class="ex-streak-card__status ex-streak-card__status--pending" id="streakParceiroStatus">
-            <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <circle cx="5" cy="5" r="4" stroke="#7A5060" stroke-width="1"/>
-              <path d="M5 3v3" stroke="#7A5060" stroke-width="1" stroke-linecap="round"/>
-              <circle cx="5" cy="7.5" r="0.4" fill="#7A5060"/>
-            </svg>
+            <i class="ph ph-clock icon-xs" aria-hidden="true"></i>
             aguardando
           </div>
         </div>
@@ -839,19 +839,19 @@
         </div>
         <div class="ex-badges-row">
           <div class="ex-badge ex-badge--earned">
-            <div class="ex-badge__icon">🔥</div>
+            <div class="ex-badge__icon"><i class="ph-fill ph-fire" aria-hidden="true"></i></div>
             <div class="ex-badge__name">7 dias</div>
           </div>
           <div class="ex-badge ex-badge--earned">
-            <div class="ex-badge__icon">⚡</div>
+            <div class="ex-badge__icon"><i class="ph-fill ph-lightning" aria-hidden="true"></i></div>
             <div class="ex-badge__name">dupla em chamas</div>
           </div>
           <div class="ex-badge">
-            <div class="ex-badge__icon">🏅</div>
+            <div class="ex-badge__icon"><i class="ph-fill ph-medal" aria-hidden="true"></i></div>
             <div class="ex-badge__name">30 dias</div>
           </div>
           <div class="ex-badge">
-            <div class="ex-badge__icon">🤝</div>
+            <div class="ex-badge__icon"><i class="ph-fill ph-handshake" aria-hidden="true"></i></div>
             <div class="ex-badge__name">maratonistas</div>
           </div>
         </div>
@@ -862,16 +862,11 @@
     <!-- Botão de check-in -->
     <div class="ex-checkin-wrap" id="exCheckinWrap">
       <button class="ex-checkin-btn" id="exCheckinBtn" data-action="fazer-checkin">
-        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <path d="M4 11l5 5 9-9" stroke="#2A1020" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <i class="ph-bold ph-check icon-xl" aria-hidden="true"></i>
         marcar hoje como feito
       </button>
       <div class="ex-checkin-done is-hidden" id="exCheckinDone">
-        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <circle cx="8" cy="8" r="7" stroke="#7ABA7A" stroke-width="1.3"/>
-          <path d="M5 8l2.5 2.5L11 5.5" stroke="#7ABA7A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <i class="ph ph-check-circle" aria-hidden="true"></i>
         exercício feito hoje
       </div>
     </div>
@@ -881,7 +876,7 @@
   <!-- Overlay de celebração -->
   <div class="ex-celebrate" id="exCelebrate" role="alertdialog" aria-labelledby="exCelebrateTitulo" aria-hidden="true">
     <div class="ex-celebrate__card">
-      <div class="ex-celebrate__emoji" id="exCelebrateEmoji">🔥</div>
+      <div class="ex-celebrate__emoji" id="exCelebrateEmoji"><i class="ph-fill ph-fire" aria-hidden="true"></i></div>
       <div class="ex-celebrate__num" id="exCelebrateNum">13</div>
       <div id="exCelebrateTitulo" class="visually-hidden">Streak alcançado</div>
       <div class="ex-celebrate__label">dias seguidos!</div>
@@ -917,30 +912,19 @@
 <!-- ── Nav bar ── -->
 <nav class="nav-bar" aria-label="Navegação principal">
   <button class="nav-item active" data-action="ir-home" aria-current="page" aria-label="Início">
-    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M3 9.5L10 3l7 6.5V17a1 1 0 0 1-1 1h-4v-4h-4v4H4a1 1 0 0 1-1-1V9.5z" stroke="#E8849A" stroke-width="1.3" stroke-linejoin="round"/>
-    </svg>
+    <i class="ph-fill ph-house icon-lg" aria-hidden="true"></i>
     início
   </button>
   <button class="nav-item" data-action="ir-tarefas" aria-label="Tarefas">
-    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect x="4" y="4" width="12" height="12" rx="2" stroke="#7A5060" stroke-width="1.3"/>
-      <path d="M7 10h6M10 7v6" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round"/>
-    </svg>
+    <i class="ph ph-check-square icon-lg" aria-hidden="true"></i>
     tarefas
   </button>
   <button class="nav-item" data-action="ir-exercicios" aria-label="Exercícios">
-    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="10" r="7" stroke="#7A5060" stroke-width="1.3"/>
-      <path d="M10 7v4l2.5 1.5" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round"/>
-    </svg>
+    <i class="ph ph-barbell icon-lg" aria-hidden="true"></i>
     exercícios
   </button>
   <button class="nav-item" data-action="ir-loja" aria-label="Loja">
-    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M4 17l2.5-7h7L16 17H4z" stroke="#7A5060" stroke-width="1.3" stroke-linejoin="round"/>
-      <path d="M7 10V7a3 3 0 0 1 6 0v3" stroke="#7A5060" stroke-width="1.3" stroke-linecap="round"/>
-    </svg>
+    <i class="ph ph-shopping-bag icon-lg" aria-hidden="true"></i>
     loja
   </button>
 </nav>

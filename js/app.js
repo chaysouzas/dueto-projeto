@@ -14,7 +14,7 @@ const firebaseConfig = {
 // ── 2. Service worker (PWA) ────────────────────────────────
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js")
+    navigator.serviceWorker.register("/service-worker.js")
       .then(() => console.log("[Dueto] Service worker ok"))
       .catch(err => console.warn("[Dueto] SW falhou:", err));
   });
@@ -98,8 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ════════════════════════════════════════════════════════
 
   let etapaAtual = 0;
-  let avatarSelecionado = '🌸';
-  let corSelecionada = '#E8849A';
+  let avatarSelecionado = 'ph-flower';
+  let corSelecionada = '#FF2B00';
   let parceiroConectado = false;
 
   const titulos = ['criar conta', 'seu perfil', 'conectar parceiro', ''];
@@ -173,11 +173,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (/[^A-Za-z0-9]/.test(senha)) forca++;
 
     const pct    = Math.min(forca * 20, 100);
-    const cores  = ['', '#F87171', '#F59E0B', '#F59E0B', '#7ABA7A', '#7ABA7A'];
+    const cores  = ['', '#FF6B5B', '#DB8E02', '#DB8E02', '#7ABA7A', '#7ABA7A'];
     const textos = ['', 'muito fraca', 'fraca', 'razoável', 'boa', 'forte'];
 
     fill.style.width      = pct + '%';
-    fill.style.background = cores[forca] || '#3A1F2E';
+    fill.style.background = cores[forca] || '#2A1B12';
     hint.textContent      = forca > 0 ? 'força: ' + textos[forca] : '';
     hint.style.color      = cores[forca] || 'var(--color-text-tertiary)';
   }
@@ -197,9 +197,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function selecionarAvatar(el) {
     document.querySelectorAll('.avatar-opt').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
-    avatarSelecionado = el.dataset.emoji;
-    document.getElementById('previewAvatar').textContent = avatarSelecionado;
-    document.getElementById('successAvatar').textContent = avatarSelecionado;
+    avatarSelecionado = el.dataset.emoji; // ex: 'ph-flower'
+
+    // Atualiza preview e success com a classe Phosphor
+    const preview = document.getElementById('previewAvatar');
+    const success = document.getElementById('successAvatar');
+    if (preview) preview.innerHTML = `<i class="ph ${avatarSelecionado}" aria-hidden="true"></i>`;
+    if (success) success.innerHTML = `<i class="ph ${avatarSelecionado}" aria-hidden="true"></i>`;
   }
 
   function selecionarCor(el) {
@@ -288,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tarefasConcluidas = Math.max(0, tarefasConcluidas - 1);
     } else {
       check.classList.add('done');
-      check.innerHTML = '<svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="#E8849A" stroke-width="1.3" stroke-linecap="round"/></svg>';
+      check.innerHTML = '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>';
       name.classList.add('done');
       tarefasConcluidas = Math.min(totalTarefas, tarefasConcluidas + 1);
       mostrarToast('tarefa concluída — aguardando validação');
@@ -321,6 +325,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // ════════════════════════════════════════════════════════
 
   let pontosSelecionados = 15;
+  let tipoSelecionado = 'diaria';
+
+  function selecionarTipo(btn) {
+    document.querySelectorAll('.tipo-opt').forEach(o => o.classList.remove('active'));
+    btn.classList.add('active');
+    tipoSelecionado = btn.dataset.tipo;
+
+    const cicloField = document.getElementById('cicloField');
+    if (cicloField) {
+      cicloField.classList.toggle('is-hidden', tipoSelecionado !== 'pontual');
+    }
+  }
+
+  function ajustarCiclo(delta) {
+    const input = document.getElementById('cicloDias');
+    if (!input) return;
+    const novo = Math.max(1, Math.min(365, (parseInt(input.value) || 1) + delta));
+    input.value = novo;
+  }
+
 
   function toggleGrupo(grupo) {
     const body    = document.getElementById('body-' + grupo);
@@ -349,7 +373,7 @@ function toggleTaskHome(item) {
     atualizarSaldo(-pts);
   } else {
     check.classList.add('done');
-    check.innerHTML = '<svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M1.5 4l2 2 3-3" stroke="#E8849A" stroke-width="1.3" stroke-linecap="round"/></svg>';
+    check.innerHTML = '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>';
     name.classList.add('done');
     atualizarSaldo(pts);
     mostrarToast('+' + pts + ' moedas');
@@ -376,7 +400,7 @@ function toggleTaskHome(item) {
   }
 
   function inicializarBadges() {
-    ['limpeza', 'pets', 'organizacao'].forEach(atualizarBadgeGrupo);
+    ['limpeza', 'pets', 'organizacao', 'roupas', 'outros'].forEach(atualizarBadgeGrupo);
   }
 
   function atualizarResumoDia() {
@@ -395,10 +419,25 @@ function toggleTaskHome(item) {
   function fecharModalNovaTarefa() {
     document.getElementById('modalNovaTarefa').classList.remove('open');
     document.getElementById('novaTarefaNome').value = '';
+
+    // Reset tipo
+    document.querySelectorAll('.tipo-opt').forEach(o => o.classList.remove('active'));
+    const tipoDefault = document.querySelector('.tipo-opt[data-tipo="diaria"]');
+    if (tipoDefault) tipoDefault.classList.add('active');
+    tipoSelecionado = 'diaria';
+    document.getElementById('cicloField')?.classList.add('is-hidden');
+    const ciclo = document.getElementById('cicloDias');
+    if (ciclo) ciclo.value = 3;
+
+    // Reset pontos
     document.querySelectorAll('.pts-opt').forEach(o => o.classList.remove('active'));
-    const defaultOpt = document.querySelector('.pts-opt[data-pts="15"]');
-    if (defaultOpt) defaultOpt.classList.add('active');
+    const ptsDefault = document.querySelector('.pts-opt[data-pts="15"]');
+    if (ptsDefault) ptsDefault.classList.add('active');
     pontosSelecionados = 15;
+
+    // Reset grupo
+    const select = document.getElementById('novaTarefaGrupo');
+    if (select) select.value = 'limpeza';
   }
 
   function fecharModalNovaTarefaFora(e) {
@@ -414,17 +453,36 @@ function toggleTaskHome(item) {
   function criarTarefa() {
     const nome  = document.getElementById('novaTarefaNome').value.trim();
     const grupo = document.getElementById('novaTarefaGrupo').value;
+
     if (!nome) { mostrarToast('dê um nome para a tarefa'); return; }
 
+    const cicloDias = tipoSelecionado === 'pontual'
+      ? parseInt(document.getElementById('cicloDias').value) || 1
+      : null;
+
+    // Cria item da tarefa
     const item = document.createElement('div');
     item.className     = 'task-item';
     item.dataset.pts   = pontosSelecionados;
     item.dataset.grupo = grupo;
-    item.onclick = function() { toggleTaskHome(this); atualizarResumoDia(); };
+    item.dataset.tipo  = tipoSelecionado;
+    item.dataset.action = 'toggle-task';
+
+    if (tipoSelecionado === 'pontual') {
+      item.dataset.ciclo = cicloDias;
+      item.dataset.criadaEm = new Date().toISOString();
+      item.dataset.proxData = calcularProxData(cicloDias).toISOString();
+    }
+
+    const tagTexto = tipoSelecionado === 'pontual'
+      ? `a cada ${cicloDias} dia${cicloDias > 1 ? 's' : ''}`
+      : 'diária';
+
     item.innerHTML = `
       <div class="task-check"></div>
       <div class="task-item__info">
         <div class="task-item__name">${nome}</div>
+        <div class="task-item__tag">${tagTexto}</div>
       </div>
       <span class="task-item__pts">+${pontosSelecionados}</span>
     `;
@@ -438,14 +496,41 @@ function toggleTaskHome(item) {
 
     atualizarBadgeGrupo(grupo);
     atualizarResumoDia();
+    verificarAtrasadas();
     fecharModalNovaTarefa();
-    mostrarToast('tarefa criada em ' + grupo);
+    mostrarToast('tarefa criada');
     // TODO: salvar no Firestore
   }
 
+  // Calcula a próxima data baseada no ciclo (em dias)
+  function calcularProxData(dias) {
+    const d = new Date();
+    d.setDate(d.getDate() + dias);
+    return d;
+  }
+
+  // Verifica todas as tarefas pontuais e marca as atrasadas
+  function verificarAtrasadas() {
+    const agora = new Date();
+    document.querySelectorAll('.task-item[data-tipo="pontual"]').forEach(item => {
+      const prox = item.dataset.proxData ? new Date(item.dataset.proxData) : null;
+      if (!prox) return;
+      const atrasada = agora > prox;
+      item.classList.toggle('task-item--atrasada', atrasada);
+      // Atualiza tag
+      const tag = item.querySelector('.task-item__tag');
+      const ciclo = item.dataset.ciclo;
+      if (tag && ciclo) {
+        tag.innerHTML = atrasada
+          ? `<span class="task-item__alerta"><i class="ph-fill ph-warning-circle" aria-hidden="true"></i> em atraso</span>`
+          : `a cada ${ciclo} dia${ciclo > 1 ? 's' : ''}`;
+      }
+    });
+  }
   function inicializarTarefas() {
     inicializarBadges();
     atualizarResumoDia();
+    verificarAtrasadas();
   }
 
   const exEstado = {
@@ -527,15 +612,15 @@ function renderizarCalendarioSemanal() {
     } else if (isHoje) {
       dotClass += isFeitoHoje ? ' ex-cal-day__dot--done' : ' ex-cal-day__dot--today';
       conteudo = isFeitoHoje
-        ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 5l2 2 3-3" stroke="#E8849A" stroke-width="1.3" stroke-linecap="round"/></svg>'
+        ? '<i class="ph-bold ph-check" aria-hidden="true"></i>'
         : dia.getDate();
     } else {
       // dias anteriores — checar no histórico simplificado
       const idx = exEstado.historico[dia.getDate() - 1];
       dotClass += idx === false ? ' ex-cal-day__dot--miss' : ' ex-cal-day__dot--done';
       conteudo = idx === false
-        ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 3l4 4M7 3L3 7" stroke="#F87171" stroke-width="1.3" stroke-linecap="round"/></svg>'
-        : '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 5l2 2 3-3" stroke="#E8849A" stroke-width="1.3" stroke-linecap="round"/></svg>';
+        ? '<i class="ph-bold ph-x" aria-hidden="true"></i>'
+        : '<i class="ph-bold ph-check" aria-hidden="true"></i>';
     }
  
     container.innerHTML += `
@@ -598,12 +683,7 @@ function fazerCheckin() {
   const status = document.getElementById('streakVoceStatus');
   if (status) {
     status.className = 'ex-streak-card__status';
-    status.innerHTML = `
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-        <circle cx="5" cy="5" r="4" stroke="#7ABA7A" stroke-width="1"/>
-        <path d="M3 5l1.5 1.5L7 3.5" stroke="#7ABA7A" stroke-width="1" stroke-linecap="round"/>
-      </svg>
-      feito hoje`;
+    status.innerHTML = `<i class="ph ph-check-circle icon-xs" aria-hidden="true"></i> feito hoje`;
   }
  
   // Mostrar celebração
@@ -620,7 +700,12 @@ function mostrarCelebracao() {
   if (!overlay) return;
  
   if (num)   num.textContent   = exEstado.streakVoce;
-  if (emoji) emoji.textContent = exEstado.streakVoce >= 30 ? '🏅' : exEstado.streakVoce >= 14 ? '⚡' : '🔥';
+  if (emoji) {
+    const icone = exEstado.streakVoce >= 30 ? 'ph-medal'
+                : exEstado.streakVoce >= 14 ? 'ph-lightning'
+                : 'ph-fire';
+    emoji.innerHTML = `<i class="ph-fill ${icone}" aria-hidden="true"></i>`;
+  }
   if (sub) {
     if      (exEstado.streakVoce === exEstado.metaDias) sub.textContent = '🎉 você bateu a meta!';
     else if (exEstado.streakVoce % 7 === 0)             sub.textContent = 'mais uma semana completa!';
@@ -663,6 +748,20 @@ function salvarMeta() {
   mostrarToast('meta atualizada: ' + metaSelecionada + ' dias');
   // TODO: salvar no Firestore
 }
+
+  
+  // Mostrar/esconder campo "novo grupo" conforme seleção do select
+  const selectGrupo = document.getElementById('novaTarefaGrupo');
+  if (selectGrupo) {
+    selectGrupo.addEventListener('change', () => {
+      const campo = document.getElementById('novoGrupoField');
+      if (!campo) return;
+      campo.classList.toggle('is-hidden', selectGrupo.value !== '__novo__');
+      if (selectGrupo.value === '__novo__') {
+        document.getElementById('novoGrupoNome')?.focus();
+      }
+    });
+  }
 
   // ════════════════════════════════════════════════════════
   // DELEGAÇÃO DE EVENTOS — substitui todos os onclick="" do HTML
@@ -718,6 +817,11 @@ function salvarMeta() {
     'salvar-meta':                  () => salvarMeta(),
     'fazer-checkin':                () => fazerCheckin(),
     'fechar-celebracao':            () => fecharCelebracao(),
+
+    // Tipo de tarefa
+    'selecionar-tipo':              (el) => selecionarTipo(el),
+    'ciclo-mais':                   () => ajustarCiclo(1),
+    'ciclo-menos':                  () => ajustarCiclo(-1),
   };
 
   // Delegação única de cliques — captura todos os data-action

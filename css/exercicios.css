@@ -20,8 +20,8 @@
   flex-direction: column;
   gap: 2px;
 }
-.ex-streak-card--you   { border-color: rgba(232,132,154,0.3); }
-.ex-streak-card--partner { border-color: rgba(212,149,106,0.2); }
+.ex-streak-card--you   { border-color: rgba(255, 43, 0,0.3); }
+.ex-streak-card--partner { border-color: rgba(219, 142, 2,0.2); }
 
 .ex-streak-card__label {
   font-size: var(--text-xs);
@@ -172,9 +172,9 @@
   font-size: 11px;
   color: var(--color-text-tertiary);
 }
-.ex-cal-day__dot--done  { background: var(--color-primary-subtle); border-color: rgba(232,132,154,0.4); color: var(--color-primary); }
+.ex-cal-day__dot--done  { background: var(--color-primary-subtle); border-color: rgba(255, 43, 0,0.4); color: var(--color-primary); }
 .ex-cal-day__dot--today { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-text-on-primary); font-weight: var(--font-medium); }
-.ex-cal-day__dot--miss  { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.2); color: var(--color-error); opacity: 0.6; }
+.ex-cal-day__dot--miss  { background: rgba(255, 107, 91,0.08); border-color: rgba(255, 107, 91,0.2); color: var(--color-error); opacity: 0.6; }
 .ex-cal-day__dot--future { opacity: 0.3; }
 
 /* ── Histórico mensal ── */
@@ -197,7 +197,7 @@
   border: 1px solid var(--color-border-subtle);
 }
 .ex-history-dot--done  { background: var(--color-primary); border-color: var(--color-primary); opacity: 0.8; }
-.ex-history-dot--miss  { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.2); }
+.ex-history-dot--miss  { background: rgba(255, 107, 91,0.15); border-color: rgba(255, 107, 91,0.2); }
 .ex-history-dot--future { opacity: 0.2; }
 
 /* ── Badges ── */
@@ -220,7 +220,7 @@
 }
 .ex-badge--earned {
   opacity: 1;
-  border-color: rgba(232,132,154,0.3);
+  border-color: rgba(255, 43, 0,0.3);
   background: var(--color-primary-subtle);
 }
 .ex-badge__icon { font-size: 20px; }
@@ -361,6 +361,14 @@
 }
 .ex-meta-opt.active {
   background: var(--color-primary-subtle);
-  border-color: rgba(232,132,154,0.4);
+  border-color: rgba(255, 43, 0,0.4);
   color: var(--color-primary);
+}
+
+
+/* ── Desktop (>= 768px): celebração fica dentro do frame ── */
+@media (min-width: 768px) {
+  .ex-celebrate {
+    position: absolute;
+  }
 }
