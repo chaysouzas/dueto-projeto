@@ -234,6 +234,9 @@
 
 /* ── Botão de check-in ── */
 .ex-checkin-wrap {
+  position: sticky;
+  bottom: 76px; /* fica acima da nav bar (mobile e desktop) */
+  z-index: 10;
   padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
   border-top: 1px solid var(--color-border-subtle);
   background: var(--color-bg-primary);

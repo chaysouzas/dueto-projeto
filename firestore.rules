@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /usuarios/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null;
+    }
+
+    match /casais/{casalId} {
+      function isMember() {
+        return request.auth != null &&
+          (request.auth.uid == resource.data.uid1 ||
+           request.auth.uid == resource.data.uid2);
+      }
+
+      allow read, write: if isMember();
+
+      match /tarefas/{id}    { allow read, write: if isMember(); }
+      match /exercicios/{id} { allow read, write: if isMember(); }
+      match /loja/{id}       { allow read, write: if isMember(); }
+      match /transacoes/{id} { allow read, write: if isMember(); }
+    }
+  }
+}

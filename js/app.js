@@ -1,32 +1,34 @@
 /* 
-   DUETO — app.js  v1.0 */
+   DUETO — app.js  v2.0 — Firebase integrado */
 
-// ── 1. Firebase config (preencher depois) ──────────────────
-const firebaseConfig = {
-  apiKey:            "SUA_API_KEY",
-  authDomain:        "SEU_PROJETO.firebaseapp.com",
-  projectId:         "SEU_PROJETO",
-  storageBucket:     "SEU_PROJETO.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId:             "SEU_APP_ID"
-};
+// ── Imports do Firebase (via CDN — sem bundler necessário) ──
+import {
+  iniciarAuthListener, loginEmail, loginComGoogle,
+  recuperarSenha, cadastrarEmail,
+  criarPerfil, buscarPorCodigo, conectarParceiro,
+  criarTarefaDB, excluirTarefaDB, ouvirTarefas,
+  salvarExercicioDB, ouvirExercicios,
+  criarItemLojaDB, excluirItemLojaDB,
+  resgatarItemDB, confirmarResgateCasalDB, ouvirLoja,
+  adicionarSaldoDB, atualizarSaldoUsuarioDB, ouvirSaldo,
+  logout
+} from './firebase.js';
 
-// ── 2. Service worker (PWA) ────────────────────────────────
+// ── Service worker (PWA) ────────────────────────────────────
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js")
+    navigator.serviceWorker.register("./service-worker.js")
       .then(() => console.log("[Dueto] Service worker ok"))
       .catch(err => console.warn("[Dueto] SW falhou:", err));
   });
 }
 
-// TODO: descomentar após instalar o SDK do Firebase
-// import { initializeApp } from "firebase/app";
-// import { getAuth }        from "firebase/auth";
-// import { getFirestore }   from "firebase/firestore";
-// const app  = initializeApp(firebaseConfig);
-// const auth = getAuth(app);
-// const db   = getFirestore(app);
+// ── Estado global Firebase ──────────────────────────────────
+let _fbUid    = null;  // uid do usuário logado
+let _fbCasalId = null; // id do casal no Firestore
+let _unsubTarefas    = null;
+let _unsubLoja       = null;
+let _unsubSaldo      = null;
 
 // ── 3. Navegação entre telas ───────────────────────────────
 function navegar(id) {
@@ -239,16 +241,25 @@ function iniciarResgatar(id) {
   abrirModal('modalResgatar');
 }
 
-function confirmarResgatar() {
+async function confirmarResgatar() {
   const item = lojaEstado.individuais.find(i => i.id === itemResgatandoId);
   if (!item) return;
-  item.resgatado = true;
-  saldoAtual -= item.custo;
-  salvarLoja();
-  atualizarSaldo();
-  fecharModalResgatar();
-  renderizarLoja();
-  mostrarToast('recompensa resgatada!');
+  if (saldoAtual < item.custo) { mostrarToast('saldo insuficiente'); return; }
+  try {
+    if (_fbCasalId && _fbUid) {
+      await resgatarItemDB(_fbCasalId, _fbUid, item.id, item.custo);
+    } else {
+      item.resgatado = true;
+      saldoAtual -= item.custo;
+      salvarLoja();
+      atualizarSaldo();
+      renderizarLoja();
+    }
+    fecharModalResgatar();
+    mostrarToast('recompensa resgatada! 🎉');
+  } catch (err) {
+    mostrarToast('erro ao resgatar: ' + err.message);
+  }
 }
 
 function fecharModalResgatar() {
@@ -307,20 +318,20 @@ function fecharResgatarCasal() {
 }
 
 // ── Excluir item ─────────────────────────────────────────────
-function excluirItem(id) {
-  const item = [...lojaEstado.individuais, ...lojaEstado.casal].find(i => i.id === id);
-  const nome = item?.nome || 'item';
-  abrirModalConfirmar(
-    'remover item?',
-    `"${nome}" será removido da loja.`,
-    () => {
+async function excluirItem(id) {
+  try {
+    if (_fbCasalId) {
+      await excluirItemLojaDB(_fbCasalId, id);
+    } else {
       lojaEstado.individuais = lojaEstado.individuais.filter(i => i.id !== id);
       lojaEstado.casal       = lojaEstado.casal.filter(i => i.id !== id);
       salvarLoja();
       renderizarLoja();
-      mostrarToast('item removido');
     }
-  );
+    mostrarToast('item removido');
+  } catch (err) {
+    mostrarToast('erro: ' + err.message);
+  }
 }
 
 // ── Adicionar item ────────────────────────────────────────────
@@ -356,29 +367,29 @@ function ajustarItemCusto(delta) {
   input.value = novo;
 }
 
-function salvarNovoItem() {
+async function salvarNovoItem() {
   const nome  = document.getElementById('novoItemNome').value.trim();
   const custo = parseInt(document.getElementById('novoItemCusto').value) || 100;
   if (!nome) { mostrarToast('dê um nome ao item'); return; }
-
-  const id = tipoItemSelecionado[0] + Date.now();
-
-  if (tipoItemSelecionado === 'individuais') {
-    lojaEstado.individuais.push({ id, nome, custo, resgatado: false });
-  } else {
-    lojaEstado.casal.push({ id, nome, custo, confirmadoPor: [] });
+  try {
+    if (_fbCasalId && _fbUid) {
+      await criarItemLojaDB(_fbCasalId, _fbUid, { nome, custo, tipo: tipoItemSelecionado });
+    } else {
+      const id = tipoItemSelecionado[0] + Date.now();
+      if (tipoItemSelecionado === 'individuais') {
+        lojaEstado.individuais.push({ id, nome, custo, resgatado: false });
+      } else {
+        lojaEstado.casal.push({ id, nome, custo, confirmadoPor: [] });
+      }
+      salvarLoja();
+      renderizarLoja();
+    }
+    fecharNovoItem();
+    if (lojaAbaAtiva !== tipoItemSelecionado) ativarAbaLoja(tipoItemSelecionado);
+    mostrarToast('item adicionado');
+  } catch (err) {
+    mostrarToast('erro: ' + err.message);
   }
-
-  salvarLoja();
-  fecharNovoItem();
-
-  if (lojaAbaAtiva !== tipoItemSelecionado) {
-    ativarAbaLoja(tipoItemSelecionado);
-  } else {
-    renderizarLoja();
-  }
-
-  mostrarToast('item adicionado');
 }
 
 function atualizarSaldo() {
@@ -423,28 +434,288 @@ function confirmarExclusao() {
   fecharModalConfirmar();
 }
 
+
+// ── Perfil e logout ─────────────────────────────────────────
+let _dadosPerfilAtual = null; // cache local dos dados do usuário
+
+function irParaPerfil() {
+  navegar('perfil');
+  _atualizarTelaPerfil();
+}
+
+function _atualizarTelaPerfil() {
+  if (!_dadosPerfilAtual) return;
+  const d = _dadosPerfilAtual;
+  const setText = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  };
+  setText('perfilNome',   d.nome   || 'você');
+  setText('perfilEmail',  d.email  || '—');
+  setText('perfilCodigo', d.codigo || 'DU·----');
+
+  // Avatar
+  const avatarEl = document.getElementById('perfilAvatar');
+  if (avatarEl && d.avatar) {
+    avatarEl.innerHTML = `<i class="ph ${d.avatar}" aria-hidden="true"></i>`;
+  }
+
+  // Status do parceiro
+  const parceiroEl = document.getElementById('perfilParceiro');
+  if (parceiroEl) {
+    if (d.parceiroUid) {
+      parceiroEl.innerHTML = `
+        <i class="ph ph-user-circle-check" aria-hidden="true"></i>
+        <span>conectado</span>
+      `;
+      parceiroEl.classList.add('conectado');
+    } else {
+      parceiroEl.innerHTML = `
+        <i class="ph ph-user-circle-dashed" aria-hidden="true"></i>
+        <span>nenhum parceiro conectado</span>
+      `;
+      parceiroEl.classList.remove('conectado');
+    }
+  }
+}
+
+async function copiarCodigoPerfil() {
+  const codigo = document.getElementById('perfilCodigo')?.textContent;
+  if (!codigo || codigo === 'DU·----') return;
+  try {
+    await navigator.clipboard.writeText(codigo);
+    mostrarToast('código copiado!');
+  } catch {
+    mostrarToast('erro ao copiar');
+  }
+}
+
+async function fazerLogout() {
+  fecharModal('modalLogout');
+  _fbUid     = null;
+  _fbCasalId = null;
+  _unsubTarefas?.(); _unsubTarefas = null;
+  _unsubLoja?.();    _unsubLoja    = null;
+  _unsubSaldo?.();   _unsubSaldo   = null;
+  navegar('login');
+  try {
+    await logout();
+  } catch (err) {
+    mostrarToast('erro ao sair: ' + err.message);
+  }
+}
+
+// ── Formatador do código de parceiro (cadastro) ─────────────
+function formatarCodigoParceiro(input) {
+  let val = input.value.toUpperCase().replace(/[^A-Z0-9·]/g, '');
+  // Garantir prefixo DU·
+  if (!val.startsWith('DU·') && val.length > 0) {
+    val = 'DU·' + val.replace(/^DU·?/i, '');
+  }
+  // Limitar a 7 caracteres (DU·XXXX)
+  if (val.length > 7) val = val.substring(0, 7);
+  input.value = val;
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
+
+  // ── Auth Listener: gerencia sessão automaticamente ──────────
+  iniciarAuthListener(
+    async (user, dados) => {
+      _fbUid    = user.uid;
+      _fbCasalId = dados?.casalId || null;
+
+      if (dados) {
+        // Cachear dados para a tela de perfil
+        _dadosPerfilAtual = { ...dados, email: user.email };
+
+        // Atualizar UI com dados do usuário
+        const nome = dados.nome || 'você';
+        const homeNome    = document.getElementById('homeNome');
+        const profileNome = document.getElementById('profileNome');
+        if (homeNome)    homeNome.textContent    = nome;
+        if (profileNome) profileNome.textContent = nome;
+
+        const avatarEl = document.getElementById('myAvatar') || document.querySelector('.my-avatar');
+        if (avatarEl && dados.avatar) {
+          avatarEl.innerHTML = `<i class="ph ${dados.avatar}" aria-hidden="true"></i>`;
+        }
+
+        saldoAtual = dados.saldo || 0;
+        atualizarSaldo();
+
+        // Ouvir saldo SEMPRE — independente de ter casal
+        _unsubSaldo?.();
+        _unsubSaldo = ouvirSaldo(user.uid, (saldo) => {
+          saldoAtual = saldo;
+          atualizarSaldo();
+        });
+
+        // Ir para home se estiver no login ou cadastro
+        const telaAtiva = document.querySelector('.tela.ativa');
+        if (!telaAtiva || telaAtiva.id === 'tela-login' || telaAtiva.id === 'tela-cadastro') {
+          navegar('home');
+        }
+
+        // Iniciar listeners em tempo real se tiver casal
+        if (dados.casalId) {
+          _iniciarListeners(dados.casalId, user.uid);
+        }
+      } else {
+        // Usuário logado mas sem perfil — ir para cadastro
+        navegar('cadastro');
+      }
+    },
+    () => {
+      // Deslogado — mostrar login
+      _fbUid = null;
+      _fbCasalId = null;
+      _dadosPerfilAtual = null;
+      _pararListeners();
+      navegar('login');
+    }
+  );
+
+  // ── Listeners Firestore em tempo real ───────────────────────
+
+  function _renderLojaFirestore(snap) {
+    // Reconstruir lojaEstado a partir do Firestore
+    lojaEstado.individuais = [];
+    lojaEstado.casal = [];
+    snap.forEach(docSnap => {
+      const d  = docSnap.data();
+      const id = docSnap.id;
+      if (d.tipo === 'individuais') {
+        lojaEstado.individuais.push({
+          id, nome: d.nome, custo: d.custo,
+          resgatado: !!d.resgatadoPor
+        });
+      } else {
+        lojaEstado.casal.push({
+          id, nome: d.nome, custo: d.custo,
+          confirmadoPor: d.confirmadoPor || []
+        });
+      }
+    });
+    // Re-renderizar se a loja estiver aberta
+    if (document.querySelector('#tela-loja.ativa')) {
+      renderizarLoja();
+      const saldoEl = document.getElementById('lojaSaldo');
+      if (saldoEl) saldoEl.textContent = saldoAtual;
+    }
+  }
+
+  function _iniciarListeners(casalId, uid) {
+    _pararListeners();
+
+    // Loja em tempo real
+    _unsubLoja = ouvirLoja(casalId, (snap) => {
+      _renderLojaFirestore(snap);
+    });
+
+    // Tarefas em tempo real
+    _unsubTarefas = ouvirTarefas(casalId, (snap) => {
+      snap.docChanges().forEach(change => {
+        if (change.type === 'added') {
+          _renderTarefaFirestore(change.doc, uid);
+        } else if (change.type === 'removed') {
+          document.querySelector(`[data-task-id="${change.doc.id}"]`)?.remove();
+        }
+      });
+      atualizarResumoDia();
+      inicializarBadges();
+    });
+  }
+
+  function _pararListeners() {
+    _unsubTarefas?.();
+    _unsubLoja?.();
+    _unsubSaldo?.();
+    _unsubTarefas = null;
+    _unsubLoja    = null;
+    _unsubSaldo   = null;
+  }
+
+  function _renderTarefaFirestore(docSnap, uid) {
+    const dados = docSnap.data();
+    const id    = docSnap.id;
+    if (document.querySelector(`[data-task-id="${id}"]`)) return;
+
+    const hoje      = new Date().toISOString().split('T')[0];
+    const feitoHoje = dados.concluidaPor?.[uid] === hoje;
+    const tagTexto  = dados.tipo === 'pontual'
+      ? `a cada ${dados.ciclo} dia${dados.ciclo > 1 ? 's' : ''}`
+      : 'diária';
+
+    const item = document.createElement('div');
+    item.className      = 'task-item';
+    item.dataset.taskId = id;
+    item.dataset.grupo  = dados.grupo;
+    item.dataset.pts    = dados.pontos;
+    item.dataset.action = 'toggle-task';
+    item.innerHTML = `
+      <div class="task-check ${feitoHoje ? 'done' : ''}"></div>
+      <div class="task-item__info">
+        <div class="task-item__name ${feitoHoje ? 'done' : ''}">${dados.nome}</div>
+        <div class="task-item__tag">${tagTexto}</div>
+      </div>
+      <span class="task-item__pts">+${dados.pontos}</span>
+      <button class="task-item__del" data-action="excluir-tarefa"
+              data-task-id="${id}" aria-label="Excluir tarefa">
+        <i class="ph ph-trash" aria-hidden="true"></i>
+      </button>
+    `;
+    const body = document.getElementById('body-' + dados.grupo);
+    if (body) {
+      body.appendChild(item);
+      body.classList.add('open');
+      document.getElementById('chevron-' + dados.grupo)?.classList.add('open');
+    }
+  }
+
+
 
   // ════════════════════════════════════════════════════════
   // TELA DE LOGIN
   // ════════════════════════════════════════════════════════
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
     const senha = document.getElementById('senha').value;
-    // TODO: auth.signInWithEmailAndPassword(email, senha)
-    mostrarToast('entrando...');
+    if (!email || !senha) { mostrarToast('preencha e-mail e senha'); return; }
+    try {
+      mostrarToast('entrando...');
+      await loginEmail(email, senha);
+      // onAuthStateChanged redireciona automaticamente
+    } catch (err) {
+      const msgs = {
+        'auth/invalid-credential': 'e-mail ou senha incorretos',
+        'auth/user-not-found':     'usuário não encontrado',
+        'auth/wrong-password':     'senha incorreta',
+        'auth/too-many-requests':  'muitas tentativas — tente mais tarde',
+      };
+      mostrarToast(msgs[err.code] || 'erro ao entrar');
+    }
   }
 
   function irParaCadastro() {
     navegar('cadastro');
   }
 
-  function loginGoogle() {
-    // TODO: const provider = new GoogleAuthProvider();
-    //       auth.signInWithPopup(provider);
-    mostrarToast('login com Google em breve');
+  async function loginGoogle() {
+    try {
+      await loginComGoogle();
+    } catch (err) {
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') return;
+      const msgs = {
+        'auth/popup-blocked':        'popup bloqueado — libere popups para este site',
+        'auth/unauthorized-domain':  'domínio não autorizado no Firebase Console',
+        'auth/operation-not-allowed':'login com Google não ativado no Firebase Console',
+      };
+      mostrarToast(msgs[err.code] || 'erro Google: ' + err.code);
+    }
   }
 
   function abrirRecuperarSenha() {
@@ -480,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const titulos = ['criar conta', 'seu perfil', 'conectar parceiro', ''];
 
-  function avancar(etapa, pular = false) {
+  async function avancar(etapa, pular = false) {
     if (etapa === 0) {
       const nome  = document.getElementById('nome').value.trim();
       const email = document.getElementById('emailCadastro').value.trim();
@@ -491,6 +762,36 @@ document.addEventListener('DOMContentLoaded', () => {
       if (senha.length < 6) { mostrarToast('senha muito curta'); return; }
       if (senha !== conf)   { mostrarToast('as senhas não coincidem'); return; }
       document.getElementById('previewNome').textContent = nome;
+      // ── Firebase Auth: criar usuário ──
+      try {
+        const user = await cadastrarEmail(email, senha);
+        window._uidCadastro  = user.uid;
+        window._nomeCadastro = nome;
+      } catch (err) {
+        const msgs = {
+          'auth/email-already-in-use': 'e-mail já cadastrado',
+          'auth/weak-password':        'senha muito fraca',
+          'auth/invalid-email':        'e-mail inválido',
+        };
+        mostrarToast(msgs[err.code] || 'erro no cadastro');
+        return;
+      }
+    }
+
+    // ── Etapa 1 → 2: salvar perfil (avatar + cor) no Firestore ──
+    if (etapa === 1) {
+      try {
+        const uid = window._uidCadastro || _fbUid;
+        if (uid) {
+          const codigo = await criarPerfil(uid, {
+            nome:   window._nomeCadastro || 'você',
+            avatar: avatarSelecionado,
+            cor:    corSelecionada
+          });
+          const codeEl = document.getElementById('inviteCode');
+          if (codeEl) codeEl.textContent = codigo;
+        }
+      } catch (err) { console.error('Erro ao salvar perfil:', err); }
     }
 
     const proxima = etapa + 1;
@@ -570,6 +871,19 @@ document.addEventListener('DOMContentLoaded', () => {
     hint.textContent = ok ? 'senhas conferem' : 'senhas diferentes';
   }
 
+  // ── Listeners de validação do cadastro ──────────────────────
+  document.getElementById('emailCadastro')
+    ?.addEventListener('input', validarEmailCadastro);
+  document.getElementById('senhaCadastro')
+    ?.addEventListener('input', verificarForca);
+  document.getElementById('confirmar')
+    ?.addEventListener('input', verificarConfirmacao);
+
+  // ── Formatação do código do parceiro ────────────────────────
+  document.querySelector('[data-format="codigo"]')
+    ?.addEventListener('input', (e) => formatarCodigoParceiro(e.target));
+
+
   function selecionarAvatar(el) {
     document.querySelectorAll('.avatar-opt').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
@@ -632,9 +946,14 @@ document.addEventListener('DOMContentLoaded', () => {
     navegar('home');
   }
 
-  function cadastroGoogle() {
-    // TODO: const provider = new GoogleAuthProvider(); auth.signInWithPopup(provider);
-    mostrarToast('cadastro com Google em breve');
+  async function cadastroGoogle() {
+    try {
+      await loginComGoogle();
+    } catch (err) {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        mostrarToast('erro: ' + err.code);
+      }
+    }
   }
 
   // Gerar código de convite ao carregar
@@ -656,9 +975,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fill.style.width  = pct + '%';
     count.textContent = tarefasConcluidas + ' de ' + totalTarefas;
   }
-  function toggleTask(item) {
+  async function toggleTask(item) {
     const check = item.querySelector('.task-check');
     const name  = item.querySelector('.task-item__name');
+    const pts   = parseInt(item.dataset.pts) || 0;
     const done  = check.classList.contains('done');
 
     if (done) {
@@ -666,12 +986,24 @@ document.addEventListener('DOMContentLoaded', () => {
       check.innerHTML = '';
       name.classList.remove('done');
       tarefasConcluidas = Math.max(0, tarefasConcluidas - 1);
+      if (_fbUid) {
+        try {
+          if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, -pts, 'desfeito: ' + name.textContent);
+          else            await atualizarSaldoUsuarioDB(_fbUid, -pts);
+        } catch (err) { console.error(err); }
+      }
     } else {
       check.classList.add('done');
       check.innerHTML = '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>';
       name.classList.add('done');
       tarefasConcluidas = Math.min(totalTarefas, tarefasConcluidas + 1);
-      mostrarToast('tarefa concluída — aguardando validação');
+      if (_fbUid) {
+        try {
+          if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, pts, name.textContent);
+          else            await atualizarSaldoUsuarioDB(_fbUid, pts);
+        } catch (err) { console.error(err); }
+      }
+      mostrarToast('+' + pts + ' moedas');
     }
     atualizarProgresso();
   }
@@ -688,6 +1020,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function irParaLoja() {
     navegar('loja');
     inicializarLoja();
+    // Atualizar saldo na loja
+    const saldoEl = document.getElementById('lojaSaldo');
+    if (saldoEl) saldoEl.textContent = saldoAtual;
   }
 
   // Saudação dinâmica por hora
@@ -738,33 +1073,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // TODO: filtrar tarefas pelo tipo quando vier do Firebase
   }
 
-function toggleTaskHome(item) {
+async function toggleTaskHome(item) {
   const check = item.querySelector('.task-check');
   const name  = item.querySelector('.task-item__name');
   const pts   = parseInt(item.dataset.pts) || 0;
   const done  = check.classList.contains('done');
+
   if (done) {
     check.classList.remove('done');
     check.innerHTML = '';
     name.classList.remove('done');
-    atualizarSaldo(-pts);
+    if (_fbUid) {
+      try {
+        if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, -pts, 'desfeito: ' + name.textContent);
+        else            await atualizarSaldoUsuarioDB(_fbUid, -pts);
+      } catch (err) { console.error(err); }
+    } else {
+      saldoAtual = Math.max(0, saldoAtual - pts);
+      atualizarSaldo();
+    }
   } else {
     check.classList.add('done');
     check.innerHTML = '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>';
     name.classList.add('done');
-    atualizarSaldo(pts);
+    if (_fbUid) {
+      try {
+        if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, pts, name.textContent);
+        else            await atualizarSaldoUsuarioDB(_fbUid, pts);
+      } catch (err) { console.error(err); }
+    } else {
+      saldoAtual += pts;
+      atualizarSaldo();
+    }
     mostrarToast('+' + pts + ' moedas');
   }
   if (item.dataset.grupo) atualizarBadgeGrupo(item.dataset.grupo);
 }
 
-  function atualizarSaldo(delta) {
-  const el = document.getElementById('saldoVal');
-  if (!el) return;
-  const atual = parseInt(el.textContent) || 0;
-  el.textContent = Math.max(0, atual + delta);
-  // TODO: salvar no Firestore
-}
 
   function atualizarBadgeGrupo(grupo) {
     const body  = document.getElementById('body-' + grupo);
@@ -882,7 +1227,16 @@ function toggleTaskHome(item) {
     verificarAtrasadas();
     fecharModalNovaTarefa();
     mostrarToast('tarefa criada');
-    // TODO: salvar no Firestore
+    // Salvar no Firestore
+    if (_fbCasalId) {
+      criarTarefaDB(_fbCasalId, {
+        nome, grupo,
+        tipo: tipoSelecionado,
+        pontos: pontosSelecionados,
+        ciclo: tipoSelecionado === 'pontual' ? cicloDias : null,
+        proxData: tipoSelecionado === 'pontual' ? calcularProxData(cicloDias).toISOString() : null,
+      }).catch(console.error);
+    }
   }
 
   // Calcula a próxima data baseada no ciclo (em dias)
@@ -1221,6 +1575,13 @@ function salvarMeta() {
     'fazer-checkin':                () => fazerCheckin(),
     'fechar-celebracao':            () => fecharCelebracao(),
 
+    // Perfil e logout
+    'ir-perfil':                    () => irParaPerfil(),
+    'copiar-codigo-perfil':         () => copiarCodigoPerfil(),
+    'confirmar-logout':             () => abrirModal('modalLogout'),
+    'fechar-logout':                () => fecharModal('modalLogout'),
+    'fazer-logout':                 () => fazerLogout(),
+
     // Excluir tarefa
     'excluir-tarefa':               (el) => excluirTarefa(el.dataset.taskId),
 
@@ -1248,7 +1609,15 @@ function salvarMeta() {
     'fechar-resgatar':              () => fecharModalResgatar(),
     'confirmar-resgatar-casal':     () => confirmarResgatarCasal(),
     'fechar-resgatar-casal':        () => fecharResgatarCasal(),
-    'excluir-item':                 (el) => excluirItem(el.dataset.id),
+    'excluir-item': (el) => {
+      const id   = el.dataset.id;
+      const item = [...lojaEstado.individuais, ...lojaEstado.casal].find(i => i.id === id);
+      abrirModalConfirmar(
+        'remover item?',
+        `"${item?.nome || 'item'}" será removido da loja.`,
+        () => excluirItem(id)
+      );
+    },
   };
 
   // Delegação única de cliques — captura todos os data-action

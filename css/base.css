@@ -410,9 +410,16 @@
   padding-bottom: 76px; /* espaço para nav-bar fixa */
 }
 
-/* Login não tem nav-bar — sem padding-bottom */
-#tela-login.ativa {
+/* Login e cadastro não têm nav-bar */
+#tela-login.ativa,
+#tela-cadastro.ativa {
   padding-bottom: 0;
+}
+
+/* Esconde nav bar em telas não autenticadas */
+#tela-login.ativa ~ .nav-bar,
+#tela-cadastro.ativa ~ .nav-bar {
+  display: none;
 }
 
 /* ── Desktop: shell vira frame centralizado (>= 768px) ── */

@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="css/tarefas.css">
   <link rel="stylesheet" href="css/exercicios.css">
   <link rel="stylesheet" href="css/loja.css">
+  <link rel="stylesheet" href="css/perfil.css">
 </head>
 <body>
 
@@ -41,7 +42,7 @@
         <div class="login-logo__tagline">a rotina de vocês dois, em sincronia</div>
       </div>
 
-      <form class="login-form" onsubmit="handleLogin(event)" aria-label="Formulário de login">
+      <form class="login-form" id="form-login" aria-label="Formulário de login">
 
         <input class="input" type="email" id="email"
                placeholder="seu e-mail" autocomplete="email" required
@@ -140,16 +141,14 @@
           <div class="field">
             <label class="field-label" for="emailCadastro">e-mail</label>
             <input class="input" type="email" id="emailCadastro"
-                   placeholder="seu e-mail" autocomplete="email"
-                   oninput="validarEmailCadastro()">
+                  placeholder="seu e-mail" autocomplete="email">
             <span class="field-hint" id="emailHint"></span>
           </div>
 
           <div class="field">
             <label class="field-label" for="senhaCadastro">senha</label>
-            <input class="input" type="password" id="senhaCadastro"
-                   placeholder="mínimo 6 caracteres" autocomplete="new-password"
-                   oninput="verificarForca()">
+          <input class="input" type="password" id="senhaCadastro"
+                placeholder="mínimo 6 caracteres" autocomplete="new-password">
             <div class="strength-bar">
               <div class="strength-bar__fill" id="strengthFill"></div>
             </div>
@@ -159,8 +158,7 @@
           <div class="field">
             <label class="field-label" for="confirmar">confirmar senha</label>
             <input class="input" type="password" id="confirmar"
-                   placeholder="repita a senha" autocomplete="new-password"
-                   oninput="verificarConfirmacao()">
+                  placeholder="repita a senha" autocomplete="new-password">
             <span class="field-hint" id="confirmarHint"></span>
           </div>
 
@@ -256,7 +254,7 @@
           <div class="input-invite-row">
             <input class="input-code" type="text" id="codigoParceiro"
                    placeholder="ex: DU·0000" maxlength="7"
-                   oninput="formatarCodigo(this)">
+                   data-format="codigo">
             <button class="btn-check" data-action="verificar-parceiro">verificar</button>
           </div>
 
@@ -345,7 +343,7 @@
  
     <!-- ── Perfil + saldo ── -->
     <div class="profile-card">
-      <div class="my-avatar"><i class="ph ph-flower" aria-hidden="true"></i></div>
+      <button class="my-avatar" data-action="ir-perfil" aria-label="Abrir perfil"><i class="ph ph-flower" aria-hidden="true"></i></button>
       <div class="profile-info">
         <div class="profile-info__name" id="profileNome">Ana</div>
         <div class="profile-info__sub">membro desde mai. 2026</div>
@@ -376,7 +374,7 @@
           <div class="progress-bar__fill" id="progressFill"></div>
         </div>
  
-        <div class="task-item" data-action="toggle-task">
+        <div class="task-item" data-action="toggle-task" data-pts="10">
           <div class="task-check done">
             <i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>
           </div>
@@ -384,20 +382,19 @@
             <div class="task-item__name done">Fazer a cama</div>
             <div class="task-item__tag">limpeza</div>
           </div>
-          <span class="task-item__pts">+15</span>
-
+          <span class="task-item__pts">+10</span>
         </div>
- 
-        <div class="task-item" data-action="toggle-task">
+
+        <div class="task-item" data-action="toggle-task" data-pts="10">
           <div class="task-check"></div>
           <div class="task-item__info">
             <div class="task-item__name">Lavar a louça</div>
             <div class="task-item__tag">limpeza</div>
           </div>
-          <span class="task-item__pts">+15</span>
+          <span class="task-item__pts">+10</span>
         </div>
- 
-        <div class="task-item" data-action="toggle-task">
+
+        <div class="task-item" data-action="toggle-task" data-pts="50">
           <div class="task-check"></div>
           <div class="task-item__info">
             <div class="task-item__name">Pagar boletos</div>
@@ -985,7 +982,65 @@
     <button class="fab" id="fabNovoItem" data-action="abrir-novo-item" aria-label="Adicionar novo item">
       <i class="ph-bold ph-plus icon-xl" aria-hidden="true"></i>
     </button>
-  </div><!-- fim tela-loja -->
+  </div>
+
+    <!-- ════════════════════════════════════════════════
+         TELA DE PERFIL
+    ════════════════════════════════════════════════ -->
+    <div class="tela" id="tela-perfil">
+
+      <header class="top-bar">
+        <button class="btn-back" data-action="ir-home" aria-label="Voltar">
+          <i class="ph ph-arrow-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="top-bar__title">perfil</h1>
+      </header>
+
+      <div class="perfil-body">
+
+        <!-- Card do perfil -->
+        <div class="perfil-card">
+          <div class="perfil-card__avatar" id="perfilAvatar">
+            <i class="ph ph-sparkle" aria-hidden="true"></i>
+          </div>
+          <div class="perfil-card__info">
+            <div class="perfil-card__nome" id="perfilNome">você</div>
+            <div class="perfil-card__email" id="perfilEmail">—</div>
+          </div>
+        </div>
+
+        <!-- Código de convite -->
+        <div class="perfil-section">
+          <div class="perfil-section__label">SEU CÓDIGO</div>
+          <div class="perfil-codigo">
+            <span id="perfilCodigo">DU·----</span>
+            <button class="btn-copy-mini" data-action="copiar-codigo-perfil" aria-label="Copiar código">
+              <i class="ph ph-copy" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="perfil-section__hint">compartilhe com seu parceiro para conectar</div>
+        </div>
+
+        <!-- Status do parceiro -->
+        <div class="perfil-section">
+          <div class="perfil-section__label">PARCEIRO</div>
+          <div class="perfil-parceiro" id="perfilParceiro">
+            <i class="ph ph-user-circle-dashed" aria-hidden="true"></i>
+            <span>nenhum parceiro conectado</span>
+          </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="perfil-actions">
+          <button class="btn-logout" data-action="confirmar-logout">
+            <i class="ph ph-sign-out" aria-hidden="true"></i>
+            <span>sair da conta</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div><!-- fim tela-loja -->
 
   <!-- Modal: adicionar item -->
   <div class="modal-backdrop" id="modalNovoItem" role="dialog" aria-modal="true" aria-labelledby="novoItemTitulo" data-action="fechar-novo-item-fora">
@@ -1062,7 +1117,20 @@
 </div>
 
 <!-- ── Nav bar ── -->
-<nav class="nav-bar" aria-label="Navegação principal">
+
+    <!-- Modal: confirmar logout -->
+    <div class="modal-backdrop" id="modalLogout" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+      <div class="modal">
+        <h2 class="modal__title" id="logoutTitle">sair da conta?</h2>
+        <p class="modal__desc">você precisará entrar novamente para acessar suas tarefas e seu saldo.</p>
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-logout">cancelar</button>
+          <button class="btn-modal-send btn-modal-send--danger" data-action="fazer-logout">sair</button>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav-bar" aria-label="Navegação principal">
   <button class="nav-item active" data-action="ir-home" aria-current="page" aria-label="Início">
     <i class="ph-fill ph-house icon-lg" aria-hidden="true"></i>
     início
@@ -1085,6 +1153,6 @@
 
 </div><!-- fim app-shell -->
 
-  <script src="js/app.js" defer></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
