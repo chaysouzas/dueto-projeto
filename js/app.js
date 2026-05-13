@@ -564,7 +564,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } else {
         // Usuário logado mas sem perfil — ir para cadastro
+        const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
         navegar('cadastro');
+        if (isGoogle) {
+          // Conta já criada via Google — pular Step 0 e pré-preencher nome
+          window._uidCadastro  = user.uid;
+          window._nomeCadastro = user.displayName || '';
+          document.getElementById('step0').classList.remove('visible');
+          document.getElementById('step1').classList.add('visible');
+          const previewNome = document.getElementById('previewNome');
+          if (previewNome && window._nomeCadastro) previewNome.textContent = window._nomeCadastro;
+          atualizarDots(1);
+          etapaAtual = 1;
+          document.getElementById('topTitle').textContent = titulos[1] || '';
+        }
       }
     },
     () => {
