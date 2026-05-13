@@ -424,7 +424,13 @@ function confirmarExclusao() {
 // ── Perfil e logout ─────────────────────────────────────────
 let _dadosPerfilAtual = null; // cache local dos dados do usuário
 
+function _autenticado() {
+  if (!_fbUid) { navegar('login'); return false; }
+  return true;
+}
+
 function irParaPerfil() {
+  if (!_autenticado()) return;
   navegar('perfil');
   _atualizarTelaPerfil();
 }
@@ -558,6 +564,11 @@ document.addEventListener('DOMContentLoaded', () => {
           window._nomeCadastro = user.displayName || '';
           document.getElementById('step0').classList.remove('visible');
           document.getElementById('step1').classList.add('visible');
+          // Mostrar campo de nome editável no Step 1
+          const nomeGoogleField = document.getElementById('nomeGoogleField');
+          const nomeGoogleInput = document.getElementById('nomeGoogle');
+          if (nomeGoogleField) nomeGoogleField.style.display = '';
+          if (nomeGoogleInput) nomeGoogleInput.value = window._nomeCadastro;
           const previewNome = document.getElementById('previewNome');
           if (previewNome && window._nomeCadastro) previewNome.textContent = window._nomeCadastro;
           atualizarDots(1);
@@ -731,6 +742,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === document.getElementById('modalRecuperar')) fecharModalRecuperar();
   }
 
+  function toggleSenha(btn) {
+    const input = document.getElementById(btn.dataset.target);
+    if (!input) return;
+    const mostrar = input.type === 'password';
+    input.type = mostrar ? 'text' : 'password';
+    const icone = btn.querySelector('i');
+    if (icone) icone.className = mostrar ? 'ph ph-eye-slash' : 'ph ph-eye';
+    btn.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
+  }
+
   function enviarRecuperacao() {
     const email = document.getElementById('emailRecuperar').value;
     if (!email) return;
@@ -779,11 +800,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Etapa 1 → 2: salvar perfil (avatar + cor) no Firestore ──
     if (etapa === 1) {
+      // Se veio do Google, o nome pode ter sido editado no campo do Step 1
+      const nomeEditado = document.getElementById('nomeGoogle')?.value.trim();
+      if (nomeEditado) window._nomeCadastro = nomeEditado;
+      if (!window._nomeCadastro) { mostrarToast('insira seu nome'); return; }
       try {
         const uid = window._uidCadastro || _fbUid;
         if (uid) {
           const codigo = await criarPerfil(uid, {
-            nome:   window._nomeCadastro || 'você',
+            nome:   window._nomeCadastro,
             avatar: avatarSelecionado,
             cor:    corSelecionada
           });
@@ -877,6 +902,11 @@ document.addEventListener('DOMContentLoaded', () => {
     ?.addEventListener('input', verificarForca);
   document.getElementById('confirmar')
     ?.addEventListener('input', verificarConfirmacao);
+  document.getElementById('nomeGoogle')
+    ?.addEventListener('input', (e) => {
+      const preview = document.getElementById('previewNome');
+      if (preview) preview.textContent = e.target.value || 'seu nome';
+    });
 
   // ── Formatação do código do parceiro ────────────────────────
   document.querySelector('[data-format="codigo"]')
@@ -942,7 +972,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function irParaHome() {
+    if (!_autenticado()) return;
     navegar('home');
+    atualizarProgresso();
   }
 
   async function cadastroGoogle() {
@@ -1012,11 +1044,12 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarToast('perfil do parceiro — em breve');
   }
 
-  function irParaTarefas() { navegar('tarefas'); inicializarTarefas(); }
+  function irParaTarefas() { if (!_autenticado()) return; navegar('tarefas'); inicializarTarefas(); }
 
- function irParaExercicios() { navegar('exercicios'); inicializarExercicios(); }
+  function irParaExercicios() { if (!_autenticado()) return; navegar('exercicios'); inicializarExercicios(); }
 
   function irParaLoja() {
+    if (!_autenticado()) return;
     navegar('loja');
     inicializarLoja();
     // Atualizar saldo na loja
@@ -1288,20 +1321,11 @@ async function toggleTaskHome(item) {
   }
 
   const exEstado = {
-  streakVoce:     12,
-  streakParceiro: 10,
+  streakVoce:     0,
+  streakParceiro: 0,
   metaDias:       30,
-  feitoHoje:      false,   // TODO: verificar data do último check-in no Firestore
-  historico: [
-    // true = feito, false = perdido, null = futuro
-    true,true,true,true,true,
-    true,true,true,true,true,
-    true,true,false,false,true,
-    true,true,true,true,true,
-    true,true,true,true,true,
-    true,true,true,true,true,
-    true
-  ]
+  feitoHoje:      false,
+  historico:      []
 };
  
 const DIAS_SEMANA = ['D','S','T','Q','Q','S','S'];
@@ -1537,6 +1561,9 @@ function salvarMeta() {
     'fechar-modal-recuperar':       () => fecharModalRecuperar(),
     'fechar-modal-recuperar-fora':  (el, e) => fecharModalFora(e),
     'enviar-recuperacao':           () => enviarRecuperacao(),
+
+    // Senha
+    'toggle-senha':                 (el) => toggleSenha(el),
 
     // Cadastro
     'voltar-cadastro':              () => voltarCadastro(),

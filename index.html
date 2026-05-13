@@ -48,9 +48,14 @@
                placeholder="seu e-mail" autocomplete="email" required
                aria-label="seu e-mail">
 
-        <input class="input" type="password" id="senha"
-               placeholder="senha" autocomplete="current-password" required
-               aria-label="senha">
+        <div class="input-password-wrap">
+          <input class="input" type="password" id="senha"
+                 placeholder="senha" autocomplete="current-password" required
+                 aria-label="senha">
+          <button class="btn-password-toggle" type="button" data-action="toggle-senha" data-target="senha" aria-label="Mostrar senha">
+            <i class="ph ph-eye" aria-hidden="true"></i>
+          </button>
+        </div>
 
         <button class="forgot-link" type="button" data-action="abrir-recuperar">
           esqueci minha senha
@@ -147,8 +152,13 @@
 
           <div class="field">
             <label class="field-label" for="senhaCadastro">senha</label>
-          <input class="input" type="password" id="senhaCadastro"
-                placeholder="mínimo 6 caracteres" autocomplete="new-password">
+            <div class="input-password-wrap">
+              <input class="input" type="password" id="senhaCadastro"
+                    placeholder="mínimo 6 caracteres" autocomplete="new-password">
+              <button class="btn-password-toggle" type="button" data-action="toggle-senha" data-target="senhaCadastro" aria-label="Mostrar senha">
+                <i class="ph ph-eye" aria-hidden="true"></i>
+              </button>
+            </div>
             <div class="strength-bar">
               <div class="strength-bar__fill" id="strengthFill"></div>
             </div>
@@ -157,8 +167,13 @@
 
           <div class="field">
             <label class="field-label" for="confirmar">confirmar senha</label>
-            <input class="input" type="password" id="confirmar"
-                  placeholder="repita a senha" autocomplete="new-password">
+            <div class="input-password-wrap">
+              <input class="input" type="password" id="confirmar"
+                    placeholder="repita a senha" autocomplete="new-password">
+              <button class="btn-password-toggle" type="button" data-action="toggle-senha" data-target="confirmar" aria-label="Mostrar senha">
+                <i class="ph ph-eye" aria-hidden="true"></i>
+              </button>
+            </div>
             <span class="field-hint" id="confirmarHint"></span>
           </div>
 
@@ -186,6 +201,12 @@
           <div>
             <div class="step-title">personalize seu perfil</div>
             <div class="step-desc">Escolha um avatar e uma cor. Seu parceiro vai ver isso.</div>
+          </div>
+
+          <div class="field" id="nomeGoogleField" style="display:none">
+            <label class="field-label" for="nomeGoogle">como quer ser chamado</label>
+            <input class="input" type="text" id="nomeGoogle"
+                   placeholder="seu nome" autocomplete="given-name">
           </div>
 
           <div class="field">

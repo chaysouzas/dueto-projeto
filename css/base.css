@@ -22,6 +22,30 @@
 .input.ok           { border-color: var(--color-success); }
 .input.error        { border-color: var(--color-error); }
 
+/* ── Campo senha com toggle ── */
+.input-password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-password-wrap .input {
+  padding-right: 44px;
+}
+.btn-password-toggle {
+  position: absolute;
+  right: var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: color var(--transition-fast);
+  font-size: 18px;
+}
+.btn-password-toggle:hover { color: var(--color-text-primary); }
+
 /* ── Hints de validação ── */
 .field-hint        { font-size: var(--text-xs); color: var(--color-text-tertiary); line-height: 1.5; }
 .field-hint.ok     { color: var(--color-success); }
