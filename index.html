@@ -330,7 +330,7 @@
   <header class="home-header">
     <div class="home-header__greeting">
       <span class="home-header__sub">bom dia</span>
-      <h1 class="home-header__name" id="homeNome">Ana</h1>
+      <h1 class="home-header__name" id="homeNome"></h1>
     </div>
     <button class="partner-btn" data-action="ver-parceiro">
       <div class="partner-avatar"><i class="ph ph-moon" aria-hidden="true"></i></div>
@@ -345,14 +345,14 @@
     <div class="profile-card">
       <button class="my-avatar" data-action="ir-perfil" aria-label="Abrir perfil"><i class="ph ph-flower" aria-hidden="true"></i></button>
       <div class="profile-info">
-        <div class="profile-info__name" id="profileNome">Ana</div>
-        <div class="profile-info__sub">membro desde mai. 2026</div>
+        <div class="profile-info__name" id="profileNome"></div>
+        <div class="profile-info__sub" id="profileSub"></div>
       </div>
       <div class="saldo-box">
         <span class="saldo-box__label">saldo</span>
         <div class="saldo-box__val">
           <i class="ph ph-coin" aria-hidden="true"></i>
-          <span id="saldoVal">420</span>
+          <span id="saldoVal">0</span>
         </div>
       </div>
     </div>
@@ -368,43 +368,14 @@
       <div class="tasks-card">
         <div class="tasks-progress">
           <span class="tasks-progress__label">progresso do dia</span>
-          <span class="tasks-progress__count" id="progressCount">1 de 3</span>
+          <span class="tasks-progress__count" id="progressCount">0 de 0</span>
         </div>
         <div class="progress-bar">
           <div class="progress-bar__fill" id="progressFill"></div>
         </div>
  
-        <div class="task-item" data-action="toggle-task" data-pts="10">
-          <div class="task-check done">
-            <i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>
-          </div>
-          <div class="task-item__info">
-            <div class="task-item__name done">Fazer a cama</div>
-            <div class="task-item__tag">limpeza</div>
-          </div>
-          <span class="task-item__pts">+10</span>
-        </div>
-
-        <div class="task-item" data-action="toggle-task" data-pts="10">
-          <div class="task-check"></div>
-          <div class="task-item__info">
-            <div class="task-item__name">Lavar a louça</div>
-            <div class="task-item__tag">limpeza</div>
-          </div>
-          <span class="task-item__pts">+10</span>
-        </div>
-
-        <div class="task-item" data-action="toggle-task" data-pts="50">
-          <div class="task-check"></div>
-          <div class="task-item__info">
-            <div class="task-item__name">Pagar boletos</div>
-            <div class="task-item__tag">finanças</div>
-          </div>
-          <span class="task-item__pts">+50</span>
-        </div>
- 
         <div class="tasks-card__footer">
-          <span class="tasks-card__footer-label">2 pendentes</span>
+          <span class="tasks-card__footer-label" id="homePendentes"></span>
           <button class="btn-ver-todas" data-action="ir-tarefas">ver todas as tarefas</button>
         </div>
       </div>
@@ -418,17 +389,17 @@
       </div>
  
       <div class="streak-card" data-action="ir-exercicios">
-        <div class="streak-card__num">12</div>
+        <div class="streak-card__num" id="homeStreakNum">0</div>
         <div class="streak-card__info">
           <div class="streak-card__label">dias em sequência</div>
-          <div class="streak-card__sub">meta: 30 dias · 40% concluído</div>
+          <div class="streak-card__sub" id="homeStreakSub"></div>
         </div>
-        <div class="cal-mini">
-          <div class="cal-mini__day done"></div>
-          <div class="cal-mini__day done"></div>
-          <div class="cal-mini__day done"></div>
-          <div class="cal-mini__day done"></div>
-          <div class="cal-mini__day done"></div>
+        <div class="cal-mini" id="homeCalMini">
+          <div class="cal-mini__day"></div>
+          <div class="cal-mini__day"></div>
+          <div class="cal-mini__day"></div>
+          <div class="cal-mini__day"></div>
+          <div class="cal-mini__day"></div>
           <div class="cal-mini__day today"></div>
           <div class="cal-mini__day"></div>
         </div>
@@ -451,8 +422,8 @@
             <div class="module-card__title">loja</div>
             <div class="module-card__sub">troque moedas por recompensas</div>
           </div>
-          <div class="module-card__badge module-card__badge--amber">
-            420 moedas
+          <div class="module-card__badge module-card__badge--amber" id="lojaBadgeSaldo">
+            0 moedas
           </div>
         </div>
  
@@ -539,44 +510,11 @@
               <i class="ph ph-broom" aria-hidden="true"></i>
             </div>
             <span class="grupo-nome">limpeza da casa</span>
-            <span class="grupo-badge" id="badge-limpeza">1/3</span>
+            <span class="grupo-badge" id="badge-limpeza">0/0</span>
           </div>
           <i class="ph ph-caret-down grupo-chevron" id="chevron-limpeza" aria-hidden="true"></i>
         </button>
-        <div class="grupo-body open" id="body-limpeza">
-          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="limpeza" data-task-id="task-static-1">
-            <div class="task-check done">
-              <i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>
-            </div>
-            <div class="task-item__info">
-              <div class="task-item__name done">Fazer a cama</div>
-            </div>
-            <span class="task-item__pts">+10</span>
-            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-1" aria-label="Excluir tarefa">
-              <i class="ph ph-trash" aria-hidden="true"></i>
-            </button>
-          </div>
-          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="limpeza" data-task-id="task-static-2">
-            <div class="task-check"></div>
-            <div class="task-item__info">
-              <div class="task-item__name">Lavar a louça</div>
-            </div>
-            <span class="task-item__pts">+10</span>
-            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-2" aria-label="Excluir tarefa">
-              <i class="ph ph-trash" aria-hidden="true"></i>
-            </button>
-          </div>
-          <div class="task-item" data-action="toggle-task" data-pts="20" data-grupo="limpeza" data-task-id="task-static-3">
-            <div class="task-check"></div>
-            <div class="task-item__info">
-              <div class="task-item__name">Tirar o lixo</div>
-            </div>
-            <span class="task-item__pts">+20</span>
-            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-3" aria-label="Excluir tarefa">
-              <i class="ph ph-trash" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
+        <div class="grupo-body open" id="body-limpeza"></div>
       </div>
 
       <!-- GRUPO: Pets -->
@@ -587,32 +525,11 @@
               <i class="ph ph-paw-print" aria-hidden="true"></i>
             </div>
             <span class="grupo-nome">pets</span>
-            <span class="grupo-badge" id="badge-pets">0/2</span>
+            <span class="grupo-badge" id="badge-pets">0/0</span>
           </div>
           <i class="ph ph-caret-down grupo-chevron open" id="chevron-pets" aria-hidden="true"></i>
         </button>
-        <div class="grupo-body" id="body-pets">
-          <div class="task-item" data-action="toggle-task" data-pts="10" data-grupo="pets" data-task-id="task-static-4">
-            <div class="task-check"></div>
-            <div class="task-item__info">
-              <div class="task-item__name">Dar comida ao pet</div>
-            </div>
-            <span class="task-item__pts">+10</span>
-            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-4" aria-label="Excluir tarefa">
-              <i class="ph ph-trash" aria-hidden="true"></i>
-            </button>
-          </div>
-          <div class="task-item" data-action="toggle-task" data-pts="20" data-grupo="pets" data-task-id="task-static-5">
-            <div class="task-check"></div>
-            <div class="task-item__info">
-              <div class="task-item__name">Passear com o pet</div>
-            </div>
-            <span class="task-item__pts">+20</span>
-            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-5" aria-label="Excluir tarefa">
-              <i class="ph ph-trash" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
+        <div class="grupo-body" id="body-pets"></div>
       </div>
 
       <!-- GRUPO: Organização -->
@@ -623,22 +540,11 @@
               <i class="ph ph-squares-four" aria-hidden="true"></i>
             </div>
             <span class="grupo-nome">organização</span>
-            <span class="grupo-badge" id="badge-organizacao">0/1</span>
+            <span class="grupo-badge" id="badge-organizacao">0/0</span>
           </div>
           <i class="ph ph-caret-down grupo-chevron open" id="chevron-organizacao" aria-hidden="true"></i>
         </button>
-        <div class="grupo-body" id="body-organizacao">
-          <div class="task-item" data-action="toggle-task" data-pts="50" data-grupo="organizacao" data-task-id="task-static-6">
-            <div class="task-check"></div>
-            <div class="task-item__info">
-              <div class="task-item__name">Pagar boletos</div>
-            </div>
-            <span class="task-item__pts">+50</span>
-            <button class="task-item__del" data-action="excluir-tarefa" data-task-id="task-static-6" aria-label="Excluir tarefa">
-              <i class="ph ph-trash" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
+        <div class="grupo-body" id="body-organizacao"></div>
       </div>
 
       <!-- GRUPO: Roupas -->
@@ -811,7 +717,7 @@
 
         <div class="ex-streak-card ex-streak-card--you">
           <div class="ex-streak-card__label">você</div>
-          <div class="ex-streak-card__num" id="streakVoce">12</div>
+          <div class="ex-streak-card__num" id="streakVoce">0</div>
           <div class="ex-streak-card__sub">dias seguidos</div>
           <div class="ex-streak-card__status" id="streakVoceStatus">
             <i class="ph ph-check-circle icon-xs" aria-hidden="true"></i>
@@ -825,7 +731,7 @@
 
         <div class="ex-streak-card ex-streak-card--partner">
           <div class="ex-streak-card__label">parceiro</div>
-          <div class="ex-streak-card__num" id="streakParceiro">10</div>
+          <div class="ex-streak-card__num" id="streakParceiro">0</div>
           <div class="ex-streak-card__sub">dias seguidos</div>
           <div class="ex-streak-card__status ex-streak-card__status--pending" id="streakParceiroStatus">
             <i class="ph ph-clock icon-xs" aria-hidden="true"></i>
@@ -846,9 +752,9 @@
           <div class="ex-progress-bar">
             <div class="ex-progress-fill" id="exProgressFill"></div>
           </div>
-          <span class="ex-progress-pct" id="exProgressPct">40%</span>
+          <span class="ex-progress-pct" id="exProgressPct">0%</span>
         </div>
-        <div class="ex-meta-card__sub" id="exMetaSub">faltam 18 dias para bater a meta</div>
+        <div class="ex-meta-card__sub" id="exMetaSub"></div>
       </div>
 
       <!-- Calendário semanal -->
@@ -869,7 +775,7 @@
       <div class="ex-history-section">
         <div class="section-header">
           <span class="section-title">maio 2026</span>
-          <span class="ex-history-count" id="exHistoryCount">12 de 5 dias</span>
+          <span class="ex-history-count" id="exHistoryCount">0 de 0 dias</span>
         </div>
         <div class="ex-history-grid" id="exHistoryGrid">
           <!-- Gerado pelo JS -->
@@ -882,11 +788,11 @@
           <span class="section-title">conquistas</span>
         </div>
         <div class="ex-badges-row">
-          <div class="ex-badge ex-badge--earned">
+          <div class="ex-badge">
             <div class="ex-badge__icon"><i class="ph-fill ph-fire" aria-hidden="true"></i></div>
             <div class="ex-badge__name">7 dias</div>
           </div>
-          <div class="ex-badge ex-badge--earned">
+          <div class="ex-badge">
             <div class="ex-badge__icon"><i class="ph-fill ph-lightning" aria-hidden="true"></i></div>
             <div class="ex-badge__name">dupla em chamas</div>
           </div>
@@ -921,7 +827,7 @@
   <div class="ex-celebrate" id="exCelebrate" role="alertdialog" aria-labelledby="exCelebrateTitulo" aria-hidden="true">
     <div class="ex-celebrate__card">
       <div class="ex-celebrate__emoji" id="exCelebrateEmoji"><i class="ph-fill ph-fire" aria-hidden="true"></i></div>
-      <div class="ex-celebrate__num" id="exCelebrateNum">13</div>
+      <div class="ex-celebrate__num" id="exCelebrateNum">0</div>
       <div id="exCelebrateTitulo" class="visually-hidden">Streak alcançado</div>
       <div class="ex-celebrate__label">dias seguidos!</div>
       <div class="ex-celebrate__sub" id="exCelebrateSub">continue assim</div>

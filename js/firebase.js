@@ -109,27 +109,7 @@ export async function conectarParceiro(meuUid, parceiroUid) {
   return cId;
 }
 
-async function inicializarLojaCasal(cId) {
-  const itens = [
-    { nome: 'Jantar fora',               custo: 400, tipo: 'casal' },
-    { nome: 'Final de semana diferente', custo: 800, tipo: 'casal' },
-    { nome: 'Pedir delivery especial',   custo: 300, tipo: 'casal' },
-    { nome: 'Passeio surpresa',          custo: 500, tipo: 'casal' },
-    { nome: 'Noite de jogos',            custo: 200, tipo: 'casal' },
-    { nome: 'Dia livre de tarefas',      custo: 200, tipo: 'individuais' },
-    { nome: 'Escolher o jantar',         custo: 100, tipo: 'individuais' },
-    { nome: 'Filme da sua escolha',      custo:  80, tipo: 'individuais' },
-    { nome: 'Dormir mais 30min',         custo:  60, tipo: 'individuais' },
-    { nome: 'Massagem nos pés',          custo: 150, tipo: 'individuais' },
-  ];
-  for (const item of itens) {
-    await addDoc(collection(db, 'casais', cId, 'loja'), {
-      ...item, criadoPor: null,
-      resgatadoPor: null, confirmadoPor: [],
-      criadoEm: serverTimestamp()
-    });
-  }
-}
+async function inicializarLojaCasal(_cId) {}
 
 // ── Tarefas ──────────────────────────────────────────────────
 

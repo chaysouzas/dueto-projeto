@@ -63,28 +63,13 @@ function mostrarToast(msg) {
 // Estado persistido em localStorage (TODO: Firestore na Fase 2)
 const LOJA_KEY = 'dueto_loja';
 
-const ITENS_DEFAULT = {
-  individuais: [
-    { id: 'i1', nome: 'Dia livre de tarefas',  custo: 200, resgatado: false },
-    { id: 'i2', nome: 'Escolher o jantar',      custo: 100, resgatado: false },
-    { id: 'i3', nome: 'Filme da sua escolha',   custo: 80,  resgatado: false },
-    { id: 'i4', nome: 'Dormir mais 30min',      custo: 60,  resgatado: false },
-    { id: 'i5', nome: 'Massagem nos pés',       custo: 150, resgatado: false },
-  ],
-  casal: [
-    { id: 'c1', nome: 'Jantar fora',              custo: 400, confirmadoPor: [] },
-    { id: 'c2', nome: 'Final de semana diferente', custo: 800, confirmadoPor: [] },
-    { id: 'c3', nome: 'Pedir delivery especial',  custo: 300, confirmadoPor: [] },
-    { id: 'c4', nome: 'Passeio surpresa',          custo: 500, confirmadoPor: [] },
-    { id: 'c5', nome: 'Noite de jogos',            custo: 200, confirmadoPor: [] },
-  ]
-};
+const ITENS_DEFAULT = { individuais: [], casal: [] };
 
 let lojaEstado = carregarLoja();
 let lojaAbaAtiva = 'individuais';
 let tipoItemSelecionado = 'individuais';
 let itemResgatandoId = null;
-let saldoAtual = 420;
+let saldoAtual = 0;
 
 function carregarLoja() {
   try {
@@ -393,10 +378,11 @@ async function salvarNovoItem() {
 }
 
 function atualizarSaldo() {
-  // Atualizar todos os lugares que mostram saldo
   document.querySelectorAll('#saldoVal, #lojaSaldo').forEach(el => {
     if (el) el.textContent = saldoAtual;
   });
+  const badge = document.getElementById('lojaBadgeSaldo');
+  if (badge) badge.textContent = saldoAtual + ' moedas';
 }
 
 
@@ -977,14 +963,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // TELA HOME
   // ════════════════════════════════════════════════════════
 
-  let tarefasConcluidas = 1;
-  const totalTarefas = 3;
+  let tarefasConcluidas = 0;
+  let totalTarefas = 0;
 
   function atualizarProgresso() {
     const fill  = document.getElementById('progressFill');
     const count = document.getElementById('progressCount');
     if (!fill || !count) return; // evita erro se elemento não existe
-    const pct = Math.round((tarefasConcluidas / totalTarefas) * 100);
+    const pct = totalTarefas > 0 ? Math.round((tarefasConcluidas / totalTarefas) * 100) : 0;
     fill.style.width  = pct + '%';
     count.textContent = tarefasConcluidas + ' de ' + totalTarefas;
   }
