@@ -231,6 +231,44 @@ export function ouvirSaldo(uid, callback) {
   });
 }
 
+// ── Lugares (casal) ──────────────────────────────────────────
+
+export async function adicionarLugarDB(cId, uid, lugar) {
+  return await addDoc(collection(db, 'casais', cId, 'lugares'), {
+    ...lugar, adicionadoPor: uid, criadoEm: serverTimestamp()
+  });
+}
+export async function excluirLugarDB(cId, lugarId) {
+  await deleteDoc(doc(db, 'casais', cId, 'lugares', lugarId));
+}
+export async function adicionarAoCofrinhoDb(cId, lugarId, uid, valor) {
+  await updateDoc(doc(db, 'casais', cId, 'lugares', lugarId), {
+    [`cofrinho.${uid}`]: increment(valor)
+  });
+}
+export function ouvirLugares(cId, callback) {
+  return onSnapshot(collection(db, 'casais', cId, 'lugares'), callback);
+}
+
+// ── Lugares (solo) ────────────────────────────────────────────
+
+export async function adicionarLugarSoloDB(uid, lugar) {
+  return await addDoc(collection(db, 'usuarios', uid, 'lugares'), {
+    ...lugar, adicionadoPor: uid, criadoEm: serverTimestamp()
+  });
+}
+export async function excluirLugarSoloDB(uid, lugarId) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'lugares', lugarId));
+}
+export async function adicionarAoCofrinhoSoloDB(ownUid, lugarId, uid, valor) {
+  await updateDoc(doc(db, 'usuarios', ownUid, 'lugares', lugarId), {
+    [`cofrinho.${uid}`]: increment(valor)
+  });
+}
+export function ouvirLugaresSolo(uid, callback) {
+  return onSnapshot(collection(db, 'usuarios', uid, 'lugares'), callback);
+}
+
 // ── Receitas (casal) ─────────────────────────────────────────
 
 export async function adicionarReceitaDB(cId, uid, receita) {

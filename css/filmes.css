@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    DUETO — filmes.css
 ============================================================ */
 
@@ -37,7 +37,7 @@
   gap: var(--space-2);
   padding: var(--space-4);
   background: var(--color-secondary-subtle);
-  border: 1px solid rgba(212, 149, 106, 0.3);
+  border: 1px solid rgba(217, 153, 98, 0.3);
   border-radius: var(--radius-lg);
   color: var(--color-secondary);
   font-family: var(--font-sans);
@@ -49,8 +49,8 @@
 }
 .filmes-sortear-btn .ph { font-size: 18px; }
 .filmes-sortear-btn:hover {
-  background: rgba(212, 149, 106, 0.15);
-  border-color: rgba(212, 149, 106, 0.5);
+  background: rgba(217, 153, 98, 0.15);
+  border-color: rgba(217, 153, 98, 0.5);
 }
 
 /* ── Estado vazio ─────────────────────────────────────────── */
@@ -160,14 +160,14 @@
   transition: background var(--transition-fast);
 }
 .filme-item__btn .ph { font-size: 13px; }
-.filme-item__btn:hover { background: rgba(232, 132, 154, 0.2); }
+.filme-item__btn:hover { background: rgba(217, 119, 137, 0.2); }
 
 .filme-item__btn--rate {
   background: var(--color-secondary-subtle);
-  border-color: rgba(212, 149, 106, 0.3);
+  border-color: rgba(217, 153, 98, 0.3);
   color: var(--color-secondary);
 }
-.filme-item__btn--rate:hover { background: rgba(212, 149, 106, 0.15); }
+.filme-item__btn--rate:hover { background: rgba(217, 153, 98, 0.15); }
 
 .filme-item__btn--rated {
   background: transparent;
@@ -264,3 +264,4 @@
   font-size: var(--text-sm);
   color: var(--color-primary);
 }
+

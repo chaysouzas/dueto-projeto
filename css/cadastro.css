@@ -1,9 +1,9 @@
-/* ============================================================
-   DUETO — cadastro.css
-   Específico do fluxo de cadastro (4 etapas)
+﻿/* ============================================================
+   DUETO â€” cadastro.css
+   EspecÃ­fico do fluxo de cadastro (4 etapas)
 ============================================================ */
 
-/* ── Indicador de etapas ── */
+/* â”€â”€ Indicador de etapas â”€â”€ */
 .steps {
   display: flex;
   align-items: center;
@@ -24,7 +24,7 @@
 }
 .step-dot.done { background: var(--color-primary); opacity: 0.4; }
 
-/* ── Painel de etapa ── */
+/* â”€â”€ Painel de etapa â”€â”€ */
 .step-panel { display: none; flex-direction: column; gap: var(--space-5); }
 .step-panel.visible { display: flex; }
 
@@ -40,7 +40,7 @@
   line-height: 1.6;
 }
 
-/* ── Força da senha ── */
+/* â”€â”€ ForÃ§a da senha â”€â”€ */
 .strength-bar {
   height: 4px;
   background: var(--color-bg-surface-raised);
@@ -55,7 +55,7 @@
   transition: width 0.3s ease, background 0.3s ease;
 }
 
-/* ── Avatar picker ── */
+/* â”€â”€ Avatar picker â”€â”€ */
 .avatar-picker {
   display: flex;
   gap: var(--space-3);
@@ -75,10 +75,10 @@
   transition: border-color var(--transition-fast), background var(--transition-fast);
   flex-shrink: 0;
 }
-.avatar-opt:hover    { border-color: rgba(232,132,154,0.5); background: var(--color-bg-surface-raised); }
+.avatar-opt:hover    { border-color: rgba(217,119,137,0.5); background: var(--color-bg-surface-raised); }
 .avatar-opt.selected { border-color: var(--color-primary); background: var(--color-primary-subtle); }
 
-/* ── Color picker ── */
+/* â”€â”€ Color picker â”€â”€ */
 .color-picker { display: flex; gap: var(--space-2); }
 .color-opt {
   width: 32px;
@@ -91,7 +91,7 @@
 .color-opt:hover    { transform: scale(1.1); }
 .color-opt.selected { border-color: var(--color-text-primary); }
 
-/* ── Preview do perfil ── */
+/* â”€â”€ Preview do perfil â”€â”€ */
 .profile-preview {
   display: flex;
   align-items: center;
@@ -110,7 +110,7 @@
   justify-content: center;
   font-size: 26px;
   flex-shrink: 0;
-  border: 2px solid rgba(232,132,154,0.3);
+  border: 2px solid rgba(217,119,137,0.3);
 }
 .preview-info { flex: 1; }
 .preview-name {
@@ -121,7 +121,7 @@
 }
 .preview-sub { font-size: var(--text-xs); color: var(--color-text-tertiary); }
 
-/* ── Código de convite ── */
+/* â”€â”€ CÃ³digo de convite â”€â”€ */
 .invite-box {
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-subtle);
@@ -154,7 +154,7 @@
   color: var(--color-primary);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
-  border: 1px solid rgba(232,132,154,0.3);
+  border: 1px solid rgba(217,119,137,0.3);
   border-radius: var(--radius-full);
   cursor: pointer;
   font-family: var(--font-sans);
@@ -162,7 +162,7 @@
 }
 .btn-copy:hover { background: var(--color-bg-surface-raised); }
 
-/* ── Linha "ou" do código de parceiro ── */
+/* â”€â”€ Linha "ou" do cÃ³digo de parceiro â”€â”€ */
 .or-row {
   display: flex;
   align-items: center;
@@ -201,15 +201,15 @@
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
-  border: 1px solid rgba(212,149,106,0.3);
+  border: 1px solid rgba(217,153,98,0.3);
   border-radius: var(--radius-md);
   cursor: pointer;
   white-space: nowrap;
   transition: background var(--transition-fast);
 }
-.btn-check:hover { background: rgba(212,149,106,0.2); }
+.btn-check:hover { background: rgba(217,153,98,0.2); }
 
-/* ── Parceiro encontrado ── */
+/* â”€â”€ Parceiro encontrado â”€â”€ */
 .partner-found {
   display: none;
   align-items: center;
@@ -242,7 +242,7 @@
 .btn-skip:hover { color: var(--color-text-secondary); }
 
 
-/* ── Bloco de sucesso (etapa 4) ── */
+/* â”€â”€ Bloco de sucesso (etapa 4) â”€â”€ */
 .step-success {
   display: flex;
   flex-direction: column;
@@ -304,7 +304,7 @@
   width: 100%;
 }
 
-/* ── Label do invite-box ── */
+/* â”€â”€ Label do invite-box â”€â”€ */
 .invite-box__label {
   font-size: var(--text-xs);
   color: var(--color-text-tertiary);

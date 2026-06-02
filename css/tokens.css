@@ -1,47 +1,47 @@
 /* ============================================================
    DUETO — Design Tokens
-   Paleta: Vinho & Ouro
-   Versão: 1.0
+   Paleta: Logo (tema claro)
+   #D97789 · #0D0509 · #F2E7C4 · #D99962 · #A66868
    ============================================================ */
 
 
 :root {
 
   /* ── Cores base ─────────────────────────────────────────── */
-  --color-bg-primary:        #120A0F;   /* fundo principal de todas as telas */
-  --color-bg-surface:        #1E1018;   /* cards, inputs, botões */
-  --color-bg-surface-raised: #3A1F2E;   /* cards selecionados, hover, destaque */
-  --color-bg-overlay:        #2A1020;   /* overlays, modais, ícone do app */
+  --color-bg-primary:        #F5EDD5;   /* creme quente — fundo principal */
+  --color-bg-surface:        #FDF8EE;   /* quase branco creme — cards, inputs */
+  --color-bg-surface-raised: #F2E7C4;   /* creme da logo — selecionados, hover */
+  --color-bg-overlay:        #EDD8A5;   /* creme mais saturado — modais */
 
   /* ── Cores de destaque ──────────────────────────────────── */
-  --color-primary:           #E8849A;   /* rosa vinho — CTAs, streak, seu perfil */
-  --color-primary-dim:       #C8607A;   /* rosa mais escuro — hover de botão primário */
-  --color-primary-subtle:    #3A1F2E;   /* rosa muito suave — fundo de badge, chip */
+  --color-primary:           #D97789;   /* rosa da logo — CTAs, streak, perfil */
+  --color-primary-dim:       #BF5A6C;   /* rosa escuro — hover de botão primário */
+  --color-primary-subtle:    rgba(217, 119, 137, 0.12); /* fundo sutil */
 
-  --color-secondary:         #D4956A;   /* âmbar — moedas, parceiro, loja do casal */
-  --color-secondary-dim:     #B4753A;   /* âmbar mais escuro — hover secundário */
-  --color-secondary-subtle:  #2E1A12;   /* âmbar muito suave — fundo de chip âmbar */
+  --color-secondary:         #D99962;   /* âmbar da logo — moedas, parceiro */
+  --color-secondary-dim:     #B87B42;   /* âmbar escuro — hover secundário */
+  --color-secondary-subtle:  rgba(217, 153, 98, 0.12);  /* fundo sutil âmbar */
 
   /* ── Cores de texto ─────────────────────────────────────── */
-  --color-text-primary:      #F0E8C8;   /* texto principal sobre fundo escuro */
-  --color-text-secondary:    #C8A0B0;   /* labels, metadados, descrições */
-  --color-text-tertiary:     #7A5060;   /* texto desabilitado, placeholder */
-  --color-text-on-primary:   #2A1020;   /* texto sobre botão rosa */
-  --color-text-on-secondary: #2A1020;   /* texto sobre botão âmbar */
+  --color-text-primary:      #0D0509;   /* quase preto da logo — texto principal */
+  --color-text-secondary:    #A66868;   /* rosa suave da logo — labels, metadados */
+  --color-text-tertiary:     #B09070;   /* muted quente — placeholder, desabilitado */
+  --color-text-on-primary:   #FDF8EE;   /* creme sobre botão rosa */
+  --color-text-on-secondary: #0D0509;   /* escuro sobre botão âmbar */
 
   /* ── Bordas ─────────────────────────────────────────────── */
-  --color-border-subtle:     rgba(232, 132, 154, 0.12);  /* borda padrão de card */
-  --color-border-default:    rgba(232, 132, 154, 0.25);  /* borda de input, divisor */
-  --color-border-strong:     rgba(232, 132, 154, 0.50);  /* borda de card selecionado */
-  --color-border-primary:    #E8849A;                    /* borda de destaque */
+  --color-border-subtle:     rgba(13,  5,  9, 0.08);
+  --color-border-default:    rgba(13,  5,  9, 0.16);
+  --color-border-strong:     rgba(13,  5,  9, 0.35);
+  --color-border-primary:    #D97789;
 
   /* ── Feedback ───────────────────────────────────────────── */
-  --color-success:           #7ABA7A;   /* verde musgo — validado, streak ativo */
-  --color-success-bg:        #0D1A0F;   /* fundo de notificação de validação */
-  --color-warning:           #F59E0B;   /* âmbar de alerta */
-  --color-warning-bg:        #1A1200;
-  --color-error:             #F87171;   /* vermelho suave */
-  --color-error-bg:          #1A0808;
+  --color-success:           #5A9A5A;
+  --color-success-bg:        rgba(90, 154, 90, 0.10);
+  --color-warning:           #C97A20;
+  --color-warning-bg:        rgba(201, 122, 32, 0.10);
+  --color-error:             #C03040;
+  --color-error-bg:          rgba(192, 48, 64, 0.08);
 
   /* ── Tipografia ─────────────────────────────────────────── */
   --font-sans:    "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -79,11 +79,11 @@
   --radius-lg:   14px;
   --radius-xl:   20px;
   --radius-full: 9999px;
-  --radius-icon: 22.5%;   /* border-radius padrão de ícone de app */
+  --radius-icon: 22.5%;
 
-  /* ── Sombras (mínimas — dark mode) ──────────────────────── */
-  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md:  0 2px 8px rgba(0, 0, 0, 0.5);
+  /* ── Sombras ────────────────────────────────────────────── */
+  --shadow-sm:  0 1px 3px rgba(13, 5, 9, 0.10);
+  --shadow-md:  0 2px 8px rgba(13, 5, 9, 0.15);
 
   /* ── Transições ──────────────────────────────────────────── */
   --transition-fast:   0.15s ease;

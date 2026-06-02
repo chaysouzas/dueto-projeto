@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#14130B">
+  <meta name="theme-color" content="#F5EDD5">
   <meta name="description" content="Dueto — app de casal com gamificação">
   <title>Dueto</title>
   <link rel="manifest" href="manifest.json">
@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="css/parceiro.css">
   <link rel="stylesheet" href="css/filmes.css">
   <link rel="stylesheet" href="css/receitas.css">
+  <link rel="stylesheet" href="css/lugares.css">
 </head>
 <body>
 
@@ -42,7 +43,8 @@
       <div class="login-logo">
         <img src="assets/icons/logo.png" alt="Logo Dueto" class="logo-img" width="80" height="80">
         <div class="login-logo__name">Dueto</div>
-        <div class="login-logo__tagline">a rotina de vocês dois, em sincronia</div>
+        <div class="login-logo__tagline">Rotina 
+        em sincronia</div>
       </div>
 
       <form class="login-form" id="form-login" aria-label="Formulário de login">
@@ -481,16 +483,13 @@
           </div>
         </div>
  
-        <div class="module-card" data-action="toast" data-msg="em breve: lugares">
+        <div class="module-card" data-action="ir-lugares">
           <div class="module-card__icon module-card__icon--blue">
             <i class="ph ph-map-pin icon-lg" aria-hidden="true"></i>
           </div>
           <div>
             <div class="module-card__title">lugares</div>
             <div class="module-card__sub">onde conhecer juntos</div>
-          </div>
-          <div class="module-card__badge module-card__badge--blue">
-            em breve
           </div>
         </div>
  
@@ -1305,6 +1304,194 @@
     </div>
 
   </div><!-- fim tela-receitas -->
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA DE LUGARES / VIAGENS
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela" id="tela-lugares">
+    <div class="screen" role="main" aria-labelledby="lugares-titulo">
+
+      <header class="top-bar">
+        <button class="btn-back" data-action="ir-home" aria-label="Voltar">
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="top-bar__title" id="lugares-titulo">lugares</h1>
+      </header>
+
+      <div class="lugares-cats" role="group" aria-label="Filtrar por categoria">
+        <button class="lugar-cat-btn active" data-cat="todos"       data-action="lugares-cat">todos</button>
+        <button class="lugar-cat-btn" data-cat="airbnb"             data-action="lugares-cat">
+          <i class="ph ph-house" aria-hidden="true"></i> airbnb
+        </button>
+        <button class="lugar-cat-btn" data-cat="passeio"            data-action="lugares-cat">
+          <i class="ph ph-tree" aria-hidden="true"></i> passeios locais
+        </button>
+        <button class="lugar-cat-btn" data-cat="gastronomia"        data-action="lugares-cat">
+          <i class="ph ph-fork-knife" aria-hidden="true"></i> bar e gastronomia
+        </button>
+        <button class="lugar-cat-btn" data-cat="viagem"             data-action="lugares-cat">
+          <i class="ph ph-airplane" aria-hidden="true"></i> viagens
+        </button>
+      </div>
+
+      <div class="screen__body">
+
+        <button class="btn-planejar-viagem" data-action="planejar-viagem">
+          <i class="ph ph-suitcase-rolling" aria-hidden="true"></i>
+          planejar uma viagem
+        </button>
+
+        <div class="lugares-vazio" id="lugaresVazio" style="display:none">
+          <i class="ph ph-map-pin" aria-hidden="true"></i>
+          <span>nenhum lugar aqui</span>
+          <span class="lugares-vazio__sub">toque em + para adicionar</span>
+        </div>
+        <ul class="lugares-lista" id="lugaresListaEl" aria-label="Lista de lugares"></ul>
+      </div>
+    </div>
+
+    <button class="fab" data-action="abrir-novo-lugar" aria-label="Adicionar lugar">
+      <i class="ph-bold ph-plus icon-xl" aria-hidden="true"></i>
+    </button>
+
+    <!-- Modal: adicionar lugar -->
+    <div class="modal-backdrop" id="modalNovoLugar" role="dialog"
+         aria-modal="true" aria-labelledby="novoLugarTitulo"
+         data-action="fechar-novo-lugar-fora">
+      <div class="modal modal--bottom">
+        <div class="modal__handle"></div>
+        <h2 class="modal__title" id="novoLugarTitulo">adicionar lugar</h2>
+
+        <div class="field">
+          <label class="field-label" for="lugarNome">nome do lugar</label>
+          <input class="input" type="text" id="lugarNome"
+                 placeholder="ex: Restaurante Sal Gastronomia, Paris…" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="lugarLink">link (opcional)</label>
+          <input class="input" type="url" id="lugarLink"
+                 placeholder="https://…" autocomplete="off" inputmode="url">
+          <div class="lugar-link-hint">Google Maps, Airbnb, site do lugar…</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">categoria</div>
+          <div class="cat-picker">
+            <button class="cat-opt" data-cat="airbnb"      data-action="selecionar-cat-lugar">
+              <i class="ph ph-house" aria-hidden="true"></i> airbnb
+            </button>
+            <button class="cat-opt" data-cat="passeio"     data-action="selecionar-cat-lugar">
+              <i class="ph ph-tree" aria-hidden="true"></i> passeios locais
+            </button>
+            <button class="cat-opt" data-cat="gastronomia" data-action="selecionar-cat-lugar">
+              <i class="ph ph-fork-knife" aria-hidden="true"></i> bar e gastronomia
+            </button>
+            <button class="cat-opt" data-cat="viagem"      data-action="selecionar-cat-lugar">
+              <i class="ph ph-airplane" aria-hidden="true"></i> viagens
+            </button>
+          </div>
+        </div>
+
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-novo-lugar">cancelar</button>
+          <button class="btn-modal-send" data-action="salvar-lugar">adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: planejar viagem -->
+    <div class="modal-backdrop" id="modalPlanejarViagem" role="dialog"
+         aria-modal="true" aria-labelledby="planejarViagemTitulo"
+         data-action="fechar-planejar-viagem-fora">
+      <div class="modal modal--bottom">
+        <div class="modal__handle"></div>
+        <h2 class="modal__title" id="planejarViagemTitulo">planejar viagem</h2>
+
+        <div class="field">
+          <label class="field-label" for="viagemNome">destino</label>
+          <input class="input" type="text" id="viagemNome"
+                 placeholder="ex: Buenos Aires, Gramado, Paris…" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="viagemLink">link (opcional)</label>
+          <input class="input" type="url" id="viagemLink"
+                 placeholder="Airbnb, Google Maps, site…" autocomplete="off" inputmode="url">
+        </div>
+
+        <div class="field">
+          <div class="field-label">despesas esperadas</div>
+          <div class="orcamento-grid">
+            <div class="orcamento-field">
+              <div class="orcamento-field__label">
+                <i class="ph ph-airplane-tilt" aria-hidden="true"></i> passagem
+              </div>
+              <div class="orcamento-field__wrap">
+                <span class="orcamento-field__prefix">R$</span>
+                <input class="input" type="number" id="orcPassagem" min="0" inputmode="numeric" placeholder="0">
+              </div>
+            </div>
+            <div class="orcamento-field">
+              <div class="orcamento-field__label">
+                <i class="ph ph-fork-knife" aria-hidden="true"></i> alimentação
+              </div>
+              <div class="orcamento-field__wrap">
+                <span class="orcamento-field__prefix">R$</span>
+                <input class="input" type="number" id="orcAlimentacao" min="0" inputmode="numeric" placeholder="0">
+              </div>
+            </div>
+            <div class="orcamento-field">
+              <div class="orcamento-field__label">
+                <i class="ph ph-house-simple" aria-hidden="true"></i> hospedagem
+              </div>
+              <div class="orcamento-field__wrap">
+                <span class="orcamento-field__prefix">R$</span>
+                <input class="input" type="number" id="orcHospedagem" min="0" inputmode="numeric" placeholder="0">
+              </div>
+            </div>
+            <div class="orcamento-field">
+              <div class="orcamento-field__label">
+                <i class="ph ph-map-trifold" aria-hidden="true"></i> passeios
+              </div>
+              <div class="orcamento-field__wrap">
+                <span class="orcamento-field__prefix">R$</span>
+                <input class="input" type="number" id="orcPasseios" min="0" inputmode="numeric" placeholder="0">
+              </div>
+            </div>
+          </div>
+          <div class="orcamento-modal-total">
+            <span>total previsto</span>
+            <span id="orcTotalModal">R$ 0</span>
+          </div>
+        </div>
+
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-planejar-viagem">cancelar</button>
+          <button class="btn-modal-send" data-action="salvar-planejar-viagem">criar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: adicionar ao cofrinho -->
+    <div class="modal-backdrop" id="modalCofrinho" role="dialog"
+         aria-modal="true" aria-labelledby="cofrinhoLabel">
+      <div class="modal">
+        <h2 class="modal__title" id="cofrinhoLabel">adicionar ao cofrinho</h2>
+        <p class="modal__desc" id="cofrinhoViagemNome" style="font-weight:600;color:var(--color-text-primary)"></p>
+        <div class="field">
+          <label class="field-label" for="cofrinhoValor">valor (R$)</label>
+          <input class="input" type="number" id="cofrinhoValor"
+                 min="1" inputmode="numeric" placeholder="ex: 50, 100, 200…">
+        </div>
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-cofrinho">cancelar</button>
+          <button class="btn-modal-send" data-action="salvar-cofrinho">adicionar</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- fim tela-lugares -->
 
   <!-- Modal: adicionar item -->
   <div class="modal-backdrop" id="modalNovoItem" role="dialog" aria-modal="true" aria-labelledby="novoItemTitulo" data-action="fechar-novo-item-fora">

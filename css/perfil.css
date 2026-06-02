@@ -1,6 +1,6 @@
-/* ============================================================
-   DUETO — perfil.css
-   Tela de perfil e configurações
+﻿/* ============================================================
+   DUETO â€” perfil.css
+   Tela de perfil e configuraÃ§Ãµes
 ============================================================ */
 
 .perfil-body {
@@ -10,7 +10,7 @@
   padding: 0 var(--space-4) var(--space-6);
 }
 
-/* ── Card do perfil ───────────────────────────────────────── */
+/* â”€â”€ Card do perfil â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .perfil-card {
   display: flex;
   align-items: center;
@@ -32,7 +32,7 @@
   height: 64px;
   border-radius: 50%;
   background: var(--color-primary-subtle);
-  border: 2px solid rgba(255, 43, 0, 0.4);
+  border: 2px solid rgba(217, 119, 137, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,18 +45,22 @@
   right: -2px;
   width: 22px;
   height: 22px;
-  background: var(--color-primary);
-  border: 2px solid var(--color-bg-primary);
+  background: var(--color-bg-surface-raised);
+  border: 1.5px solid var(--color-border-subtle);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--color-text-on-primary);
-  transition: transform var(--transition-fast);
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
 }
 .perfil-avatar-edit .ph { font-size: 11px; }
-.perfil-avatar-edit:hover { transform: scale(1.1); }
+.perfil-avatar-edit:hover {
+  background: var(--color-primary-subtle);
+  border-color: rgba(217, 119, 137, 0.4);
+  color: var(--color-primary);
+}
 .perfil-card__avatar .ph,
 .perfil-card__avatar [class^="ph-"] {
   font-size: 28px;
@@ -80,7 +84,7 @@
   white-space: nowrap;
 }
 
-/* ── Seções ───────────────────────────────────────────────── */
+/* â”€â”€ SeÃ§Ãµes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .perfil-section {
   display: flex;
   flex-direction: column;
@@ -98,7 +102,7 @@
   line-height: 1.5;
 }
 
-/* ── Código de convite ────────────────────────────────────── */
+/* â”€â”€ CÃ³digo de convite â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .perfil-codigo {
   display: flex;
   align-items: center;
@@ -131,7 +135,7 @@
 }
 .btn-copy-mini .ph { font-size: 16px; }
 
-/* ── Status do parceiro ───────────────────────────────────── */
+/* â”€â”€ Status do parceiro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .perfil-parceiro {
   display: flex;
   align-items: center;
@@ -158,7 +162,7 @@
   color: var(--color-success);
 }
 
-/* ── Ações (logout) ───────────────────────────────────────── */
+/* â”€â”€ AÃ§Ãµes (logout) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .perfil-actions {
   margin-top: var(--space-4);
 }
@@ -184,10 +188,10 @@
 }
 .btn-logout .ph { font-size: 16px; }
 
-/* ── Avatar da home como botão (acessa perfil) ────────────── */
+/* â”€â”€ Avatar da home como botÃ£o (acessa perfil) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .my-avatar {
   cursor: pointer;
-  border: 2px solid rgba(255, 43, 0, 0.4);
+  border: 2px solid rgba(217, 119, 137, 0.4);
   background: var(--color-primary-subtle);
   font-family: var(--font-sans);
   transition: transform var(--transition-fast), border-color var(--transition-fast);

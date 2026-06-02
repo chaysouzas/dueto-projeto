@@ -15,6 +15,10 @@ import {
   uploadAvatar,
   ouvirParceiro, buscarProgressoParceiroHoje,
   fazerCheckinDB,
+  adicionarLugarDB, adicionarLugarSoloDB,
+  excluirLugarDB, excluirLugarSoloDB,
+  adicionarAoCofrinhoDb, adicionarAoCofrinhoSoloDB,
+  ouvirLugares, ouvirLugaresSolo,
   adicionarReceitaDB, adicionarReceitaSoloDB,
   excluirReceitaDB, excluirReceitaSoloDB,
   ouvirReceitas, ouvirReceitasSolo,
@@ -44,6 +48,7 @@ let _unsubSaldo      = null;
 let _unsubParceiro   = null;
 let _unsubFilmes     = null;
 let _unsubReceitas   = null;
+let _unsubLugares    = null;
 let _parceiroUidEncontrado = null;
 
 // ── Avatar helper ─────────────────────────────────────────────
@@ -597,6 +602,7 @@ async function fazerLogout() {
   _unsubParceiro?.(); _unsubParceiro = null;
   _unsubFilmes?.();    _unsubFilmes   = null;
   _unsubReceitas?.();  _unsubReceitas = null;
+  _unsubLugares?.();   _unsubLugares  = null;
   navegar('login');
   try {
     await logout();
@@ -854,6 +860,16 @@ document.addEventListener('DOMContentLoaded', () => {
       _receitasLista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (document.querySelector('#tela-receitas.ativa')) _renderReceitasLista();
     });
+
+    // Lugares em tempo real — casal ou solo
+    const ouvirLugaresFn = casalId
+      ? (cb) => ouvirLugares(casalId, cb)
+      : (cb) => ouvirLugaresSolo(uid, cb);
+
+    _unsubLugares = ouvirLugaresFn((snap) => {
+      _lugaresLista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (document.querySelector('#tela-lugares.ativa')) _renderLugaresLista();
+    });
   }
 
   function _pararListeners() {
@@ -865,6 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
     _unsubLoja     = null;
     _unsubFilmes   = null;
     _unsubReceitas = null;
+    _unsubLugares?.(); _unsubLugares = null;
   }
 
   function _renderTarefaFirestore(docSnap, uid) {
@@ -1369,6 +1386,300 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       mostrarToast('erro ao conectar: ' + err.message);
     }
+  }
+
+  // ════════════════════════════════════════════════════════
+  // TELA DE LUGARES
+  // ════════════════════════════════════════════════════════
+
+  let _lugaresLista      = [];
+  let _lugaresCatAtiva   = 'todos';
+  let _catSelecionadaLugar = null;
+
+  const CAT_CONFIG = {
+    airbnb:      { label: 'airbnb',            icon: 'ph-house',      iconCss: 'lugar-icon--airbnb',      badgeCss: 'lugar-cat-badge--airbnb' },
+    passeio:     { label: 'passeios locais',   icon: 'ph-tree',       iconCss: 'lugar-icon--passeio',     badgeCss: 'lugar-cat-badge--passeio' },
+    gastronomia: { label: 'bar e gastronomia', icon: 'ph-fork-knife', iconCss: 'lugar-icon--gastronomia', badgeCss: 'lugar-cat-badge--gastronomia' },
+    viagem:      { label: 'viagem',            icon: 'ph-airplane',   iconCss: 'lugar-icon--viagem',      badgeCss: 'lugar-cat-badge--viagem' },
+  };
+
+  function irParaLugares() {
+    if (!_autenticado()) return;
+    navegar('lugares');
+    _renderLugaresLista();
+  }
+
+  function _lugaresCatAtualizar(cat) {
+    _lugaresCatAtiva = cat;
+    document.querySelectorAll('.lugar-cat-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.cat === cat);
+    });
+    _renderLugaresLista();
+  }
+
+  function _renderLugarItem(l) {
+    const parceiroUid = _dadosPerfilAtual?.parceiroUid;
+    const autorLabel  = l.adicionadoPor === _fbUid ? 'você'
+      : (parceiroUid && l.adicionadoPor === parceiroUid ? 'parceiro' : '');
+    const cfg = l.categoria ? CAT_CONFIG[l.categoria] : null;
+
+    const iconHtml = `<div class="lugar-item__icon ${cfg ? cfg.iconCss : 'lugar-icon--todos'}">
+      <i class="ph ${cfg ? cfg.icon : 'ph-map-pin'}" aria-hidden="true"></i>
+    </div>`;
+
+    const catHtml   = cfg ? `<span class="lugar-item__cat ${cfg.badgeCss}">${cfg.label}</span>` : '';
+    const autorHtml = autorLabel ? `<span class="lugar-item__autor">por ${autorLabel}</span>` : '';
+    const linkHtml  = l.link
+      ? `<a class="lugar-item__link" href="${l.link}" target="_blank" rel="noopener noreferrer">
+           <i class="ph ph-arrow-square-out" aria-hidden="true"></i> abrir
+         </a>`
+      : '';
+
+    return `
+      <li class="lugar-item" data-id="${l.id}">
+        ${iconHtml}
+        <div class="lugar-item__main">
+          <div class="lugar-item__nome">${l.nome}</div>
+          <div class="lugar-item__meta">${catHtml}${autorHtml}</div>
+        </div>
+        <div class="lugar-item__actions">
+          ${linkHtml}
+          <button class="lugar-item__del" data-action="excluir-lugar" data-id="${l.id}" aria-label="Excluir">
+            <i class="ph ph-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </li>`;
+  }
+
+  const _brl = (v) => 'R$ ' + (v || 0).toLocaleString('pt-BR');
+
+  function _renderViagemPlanejada(l) {
+    const parceiroUid  = _dadosPerfilAtual?.parceiroUid;
+    const autorLabel   = l.adicionadoPor === _fbUid ? 'você'
+      : (parceiroUid && l.adicionadoPor === parceiroUid ? 'parceiro' : '');
+    const orc          = l.orcamento || {};
+    const passagem     = orc.passagem     || 0;
+    const alimentacao  = orc.alimentacao  || 0;
+    const hospedagem   = orc.hospedagem   || 0;
+    const passeios     = orc.passeios     || 0;
+    const totalOrc     = passagem + alimentacao + hospedagem + passeios;
+    const cofrinho     = l.cofrinho || {};
+    const minhaContrib = cofrinho[_fbUid] || 0;
+    const parcContrib  = parceiroUid ? (cofrinho[parceiroUid] || 0) : 0;
+    const totalCof     = Object.values(cofrinho).reduce((a, b) => a + b, 0);
+    const pct          = totalOrc > 0 ? Math.min(100, Math.round((totalCof / totalOrc) * 100)) : 0;
+
+    const linkHtml = l.link ? `<a class="lugar-item__link" href="${l.link}" target="_blank" rel="noopener noreferrer">
+      <i class="ph ph-arrow-square-out" aria-hidden="true"></i> abrir</a>` : '';
+
+    const row = (icon, label, val) => val > 0 ? `
+      <div class="orcamento-row">
+        <span class="orcamento-row__label"><i class="ph ${icon}" aria-hidden="true"></i> ${label}</span>
+        <span class="orcamento-row__valor">${_brl(val)}</span>
+      </div>` : '';
+
+    const orcHtml = totalOrc > 0 ? `
+      <div class="viagem-orcamento">
+        ${row('ph-airplane-tilt', 'passagem', passagem)}
+        ${row('ph-fork-knife', 'alimentação', alimentacao)}
+        ${row('ph-house-simple', 'hospedagem', hospedagem)}
+        ${row('ph-map-trifold', 'passeios', passeios)}
+        <div class="orcamento-divider"></div>
+        <div class="orcamento-total-row"><span>total previsto</span><span>${_brl(totalOrc)}</span></div>
+      </div>` : '';
+
+    const contribHtml = (minhaContrib > 0 || parcContrib > 0) ? `
+      <div class="viagem-cofrinho__contribuicoes">
+        <span>você: ${_brl(minhaContrib)}</span>
+        ${parceiroUid ? `<span>parceiro: ${_brl(parcContrib)}</span>` : ''}
+      </div>` : '';
+
+    return `
+      <li class="lugar-item lugar-item--planejada" data-id="${l.id}">
+        <div class="viagem-header">
+          <div class="lugar-item__icon lugar-icon--viagem">
+            <i class="ph ph-airplane" aria-hidden="true"></i>
+          </div>
+          <div class="viagem-header__info">
+            <div class="lugar-item__nome">${l.nome}</div>
+            <div class="lugar-item__meta">
+              <span class="lugar-item__cat lugar-cat-badge--viagem">viagem planejada</span>
+              ${autorLabel ? `<span class="lugar-item__autor">por ${autorLabel}</span>` : ''}
+            </div>
+          </div>
+          <div class="viagem-header__actions">
+            ${linkHtml}
+            <button class="lugar-item__del" data-action="excluir-lugar" data-id="${l.id}" aria-label="Excluir">
+              <i class="ph ph-trash" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        ${orcHtml}
+        <div class="viagem-cofrinho">
+          <div class="viagem-cofrinho__header">
+            <span class="viagem-cofrinho__label">cofrinho</span>
+            <span class="viagem-cofrinho__pct">${_brl(totalCof)}${totalOrc > 0 ? ` · ${pct}%` : ''}</span>
+          </div>
+          <div class="viagem-cofrinho__bar">
+            <div class="viagem-cofrinho__fill" style="width:${pct}%"></div>
+          </div>
+          ${contribHtml}
+          <button class="viagem-cofrinho__btn" data-action="abrir-cofrinho" data-id="${l.id}">
+            <i class="ph ph-piggy-bank" aria-hidden="true"></i> adicionar ao cofrinho
+          </button>
+        </div>
+      </li>`;
+  }
+
+  function _renderLugaresLista() {
+    const listaEl = document.getElementById('lugaresListaEl');
+    const vazioEl = document.getElementById('lugaresVazio');
+    if (!listaEl) return;
+    const filtrado = _lugaresCatAtiva === 'todos'
+      ? _lugaresLista
+      : _lugaresLista.filter(l => l.categoria === _lugaresCatAtiva);
+    if (filtrado.length === 0) {
+      if (vazioEl) vazioEl.style.display = '';
+      listaEl.innerHTML = '';
+      return;
+    }
+    if (vazioEl) vazioEl.style.display = 'none';
+    listaEl.innerHTML = filtrado.map(l => l.planejado ? _renderViagemPlanejada(l) : _renderLugarItem(l)).join('');
+  }
+
+  function abrirModalNovoLugar() {
+    _catSelecionadaLugar = null;
+    const nomeEl = document.getElementById('lugarNome');
+    const linkEl = document.getElementById('lugarLink');
+    if (nomeEl) nomeEl.value = '';
+    if (linkEl) linkEl.value = '';
+    document.querySelectorAll('[data-action="selecionar-cat-lugar"]').forEach(b => b.classList.remove('active'));
+    abrirModal('modalNovoLugar');
+    document.getElementById('lugarNome')?.focus();
+  }
+
+  function fecharModalNovoLugar() { fecharModal('modalNovoLugar'); }
+  function fecharModalNovoLugarFora(e) {
+    if (e.target === document.getElementById('modalNovoLugar')) fecharModalNovoLugar();
+  }
+
+  // ── Planejar viagem ──────────────────────────────────────────
+
+  let _viagemCofrinhoId = null;
+
+  function abrirModalPlanejarViagem() {
+    ['viagemNome','viagemLink','orcPassagem','orcAlimentacao','orcHospedagem','orcPasseios'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    const totalEl = document.getElementById('orcTotalModal');
+    if (totalEl) totalEl.textContent = 'R$ 0';
+    abrirModal('modalPlanejarViagem');
+    document.getElementById('viagemNome')?.focus();
+  }
+  function fecharModalPlanejarViagem() { fecharModal('modalPlanejarViagem'); }
+  function fecharModalPlanejarViagemFora(e) {
+    if (e.target === document.getElementById('modalPlanejarViagem')) fecharModalPlanejarViagem();
+  }
+
+  function _atualizarTotalOrcamento() {
+    const ids = ['orcPassagem','orcAlimentacao','orcHospedagem','orcPasseios'];
+    const total = ids.reduce((s, id) => s + (parseFloat(document.getElementById(id)?.value) || 0), 0);
+    const el = document.getElementById('orcTotalModal');
+    if (el) el.textContent = _brl(total);
+  }
+
+  // Atualizar total ao digitar
+  ['orcPassagem','orcAlimentacao','orcHospedagem','orcPasseios'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', _atualizarTotalOrcamento);
+  });
+
+  async function salvarPlanejarViagem() {
+    const nome = document.getElementById('viagemNome')?.value.trim();
+    if (!nome) { mostrarToast('informe o destino'); return; }
+    let link = document.getElementById('viagemLink')?.value.trim();
+    if (link && !link.startsWith('http')) link = 'https://' + link;
+    const orcamento = {
+      passagem:    parseFloat(document.getElementById('orcPassagem')?.value)    || 0,
+      alimentacao: parseFloat(document.getElementById('orcAlimentacao')?.value) || 0,
+      hospedagem:  parseFloat(document.getElementById('orcHospedagem')?.value)  || 0,
+      passeios:    parseFloat(document.getElementById('orcPasseios')?.value)    || 0,
+    };
+    const lugar = { nome, link: link || null, categoria: 'viagem', planejado: true, orcamento, cofrinho: {} };
+    try {
+      if (_fbCasalId) await adicionarLugarDB(_fbCasalId, _fbUid, lugar);
+      else            await adicionarLugarSoloDB(_fbUid, lugar);
+      fecharModalPlanejarViagem();
+      mostrarToast('viagem planejada!');
+    } catch (err) { mostrarToast('erro: ' + err.message); }
+  }
+
+  function abrirCofrinhoModal(lugarId) {
+    _viagemCofrinhoId = lugarId;
+    const l = _lugaresLista.find(l => l.id === lugarId);
+    const nomeEl = document.getElementById('cofrinhoViagemNome');
+    if (nomeEl) nomeEl.textContent = l?.nome || '';
+    const valorEl = document.getElementById('cofrinhoValor');
+    if (valorEl) valorEl.value = '';
+    abrirModal('modalCofrinho');
+    document.getElementById('cofrinhoValor')?.focus();
+  }
+  function fecharCofrinhoModal() {
+    fecharModal('modalCofrinho');
+    _viagemCofrinhoId = null;
+  }
+
+  async function salvarCofrinho() {
+    if (!_viagemCofrinhoId) return;
+    const valor = parseFloat(document.getElementById('cofrinhoValor')?.value);
+    if (!valor || valor <= 0) { mostrarToast('informe um valor válido'); return; }
+    try {
+      if (_fbCasalId) await adicionarAoCofrinhoDb(_fbCasalId, _viagemCofrinhoId, _fbUid, valor);
+      else            await adicionarAoCofrinhoSoloDB(_fbUid, _viagemCofrinhoId, _fbUid, valor);
+      fecharCofrinhoModal();
+      mostrarToast(`${_brl(valor)} adicionados ao cofrinho!`);
+    } catch (err) { mostrarToast('erro: ' + err.message); }
+  }
+
+  function selecionarCatLugar(btn) {
+    const cat = btn.dataset.cat;
+    if (_catSelecionadaLugar === cat) {
+      _catSelecionadaLugar = null;
+      btn.classList.remove('active');
+    } else {
+      _catSelecionadaLugar = cat;
+      document.querySelectorAll('[data-action="selecionar-cat-lugar"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  }
+
+  async function salvarLugar() {
+    const nome = document.getElementById('lugarNome')?.value.trim();
+    let link   = document.getElementById('lugarLink')?.value.trim();
+    if (!nome) { mostrarToast('dê um nome ao lugar'); return; }
+    if (link && !link.startsWith('http')) link = 'https://' + link;
+    const lugar = { nome, link: link || null, categoria: _catSelecionadaLugar };
+    try {
+      if (_fbCasalId) await adicionarLugarDB(_fbCasalId, _fbUid, lugar);
+      else            await adicionarLugarSoloDB(_fbUid, lugar);
+      fecharModalNovoLugar();
+      mostrarToast('lugar adicionado!');
+    } catch (err) { mostrarToast('erro: ' + err.message); }
+  }
+
+  function excluirLugar(lugarId) {
+    const l = _lugaresLista.find(l => l.id === lugarId);
+    if (!l) return;
+    abrirModalConfirmar(
+      'remover lugar?',
+      `"${l.nome}" será removido da lista.`,
+      async () => {
+        try {
+          if (_fbCasalId) await excluirLugarDB(_fbCasalId, lugarId);
+          else            await excluirLugarSoloDB(_fbUid, lugarId);
+        } catch (err) { console.error(err); }
+      }
+    );
   }
 
   // ════════════════════════════════════════════════════════
@@ -2386,6 +2697,23 @@ function salvarMeta() {
     // Parceiro
     'verificar-parceiro-tela':      () => verificarParceiroCodigo(),
     'confirmar-conexao-parceiro':   () => confirmarConexaoParceiro(),
+
+    // Lugares
+    'ir-lugares':                   () => irParaLugares(),
+    'lugares-cat':                  (el) => _lugaresCatAtualizar(el.dataset.cat),
+    'abrir-novo-lugar':             () => abrirModalNovoLugar(),
+    'fechar-novo-lugar':            () => fecharModalNovoLugar(),
+    'fechar-novo-lugar-fora':       (el, e) => fecharModalNovoLugarFora(e),
+    'selecionar-cat-lugar':         (el) => selecionarCatLugar(el),
+    'salvar-lugar':                 () => salvarLugar(),
+    'excluir-lugar':                (el) => excluirLugar(el.dataset.id),
+    'planejar-viagem':              () => abrirModalPlanejarViagem(),
+    'fechar-planejar-viagem':       () => fecharModalPlanejarViagem(),
+    'fechar-planejar-viagem-fora':  (el, e) => fecharModalPlanejarViagemFora(e),
+    'salvar-planejar-viagem':       () => salvarPlanejarViagem(),
+    'abrir-cofrinho':               (el) => abrirCofrinhoModal(el.dataset.id),
+    'fechar-cofrinho':              () => fecharCofrinhoModal(),
+    'salvar-cofrinho':              () => salvarCofrinho(),
 
     // Receitas
     'ir-receitas':                  () => irParaReceitas(),

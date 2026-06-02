@@ -21,6 +21,9 @@ service cloud.firestore {
       match /receitas/{id} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
+      match /lugares/{id} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
     }
 
     match /casais/{casalId} {
@@ -48,6 +51,7 @@ service cloud.firestore {
       match /transacoes/{id} { allow read, write: if isMember(); }
       match /filmes/{id}     { allow read, write: if isMember(); }
       match /receitas/{id}   { allow read, write: if isMember(); }
+      match /lugares/{id}    { allow read, write: if isMember(); }
     }
   }
 }
