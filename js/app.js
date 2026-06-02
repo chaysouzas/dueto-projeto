@@ -49,6 +49,52 @@ let _parceiroUidEncontrado = null;
 let _navStack     = [];
 let _poppingState = false;
 
+// ── Notificações ─────────────────────────────────────────────
+const _notificacoesEnviadas = new Set();
+let   _lembreteInterval     = null;
+
+function _ocultarLoading() {
+  document.getElementById('appLoading')?.classList.add('hidden');
+}
+
+async function solicitarNotificacao() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+function mostrarNotificacaoPush(titulo, corpo) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const opts = { body: corpo, icon: './assets/icons/apple-touch-icon.png', tag: 'dueto', renotify: true };
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready
+      .then(reg => reg.showNotification(titulo, opts))
+      .catch(() => new Notification(titulo, opts));
+  } else {
+    new Notification(titulo, opts);
+  }
+}
+
+function _verificarLembreteDiario() {
+  const lista = document.getElementById('homeTarefasList');
+  if (!lista) return;
+  const total    = lista.querySelectorAll('.task-item').length;
+  const feitas   = lista.querySelectorAll('.task-check.done').length;
+  const pendentes = total - feitas;
+  if (pendentes > 0) {
+    mostrarNotificacaoPush(
+      'Dueto — tarefas do dia',
+      `Você tem ${pendentes} tarefa${pendentes > 1 ? 's' : ''} pendente${pendentes > 1 ? 's' : ''} hoje`
+    );
+  }
+}
+
+function _iniciarLembrete() {
+  if (_lembreteInterval) clearInterval(_lembreteInterval);
+  _lembreteInterval = setInterval(_verificarLembreteDiario, 4 * 60 * 60 * 1000);
+}
+
 // ── 3. Navegação entre telas ───────────────────────────────
 function navegar(id) {
   const tela = document.getElementById('tela-' + id);
@@ -555,6 +601,9 @@ function formatarCodigoParceiro(input) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // Segurança: esconde loading após 5s mesmo sem resposta do auth
+  setTimeout(_ocultarLoading, 5000);
+
   // ── Auth Listener: gerencia sessão automaticamente ──────────
   iniciarAuthListener(
     async (user, dados) => {
@@ -606,13 +655,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Iniciar listeners (casal ou solo)
         _iniciarListeners(dados.casalId || null, user.uid);
 
+        // Notificações
+        solicitarNotificacao();
+        _iniciarLembrete();
+
         // Ir para home se estiver no login ou cadastro
         const telaAtiva = document.querySelector('.tela.ativa');
         if (!telaAtiva || telaAtiva.id === 'tela-login' || telaAtiva.id === 'tela-cadastro') {
           irParaHome();
         }
+        _ocultarLoading();
       } else {
         // Usuário logado mas sem perfil — ir para cadastro
+        _ocultarLoading();
         const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
         navegar('cadastro');
         if (isGoogle) {
@@ -642,7 +697,9 @@ document.addEventListener('DOMContentLoaded', () => {
       _pararListeners();
       _unsubSaldo?.();    _unsubSaldo    = null;
       _unsubParceiro?.(); _unsubParceiro = null;
+      if (_lembreteInterval) { clearInterval(_lembreteInterval); _lembreteInterval = null; }
       _limparTarefasTelas();
+      _ocultarLoading();
       navegar('login');
     }
   );
@@ -715,6 +772,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ? (cb) => ouvirTarefas(casalId, cb)
       : (cb) => ouvirTarefasSolo(uid, cb);
 
+    let tarefasInicializadas = false;
+
     _unsubTarefas = ouvirFn((snap) => {
       snap.docChanges().forEach(change => {
         const { doc, type } = change;
@@ -723,18 +782,35 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (type === 'removed') {
           document.querySelectorAll(`[data-task-id="${doc.id}"]`).forEach(el => el.remove());
         } else if (type === 'modified') {
-          const hoje = new Date().toISOString().split('T')[0];
-          const feitoHoje = doc.data().concluidaPor?.[uid] === hoje;
+          const hoje        = new Date().toISOString().split('T')[0];
+          const concluidaPor = doc.data().concluidaPor || {};
+          const parceiroUid = _dadosPerfilAtual?.parceiroUid;
+          const euFiz       = concluidaPor[uid] === hoje;
+          const alguemFez   = euFiz || (parceiroUid && concluidaPor[parceiroUid] === hoje);
+
+          // Notificar quando o parceiro concluir (apenas após carga inicial)
+          if (tarefasInicializadas && parceiroUid && concluidaPor[parceiroUid] === hoje && !euFiz) {
+            const notifKey = `${doc.id}-${parceiroUid}-${hoje}`;
+            if (!_notificacoesEnviadas.has(notifKey)) {
+              _notificacoesEnviadas.add(notifKey);
+              mostrarNotificacaoPush('✅ Tarefa concluída', `Parceiro concluiu "${doc.data().nome}"`);
+            }
+          }
+
           document.querySelectorAll(`[data-task-id="${doc.id}"]`).forEach(el => {
             const check = el.querySelector('.task-check');
             const name  = el.querySelector('.task-item__name');
             if (!check || !name) return;
-            check.classList.toggle('done', feitoHoje);
-            check.innerHTML = feitoHoje ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : '';
-            name.classList.toggle('done', feitoHoje);
+            // Home: done se qualquer um completou; Tarefas: done só se EU completei
+            const isHome = !!el.closest('#homeTarefasList');
+            const feito  = isHome ? alguemFez : euFiz;
+            check.classList.toggle('done', feito);
+            check.innerHTML = feito ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : '';
+            name.classList.toggle('done', feito);
           });
         }
       });
+      tarefasInicializadas = true;
       atualizarProgressoHome();
       atualizarResumoDia();
       inicializarBadges();
@@ -776,8 +852,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dados = docSnap.data();
     const id    = docSnap.id;
 
-    const hoje      = new Date().toISOString().split('T')[0];
-    const feitoHoje = dados.concluidaPor?.[uid] === hoje;
+    const hoje        = new Date().toISOString().split('T')[0];
+    const parceiroUid = _dadosPerfilAtual?.parceiroUid;
+    const euFiz       = dados.concluidaPor?.[uid] === hoje;
+    const alguemFez   = euFiz || (parceiroUid && dados.concluidaPor?.[parceiroUid] === hoje);
     const tagTexto  = dados.tipo === 'pontual'
       ? `a cada ${dados.ciclo} dia${dados.ciclo > 1 ? 's' : ''}`
       : 'diária';
@@ -792,9 +870,9 @@ document.addEventListener('DOMContentLoaded', () => {
       item.dataset.pts    = dados.pontos;
       item.dataset.action = 'toggle-task';
       item.innerHTML = `
-        <div class="task-check ${feitoHoje ? 'done' : ''}">${feitoHoje ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
+        <div class="task-check ${euFiz ? 'done' : ''}">${euFiz ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
         <div class="task-item__info">
-          <div class="task-item__name ${feitoHoje ? 'done' : ''}">${dados.nome}</div>
+          <div class="task-item__name ${euFiz ? 'done' : ''}">${dados.nome}</div>
           <div class="task-item__tag">${tagTexto}</div>
         </div>
         <span class="task-item__pts">+${dados.pontos}</span>
@@ -818,9 +896,9 @@ document.addEventListener('DOMContentLoaded', () => {
       homeItem.dataset.pts    = dados.pontos;
       homeItem.dataset.action = 'toggle-task';
       homeItem.innerHTML = `
-        <div class="task-check ${feitoHoje ? 'done' : ''}">${feitoHoje ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
+        <div class="task-check ${alguemFez ? 'done' : ''}">${alguemFez ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
         <div class="task-item__info">
-          <div class="task-item__name ${feitoHoje ? 'done' : ''}">${dados.nome}</div>
+          <div class="task-item__name ${alguemFez ? 'done' : ''}">${dados.nome}</div>
           <div class="task-item__tag">${tagTexto}</div>
         </div>
         <span class="task-item__pts">+${dados.pontos}</span>
@@ -2343,8 +2421,10 @@ function salvarMeta() {
       navegar(anterior);
       history.pushState({ dueto: anterior }, '');
       _poppingState = false;
+    } else {
+      // Na raiz: impedir saída/reload do app — push state de volta
+      history.pushState({ dueto: _navStack[0] || 'home' }, '');
     }
-    // Se _navStack.length <= 1 (raiz), o browser minimiza/fecha o PWA — comportamento correto
   });
 
 });

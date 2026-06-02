@@ -51,6 +51,34 @@
 .field-hint.ok     { color: var(--color-success); }
 .field-hint.error  { color: var(--color-error); }
 
+/* ── Loading / splash screen ── */
+.app-loading {
+  position: fixed;
+  inset: 0;
+  background: #120A0F;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 9999;
+  transition: opacity 0.4s ease;
+}
+.app-loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.app-loading__logo {
+  border-radius: 18px;
+}
+.app-loading__nome {
+  font-family: "Manrope", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #E8849A;
+  letter-spacing: 0.12em;
+}
+
 /* ── Campo com label ── */
 .field { display: flex; flex-direction: column; gap: var(--space-2); }
 .field-label {
