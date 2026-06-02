@@ -12,6 +12,7 @@ import {
   criarItemLojaDB, excluirItemLojaDB,
   resgatarItemDB, confirmarResgateCasalDB, ouvirLoja,
   adicionarSaldoDB, atualizarSaldoUsuarioDB, ouvirSaldo,
+  uploadAvatar,
   ouvirParceiro, buscarProgressoParceiroHoje,
   fazerCheckinDB,
   adicionarReceitaDB, adicionarReceitaSoloDB,
@@ -44,6 +45,24 @@ let _unsubParceiro   = null;
 let _unsubFilmes     = null;
 let _unsubReceitas   = null;
 let _parceiroUidEncontrado = null;
+
+// ── Avatar helper ─────────────────────────────────────────────
+function _htmlAvatar(avatar) {
+  if (avatar && (avatar.startsWith('https://') || avatar.startsWith('http://'))) {
+    return `<img src="${avatar}" alt="avatar" class="avatar-foto">`;
+  }
+  return `<i class="ph ${avatar || 'ph-user'}" aria-hidden="true"></i>`;
+}
+
+function _aplicarAvatarUI(avatar) {
+  const html = _htmlAvatar(avatar);
+  ['previewAvatar', 'successAvatar', 'perfilAvatar'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  });
+  const myAvatar = document.querySelector('.my-avatar');
+  if (myAvatar) myAvatar.innerHTML = html;
+}
 
 // ── Histórico interno de navegação (botão voltar) ───────────
 let _navStack     = [];
@@ -535,7 +554,7 @@ function _atualizarTelaPerfil() {
   // Avatar
   const avatarEl = document.getElementById('perfilAvatar');
   if (avatarEl && d.avatar) {
-    avatarEl.innerHTML = `<i class="ph ${d.avatar}" aria-hidden="true"></i>`;
+    avatarEl.innerHTML = _htmlAvatar(d.avatar);
   }
 
   // Status do parceiro
@@ -623,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const avatarEl = document.getElementById('myAvatar') || document.querySelector('.my-avatar');
         if (avatarEl && dados.avatar) {
-          avatarEl.innerHTML = `<i class="ph ${dados.avatar}" aria-hidden="true"></i>`;
+          avatarEl.innerHTML = _htmlAvatar(dados.avatar);
         }
 
         saldoAtual = dados.saldo || 0;
@@ -1141,14 +1160,47 @@ document.addEventListener('DOMContentLoaded', () => {
   function selecionarAvatar(el) {
     document.querySelectorAll('.avatar-opt').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
-    avatarSelecionado = el.dataset.emoji; // ex: 'ph-flower'
-
-    // Atualiza preview e success com a classe Phosphor
+    avatarSelecionado = el.dataset.emoji;
     const preview = document.getElementById('previewAvatar');
     const success = document.getElementById('successAvatar');
-    if (preview) preview.innerHTML = `<i class="ph ${avatarSelecionado}" aria-hidden="true"></i>`;
-    if (success) success.innerHTML = `<i class="ph ${avatarSelecionado}" aria-hidden="true"></i>`;
+    if (preview) preview.innerHTML = _htmlAvatar(avatarSelecionado);
+    if (success) success.innerHTML = _htmlAvatar(avatarSelecionado);
   }
+
+  function abrirUploadAvatar() {
+    document.getElementById('avatarFileInput')?.click();
+  }
+
+  async function _handleAvatarFile(file) {
+    const uid = _fbUid || window._uidCadastro;
+    if (!uid) { mostrarToast('conclua o cadastro primeiro'); return; }
+    if (!file?.type.startsWith('image/')) { mostrarToast('selecione uma imagem'); return; }
+    if (file.size > 5 * 1024 * 1024) { mostrarToast('imagem muito grande (máx. 5 MB)'); return; }
+
+    // Preview imediato com blob URL
+    const blobUrl = URL.createObjectURL(file);
+    _aplicarAvatarUI(blobUrl);
+    avatarSelecionado = blobUrl;
+    document.querySelectorAll('.avatar-opt').forEach(o => o.classList.remove('selected'));
+
+    mostrarToast('enviando foto...');
+    try {
+      const fotoUrl = await uploadAvatar(uid, file);
+      avatarSelecionado = fotoUrl;
+      _aplicarAvatarUI(fotoUrl);
+      if (_dadosPerfilAtual) _dadosPerfilAtual.avatar = fotoUrl;
+      mostrarToast('foto atualizada!');
+    } catch (err) {
+      mostrarToast('erro ao enviar: ' + err.message);
+      console.error(err);
+    }
+  }
+
+  document.getElementById('avatarFileInput')?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) _handleAvatarFile(file);
+    e.target.value = '';
+  });
 
   function selecionarCor(el) {
     document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
@@ -1226,15 +1278,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (_fbCasalId) {
       try {
-        const { total, concluidas } = await buscarProgressoParceiroHoje(_fbCasalId, parceiroUid);
-        _renderProgressoParceiro(total, concluidas);
+        const { total, concluidas, tarefasConcluidas } = await buscarProgressoParceiroHoje(_fbCasalId, parceiroUid);
+        _renderProgressoParceiro(total, concluidas, tarefasConcluidas);
       } catch (err) { console.error(err); }
     }
   }
 
   function _renderDadosParceiro(dados) {
     const avatarEl = document.getElementById('parceiroAvatar');
-    if (avatarEl) avatarEl.innerHTML = `<i class="ph ${dados.avatar || 'ph-user'}" aria-hidden="true"></i>`;
+    if (avatarEl) avatarEl.innerHTML = _htmlAvatar(dados.avatar || 'ph-user');
 
     const nomeEl = document.getElementById('parceiroNome');
     if (nomeEl) nomeEl.textContent = dados.nome || 'parceiro';
@@ -1249,18 +1301,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (streakSub) streakSub.textContent = streakVal > 0 ? 'ativo!' : '';
   }
 
-  function _renderProgressoParceiro(total, concluidas) {
+  function _renderProgressoParceiro(total, concluidas, tarefasConcluidas = []) {
     const pct = total > 0 ? Math.round((concluidas / total) * 100) : 0;
     const fillEl  = document.getElementById('parceiroProgressFill');
     const countEl = document.getElementById('parceiroProgressCount');
     const pendEl  = document.getElementById('parceiroPendentes');
-    if (fillEl)  fillEl.style.width   = pct + '%';
-    if (countEl) countEl.textContent  = `${concluidas} de ${total}`;
+    const listaEl = document.getElementById('parceiroTarefasList');
+
+    if (fillEl)  fillEl.style.width  = pct + '%';
+    if (countEl) countEl.textContent = `${concluidas} de ${total}`;
     if (pendEl) {
       const pend = total - concluidas;
       pendEl.textContent = total === 0 ? ''
         : pend > 0 ? `${pend} pendente${pend > 1 ? 's' : ''}`
         : 'tudo feito!';
+    }
+
+    if (listaEl) {
+      listaEl.innerHTML = tarefasConcluidas.map(t => `
+        <div class="parceiro-tarefa-item">
+          <i class="ph ph-check-circle parceiro-tarefa-item__check" aria-hidden="true"></i>
+          <span class="parceiro-tarefa-item__nome">${t.nome}</span>
+          <span class="parceiro-tarefa-item__pts">+${t.pontos}</span>
+        </div>`).join('');
     }
   }
 
@@ -2272,6 +2335,9 @@ function salvarMeta() {
 
     // Senha
     'toggle-senha':                 (el) => toggleSenha(el),
+
+    // Avatar upload
+    'upload-avatar':                () => abrirUploadAvatar(),
 
     // Cadastro
     'voltar-cadastro':              () => voltarCadastro(),

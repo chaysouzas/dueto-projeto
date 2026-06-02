@@ -212,6 +212,10 @@
                    placeholder="seu nome" autocomplete="given-name">
           </div>
 
+          <!-- Input de arquivo oculto — compartilhado entre cadastro e perfil -->
+          <input type="file" id="avatarFileInput" accept="image/*"
+                 style="display:none" aria-hidden="true">
+
           <div class="field">
             <div class="field-label">avatar</div>
             <div class="avatar-picker" id="avatarPicker">
@@ -224,6 +228,10 @@
               <div class="avatar-opt" data-emoji="ph-paw-print" data-action="selecionar-avatar"><i class="ph ph-paw-print" aria-hidden="true"></i></div>
               <div class="avatar-opt" data-emoji="ph-sparkle" data-action="selecionar-avatar"><i class="ph ph-sparkle" aria-hidden="true"></i></div>
             </div>
+            <button class="btn-upload-avatar" type="button" data-action="upload-avatar">
+              <i class="ph ph-camera" aria-hidden="true"></i>
+              usar foto da galeria
+            </button>
           </div>
 
           <div class="field">
@@ -926,8 +934,13 @@
 
         <!-- Card do perfil -->
         <div class="perfil-card">
-          <div class="perfil-card__avatar" id="perfilAvatar">
-            <i class="ph ph-sparkle" aria-hidden="true"></i>
+          <div class="perfil-card__avatar-wrap">
+            <div class="perfil-card__avatar" id="perfilAvatar">
+              <i class="ph ph-sparkle" aria-hidden="true"></i>
+            </div>
+            <button class="perfil-avatar-edit" data-action="upload-avatar" aria-label="Alterar foto">
+              <i class="ph ph-camera" aria-hidden="true"></i>
+            </button>
           </div>
           <div class="perfil-card__info">
             <div class="perfil-card__nome" id="perfilNome">você</div>
@@ -1047,6 +1060,7 @@
             <div class="progress-bar">
               <div class="progress-bar__fill" id="parceiroProgressFill"></div>
             </div>
+            <div id="parceiroTarefasList" class="parceiro-tarefas-lista"></div>
             <div class="tasks-card__footer">
               <span class="tasks-card__footer-label" id="parceiroPendentes"></span>
             </div>

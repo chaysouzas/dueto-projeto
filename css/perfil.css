@@ -20,6 +20,13 @@
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-xl);
 }
+.perfil-card__avatar-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
 .perfil-card__avatar {
   width: 64px;
   height: 64px;
@@ -29,8 +36,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  overflow: hidden;
 }
+
+.perfil-avatar-edit {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 22px;
+  height: 22px;
+  background: var(--color-primary);
+  border: 2px solid var(--color-bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-on-primary);
+  transition: transform var(--transition-fast);
+}
+.perfil-avatar-edit .ph { font-size: 11px; }
+.perfil-avatar-edit:hover { transform: scale(1.1); }
 .perfil-card__avatar .ph,
 .perfil-card__avatar [class^="ph-"] {
   font-size: 28px;
