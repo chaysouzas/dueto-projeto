@@ -6,11 +6,22 @@ import {
   iniciarAuthListener, loginEmail, loginComGoogle,
   recuperarSenha, cadastrarEmail,
   criarPerfil, buscarPorCodigo, conectarParceiro,
-  criarTarefaDB, excluirTarefaDB, ouvirTarefas,
+  criarTarefaDB, excluirTarefaDB, marcarTarefaDB, ouvirTarefas,
+  criarTarefaSoloDB, excluirTarefaSoloDB, marcarTarefaSoloDB, ouvirTarefasSolo,
   salvarExercicioDB, ouvirExercicios,
   criarItemLojaDB, excluirItemLojaDB,
   resgatarItemDB, confirmarResgateCasalDB, ouvirLoja,
   adicionarSaldoDB, atualizarSaldoUsuarioDB, ouvirSaldo,
+  ouvirParceiro, buscarProgressoParceiroHoje,
+  fazerCheckinDB,
+  adicionarReceitaDB, adicionarReceitaSoloDB,
+  excluirReceitaDB, excluirReceitaSoloDB,
+  ouvirReceitas, ouvirReceitasSolo,
+  adicionarFilmeDB, adicionarFilmeSoloDB,
+  marcarFilmeAssistidoDB, marcarFilmeAssistidoSoloDB,
+  avaliarFilmeDB, avaliarFilmeSoloDB,
+  excluirFilmeDB, excluirFilmeSoloDB,
+  ouvirFilmes, ouvirFilmesSolo,
   logout
 } from './firebase.js';
 
@@ -29,6 +40,10 @@ let _fbCasalId = null; // id do casal no Firestore
 let _unsubTarefas    = null;
 let _unsubLoja       = null;
 let _unsubSaldo      = null;
+let _unsubParceiro   = null;
+let _unsubFilmes     = null;
+let _unsubReceitas   = null;
+let _parceiroUidEncontrado = null;
 
 // ── 3. Navegação entre telas ───────────────────────────────
 function navegar(id) {
@@ -141,7 +156,8 @@ function renderizarLoja() {
 }
 
 function renderItemIndividual(item) {
-  const resgatado = item.resgatado;
+  const resgatado = _itemResgatadoAtivo(item);
+  const horas = resgatado ? _horasRestantes(item) : 0;
   return `
     <li class="loja-item ${resgatado ? 'loja-item--resgatado' : ''}"
         data-id="${item.id}" aria-label="${item.nome}">
@@ -153,8 +169,8 @@ function renderItemIndividual(item) {
       </div>
       <div class="loja-item__actions">
         ${resgatado
-          ? `<span class="loja-item__tag loja-item__tag--done">
-               <i class="ph ph-check-circle" aria-hidden="true"></i> resgatado
+          ? `<span class="loja-item__tag loja-item__tag--wait">
+               <i class="ph ph-hourglass" aria-hidden="true"></i> disponível em ${horas}h
              </span>`
           : `<button class="loja-item__btn" data-action="iniciar-resgatar"
                      data-id="${item.id}" aria-label="Resgatar ${item.nome}">
@@ -213,10 +229,19 @@ function renderItemCasal(item) {
     </li>`;
 }
 
+const MS_24H = 24 * 60 * 60 * 1000;
+function _itemResgatadoAtivo(item) {
+  return !!item.resgatadoEm && (Date.now() - item.resgatadoEm) < MS_24H;
+}
+function _horasRestantes(item) {
+  if (!item.resgatadoEm) return 0;
+  return Math.ceil((item.resgatadoEm + MS_24H - Date.now()) / 3600000);
+}
+
 // ── Resgatar individual ───────────────────────────────────────
 function iniciarResgatar(id) {
   const item = lojaEstado.individuais.find(i => i.id === id);
-  if (!item || item.resgatado) return;
+  if (!item || _itemResgatadoAtivo(item)) return;
   if (saldoAtual < item.custo) {
     mostrarToast('saldo insuficiente');
     return;
@@ -234,11 +259,13 @@ async function confirmarResgatar() {
     if (_fbCasalId && _fbUid) {
       await resgatarItemDB(_fbCasalId, _fbUid, item.id, item.custo);
     } else {
-      item.resgatado = true;
+      item.resgatadoEm = Date.now();
+      delete item.resgatado;
       saldoAtual -= item.custo;
       salvarLoja();
       atualizarSaldo();
       renderizarLoja();
+      if (_fbUid) await atualizarSaldoUsuarioDB(_fbUid, -item.custo);
     }
     fecharModalResgatar();
     mostrarToast('recompensa resgatada! 🎉');
@@ -486,9 +513,12 @@ async function fazerLogout() {
   fecharModal('modalLogout');
   _fbUid     = null;
   _fbCasalId = null;
-  _unsubTarefas?.(); _unsubTarefas = null;
-  _unsubLoja?.();    _unsubLoja    = null;
-  _unsubSaldo?.();   _unsubSaldo   = null;
+  _unsubTarefas?.();  _unsubTarefas  = null;
+  _unsubLoja?.();     _unsubLoja     = null;
+  _unsubSaldo?.();    _unsubSaldo    = null;
+  _unsubParceiro?.(); _unsubParceiro = null;
+  _unsubFilmes?.();    _unsubFilmes   = null;
+  _unsubReceitas?.();  _unsubReceitas = null;
   navegar('login');
   try {
     await logout();
@@ -537,6 +567,22 @@ document.addEventListener('DOMContentLoaded', () => {
         saldoAtual = dados.saldo || 0;
         atualizarSaldo();
 
+        // Carregar estado de exercícios persistido
+        const hojeISO = new Date().toISOString().split('T')[0];
+        exEstado.feitoHoje  = dados.ultimoCheckin === hojeISO;
+        let streakBase      = dados.streakAtual || 0;
+        if (!exEstado.feitoHoje && dados.ultimoCheckin) {
+          const ontem = new Date();
+          ontem.setDate(ontem.getDate() - 1);
+          if (dados.ultimoCheckin < ontem.toISOString().split('T')[0]) {
+            streakBase = 0; // streak quebrado — dia pulado
+          }
+        }
+        exEstado.streakVoce = streakBase;
+        if (exEstado.feitoHoje) {
+          exEstado.historico[new Date().getDate() - 1] = true;
+        }
+
         // Ouvir saldo SEMPRE — independente de ter casal
         _unsubSaldo?.();
         _unsubSaldo = ouvirSaldo(user.uid, (saldo) => {
@@ -544,15 +590,13 @@ document.addEventListener('DOMContentLoaded', () => {
           atualizarSaldo();
         });
 
+        // Iniciar listeners (casal ou solo)
+        _iniciarListeners(dados.casalId || null, user.uid);
+
         // Ir para home se estiver no login ou cadastro
         const telaAtiva = document.querySelector('.tela.ativa');
         if (!telaAtiva || telaAtiva.id === 'tela-login' || telaAtiva.id === 'tela-cadastro') {
-          navegar('home');
-        }
-
-        // Iniciar listeners em tempo real se tiver casal
-        if (dados.casalId) {
-          _iniciarListeners(dados.casalId, user.uid);
+          irParaHome();
         }
       } else {
         // Usuário logado mas sem perfil — ir para cadastro
@@ -583,6 +627,9 @@ document.addEventListener('DOMContentLoaded', () => {
       _fbCasalId = null;
       _dadosPerfilAtual = null;
       _pararListeners();
+      _unsubSaldo?.();    _unsubSaldo    = null;
+      _unsubParceiro?.(); _unsubParceiro = null;
+      _limparTarefasTelas();
       navegar('login');
     }
   );
@@ -599,7 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (d.tipo === 'individuais') {
         lojaEstado.individuais.push({
           id, nome: d.nome, custo: d.custo,
-          resgatado: !!d.resgatadoPor
+          resgatadoEm: d.resgatadoEm || null
         });
       } else {
         lojaEstado.casal.push({
@@ -616,41 +663,105 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function _limparTarefasTelas() {
+    const homeLista = document.getElementById('homeTarefasList');
+    if (homeLista) homeLista.innerHTML = '';
+    ['limpeza','pets','organizacao','roupas','outros','cozinha','banheiro'].forEach(g => {
+      const body = document.getElementById('body-' + g);
+      if (body) body.innerHTML = '';
+    });
+  }
+
+  function atualizarProgressoHome() {
+    const lista = document.getElementById('homeTarefasList');
+    const total  = lista ? lista.querySelectorAll('.task-item').length : 0;
+    const feitas = lista ? lista.querySelectorAll('.task-check.done').length : 0;
+    totalTarefas      = total;
+    tarefasConcluidas = feitas;
+    atualizarProgresso();
+    const pendEl = document.getElementById('homePendentes');
+    if (pendEl) {
+      const pend = total - feitas;
+      pendEl.textContent = total === 0 ? '' : pend > 0 ? `${pend} pendente${pend > 1 ? 's' : ''}` : 'tudo feito!';
+    }
+  }
+
   function _iniciarListeners(casalId, uid) {
     _pararListeners();
+    _limparTarefasTelas();
 
-    // Loja em tempo real
-    _unsubLoja = ouvirLoja(casalId, (snap) => {
-      _renderLojaFirestore(snap);
-    });
+    // Loja em tempo real (só para casais)
+    if (casalId) {
+      _unsubLoja = ouvirLoja(casalId, (snap) => {
+        _renderLojaFirestore(snap);
+      });
+    }
 
-    // Tarefas em tempo real
-    _unsubTarefas = ouvirTarefas(casalId, (snap) => {
+    // Tarefas em tempo real — casal ou solo
+    const ouvirFn = casalId
+      ? (cb) => ouvirTarefas(casalId, cb)
+      : (cb) => ouvirTarefasSolo(uid, cb);
+
+    _unsubTarefas = ouvirFn((snap) => {
       snap.docChanges().forEach(change => {
-        if (change.type === 'added') {
-          _renderTarefaFirestore(change.doc, uid);
-        } else if (change.type === 'removed') {
-          document.querySelector(`[data-task-id="${change.doc.id}"]`)?.remove();
+        const { doc, type } = change;
+        if (type === 'added') {
+          _renderTarefaFirestore(doc, uid);
+        } else if (type === 'removed') {
+          document.querySelectorAll(`[data-task-id="${doc.id}"]`).forEach(el => el.remove());
+        } else if (type === 'modified') {
+          const hoje = new Date().toISOString().split('T')[0];
+          const feitoHoje = doc.data().concluidaPor?.[uid] === hoje;
+          document.querySelectorAll(`[data-task-id="${doc.id}"]`).forEach(el => {
+            const check = el.querySelector('.task-check');
+            const name  = el.querySelector('.task-item__name');
+            if (!check || !name) return;
+            check.classList.toggle('done', feitoHoje);
+            check.innerHTML = feitoHoje ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : '';
+            name.classList.toggle('done', feitoHoje);
+          });
         }
       });
+      atualizarProgressoHome();
       atualizarResumoDia();
       inicializarBadges();
+    });
+
+    // Filmes em tempo real — casal ou solo
+    const ouvirFilmesFn = casalId
+      ? (cb) => ouvirFilmes(casalId, cb)
+      : (cb) => ouvirFilmesSolo(uid, cb);
+
+    _unsubFilmes = ouvirFilmesFn((snap) => {
+      _filmesLista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (document.querySelector('#tela-filmes.ativa')) _renderFilmesLista();
+    });
+
+    // Receitas em tempo real — casal ou solo
+    const ouvirReceitasFn = casalId
+      ? (cb) => ouvirReceitas(casalId, cb)
+      : (cb) => ouvirReceitasSolo(uid, cb);
+
+    _unsubReceitas = ouvirReceitasFn((snap) => {
+      _receitasLista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (document.querySelector('#tela-receitas.ativa')) _renderReceitasLista();
     });
   }
 
   function _pararListeners() {
     _unsubTarefas?.();
     _unsubLoja?.();
-    _unsubSaldo?.();
-    _unsubTarefas = null;
-    _unsubLoja    = null;
-    _unsubSaldo   = null;
+    _unsubFilmes?.();
+    _unsubReceitas?.();
+    _unsubTarefas  = null;
+    _unsubLoja     = null;
+    _unsubFilmes   = null;
+    _unsubReceitas = null;
   }
 
   function _renderTarefaFirestore(docSnap, uid) {
     const dados = docSnap.data();
     const id    = docSnap.id;
-    if (document.querySelector(`[data-task-id="${id}"]`)) return;
 
     const hoje      = new Date().toISOString().split('T')[0];
     const feitoHoje = dados.concluidaPor?.[uid] === hoje;
@@ -658,29 +769,50 @@ document.addEventListener('DOMContentLoaded', () => {
       ? `a cada ${dados.ciclo} dia${dados.ciclo > 1 ? 's' : ''}`
       : 'diária';
 
-    const item = document.createElement('div');
-    item.className      = 'task-item';
-    item.dataset.taskId = id;
-    item.dataset.grupo  = dados.grupo;
-    item.dataset.pts    = dados.pontos;
-    item.dataset.action = 'toggle-task';
-    item.innerHTML = `
-      <div class="task-check ${feitoHoje ? 'done' : ''}"></div>
-      <div class="task-item__info">
-        <div class="task-item__name ${feitoHoje ? 'done' : ''}">${dados.nome}</div>
-        <div class="task-item__tag">${tagTexto}</div>
-      </div>
-      <span class="task-item__pts">+${dados.pontos}</span>
-      <button class="task-item__del" data-action="excluir-tarefa"
-              data-task-id="${id}" aria-label="Excluir tarefa">
-        <i class="ph ph-trash" aria-hidden="true"></i>
-      </button>
-    `;
+    // ── Tela de tarefas ────────────────────────────────────────
     const body = document.getElementById('body-' + dados.grupo);
-    if (body) {
+    if (body && !body.querySelector(`[data-task-id="${id}"]`)) {
+      const item = document.createElement('div');
+      item.className      = 'task-item';
+      item.dataset.taskId = id;
+      item.dataset.grupo  = dados.grupo;
+      item.dataset.pts    = dados.pontos;
+      item.dataset.action = 'toggle-task';
+      item.innerHTML = `
+        <div class="task-check ${feitoHoje ? 'done' : ''}">${feitoHoje ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
+        <div class="task-item__info">
+          <div class="task-item__name ${feitoHoje ? 'done' : ''}">${dados.nome}</div>
+          <div class="task-item__tag">${tagTexto}</div>
+        </div>
+        <span class="task-item__pts">+${dados.pontos}</span>
+        <button class="task-item__del" data-action="excluir-tarefa"
+                data-task-id="${id}" aria-label="Excluir tarefa">
+          <i class="ph ph-trash" aria-hidden="true"></i>
+        </button>
+      `;
       body.appendChild(item);
       body.classList.add('open');
       document.getElementById('chevron-' + dados.grupo)?.classList.add('open');
+    }
+
+    // ── Home — lista resumida ──────────────────────────────────
+    const homeLista = document.getElementById('homeTarefasList');
+    if (homeLista && !homeLista.querySelector(`[data-task-id="${id}"]`)) {
+      const homeItem = document.createElement('div');
+      homeItem.className      = 'task-item';
+      homeItem.dataset.taskId = id;
+      homeItem.dataset.grupo  = dados.grupo;
+      homeItem.dataset.pts    = dados.pontos;
+      homeItem.dataset.action = 'toggle-task';
+      homeItem.innerHTML = `
+        <div class="task-check ${feitoHoje ? 'done' : ''}">${feitoHoje ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
+        <div class="task-item__info">
+          <div class="task-item__name ${feitoHoje ? 'done' : ''}">${dados.nome}</div>
+          <div class="task-item__tag">${tagTexto}</div>
+        </div>
+        <span class="task-item__pts">+${dados.pontos}</span>
+      `;
+      homeLista.appendChild(homeItem);
     }
   }
 
@@ -911,6 +1043,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Formatação do código do parceiro ────────────────────────
   document.querySelector('[data-format="codigo"]')
     ?.addEventListener('input', (e) => formatarCodigoParceiro(e.target));
+  document.getElementById('parceiroCodigoInput')
+    ?.addEventListener('input', (e) => formatarCodigoParceiro(e.target));
 
 
   function selecionarAvatar(el) {
@@ -970,6 +1104,491 @@ document.addEventListener('DOMContentLoaded', () => {
         '<path d="M4.5 7l2 2 3-3" stroke="#7ABA7A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>';
     }
   }
+
+  async function irParaParceiro() {
+    if (!_autenticado()) return;
+    navegar('parceiro');
+
+    const temParceiro = !!_dadosPerfilAtual?.parceiroUid;
+    const semEl = document.getElementById('parceiro-sem-conexao');
+    const comEl = document.getElementById('parceiro-com-conexao');
+    const tituloEl = document.getElementById('parceiro-titulo');
+
+    if (semEl) semEl.style.display = temParceiro ? 'none' : '';
+    if (comEl) comEl.style.display = temParceiro ? '' : 'none';
+    if (tituloEl) tituloEl.textContent = temParceiro ? 'parceiro' : 'conectar parceiro';
+
+    if (!temParceiro) {
+      const codeEl = document.getElementById('parceiroMeuCodigo');
+      if (codeEl) codeEl.textContent = _dadosPerfilAtual?.codigo || 'DU·----';
+      _parceiroUidEncontrado = null;
+      const foundEl = document.getElementById('parceiroEncontrado');
+      const btnEl   = document.getElementById('btnConectarParceiro');
+      if (foundEl) foundEl.style.display = 'none';
+      if (btnEl)   btnEl.style.display   = 'none';
+      return;
+    }
+
+    const parceiroUid = _dadosPerfilAtual.parceiroUid;
+    _unsubParceiro?.();
+    _unsubParceiro = ouvirParceiro(parceiroUid, _renderDadosParceiro);
+
+    if (_fbCasalId) {
+      try {
+        const { total, concluidas } = await buscarProgressoParceiroHoje(_fbCasalId, parceiroUid);
+        _renderProgressoParceiro(total, concluidas);
+      } catch (err) { console.error(err); }
+    }
+  }
+
+  function _renderDadosParceiro(dados) {
+    const avatarEl = document.getElementById('parceiroAvatar');
+    if (avatarEl) avatarEl.innerHTML = `<i class="ph ${dados.avatar || 'ph-user'}" aria-hidden="true"></i>`;
+
+    const nomeEl = document.getElementById('parceiroNome');
+    if (nomeEl) nomeEl.textContent = dados.nome || 'parceiro';
+
+    const saldoEl = document.getElementById('parceiroSaldo');
+    if (saldoEl) saldoEl.textContent = dados.saldo || 0;
+
+    const streakEl  = document.getElementById('parceiroStreak');
+    const streakSub = document.getElementById('parceiroStreakSub');
+    const streakVal = dados.streakAtual || 0;
+    if (streakEl)  streakEl.textContent  = streakVal;
+    if (streakSub) streakSub.textContent = streakVal > 0 ? 'ativo!' : '';
+  }
+
+  function _renderProgressoParceiro(total, concluidas) {
+    const pct = total > 0 ? Math.round((concluidas / total) * 100) : 0;
+    const fillEl  = document.getElementById('parceiroProgressFill');
+    const countEl = document.getElementById('parceiroProgressCount');
+    const pendEl  = document.getElementById('parceiroPendentes');
+    if (fillEl)  fillEl.style.width   = pct + '%';
+    if (countEl) countEl.textContent  = `${concluidas} de ${total}`;
+    if (pendEl) {
+      const pend = total - concluidas;
+      pendEl.textContent = total === 0 ? ''
+        : pend > 0 ? `${pend} pendente${pend > 1 ? 's' : ''}`
+        : 'tudo feito!';
+    }
+  }
+
+  async function verificarParceiroCodigo() {
+    const input = document.getElementById('parceiroCodigoInput');
+    if (!input) return;
+    const codigo = input.value.trim().toUpperCase();
+    if (codigo.length < 7) { mostrarToast('código incompleto'); return; }
+    if (codigo === _dadosPerfilAtual?.codigo) { mostrarToast('esse é o seu próprio código'); return; }
+
+    try {
+      mostrarToast('buscando...');
+      const parceiro = await buscarPorCodigo(codigo);
+      if (!parceiro) { mostrarToast('código não encontrado'); return; }
+      if (parceiro.casalId) { mostrarToast('parceiro já conectado a outra pessoa'); return; }
+
+      _parceiroUidEncontrado = parceiro.uid;
+      const nomeEl  = document.getElementById('parceiroNomeEncontrado');
+      const foundEl = document.getElementById('parceiroEncontrado');
+      const btnEl   = document.getElementById('btnConectarParceiro');
+      if (nomeEl)  nomeEl.textContent   = `${parceiro.nome} — pronto para conectar`;
+      if (foundEl) foundEl.style.display = '';
+      if (btnEl)   btnEl.style.display   = '';
+    } catch (err) {
+      mostrarToast('erro ao buscar: ' + err.message);
+    }
+  }
+
+  async function confirmarConexaoParceiro() {
+    if (!_parceiroUidEncontrado || !_fbUid) return;
+    try {
+      mostrarToast('conectando...');
+      const cId = await conectarParceiro(_fbUid, _parceiroUidEncontrado);
+      _fbCasalId = cId;
+      if (_dadosPerfilAtual) {
+        _dadosPerfilAtual.parceiroUid = _parceiroUidEncontrado;
+        _dadosPerfilAtual.casalId     = cId;
+      }
+      _parceiroUidEncontrado = null;
+      mostrarToast('parceiro conectado!');
+      _iniciarListeners(cId, _fbUid);
+      irParaParceiro();
+    } catch (err) {
+      mostrarToast('erro ao conectar: ' + err.message);
+    }
+  }
+
+  // ════════════════════════════════════════════════════════
+  // TELA DE RECEITAS
+  // ════════════════════════════════════════════════════════
+
+  let _receitasLista        = [];
+  let _receitasTagAtiva     = 'todas';
+  let _tagSelecionadaReceita = null;
+
+  const TAG_LABELS = {
+    cafe: 'café da manhã', almoco: 'almoço', jantar: 'jantar',
+    lanche: 'lanche', sobremesa: 'sobremesa', saudavel: 'saudável'
+  };
+
+  function irParaReceitas() {
+    if (!_autenticado()) return;
+    navegar('receitas');
+    _renderReceitasLista();
+  }
+
+  function _receitasAtualizarTag(tag) {
+    _receitasTagAtiva = tag;
+    document.querySelectorAll('.receita-tag-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tag === tag);
+    });
+    _renderReceitasLista();
+  }
+
+  function _renderReceitaItem(r) {
+    const parceiroUid = _dadosPerfilAtual?.parceiroUid;
+    const autorLabel  = r.adicionadoPor === _fbUid ? 'você'
+      : (parceiroUid && r.adicionadoPor === parceiroUid ? 'parceiro' : '');
+    const tagHtml   = r.tag   ? `<span class="receita-item__tag">${TAG_LABELS[r.tag] || r.tag}</span>` : '';
+    const autorHtml = autorLabel ? `<span class="receita-item__autor">por ${autorLabel}</span>` : '';
+    const linkHtml  = r.link
+      ? `<a class="receita-item__link" href="${r.link}" target="_blank" rel="noopener noreferrer">
+           <i class="ph ph-arrow-square-out" aria-hidden="true"></i> Instagram
+         </a>`
+      : '';
+
+    return `
+      <li class="receita-item" data-id="${r.id}">
+        <div class="receita-item__icon">
+          <i class="ph ph-cooking-pot" aria-hidden="true"></i>
+        </div>
+        <div class="receita-item__main">
+          <div class="receita-item__titulo">${r.titulo}</div>
+          <div class="receita-item__meta">${tagHtml}${autorHtml}</div>
+        </div>
+        <div class="receita-item__actions">
+          ${linkHtml}
+          <button class="receita-item__del" data-action="excluir-receita" data-id="${r.id}" aria-label="Excluir">
+            <i class="ph ph-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </li>`;
+  }
+
+  function _renderReceitasLista() {
+    const listaEl  = document.getElementById('receitasListaEl');
+    const vazioEl  = document.getElementById('receitasVazio');
+    const sortBtn  = document.getElementById('receitasSortearBtn');
+    if (!listaEl) return;
+    const filtrado = _receitasTagAtiva === 'todas'
+      ? _receitasLista
+      : _receitasLista.filter(r => r.tag === _receitasTagAtiva);
+    if (sortBtn) sortBtn.style.display = filtrado.length > 0 ? '' : 'none';
+    if (filtrado.length === 0) {
+      if (vazioEl) vazioEl.style.display = '';
+      listaEl.innerHTML = '';
+      return;
+    }
+    if (vazioEl) vazioEl.style.display = 'none';
+    listaEl.innerHTML = filtrado.map(r => _renderReceitaItem(r)).join('');
+  }
+
+  function sortearReceita() {
+    const pool = _receitasTagAtiva === 'todas'
+      ? _receitasLista
+      : _receitasLista.filter(r => r.tag === _receitasTagAtiva);
+    if (pool.length === 0) { mostrarToast('nenhuma receita para sortear'); return; }
+    const sorteada  = pool[Math.floor(Math.random() * pool.length)];
+    const tituloEl  = document.getElementById('sorteioReceitaTitulo');
+    const tagEl     = document.getElementById('sorteioReceitaTag');
+    if (tituloEl) tituloEl.textContent = sorteada.titulo;
+    if (tagEl) {
+      tagEl.textContent  = sorteada.tag ? TAG_LABELS[sorteada.tag] : '';
+      tagEl.style.display = sorteada.tag ? '' : 'none';
+    }
+    abrirModal('modalSorteioReceita');
+  }
+
+  function fecharSorteioReceita() { fecharModal('modalSorteioReceita'); }
+
+  function abrirModalNovaReceita() {
+    _tagSelecionadaReceita = null;
+    const nomeEl = document.getElementById('receitaNome');
+    const linkEl = document.getElementById('receitaLink');
+    if (nomeEl) nomeEl.value = '';
+    if (linkEl) linkEl.value = '';
+    document.querySelectorAll('[data-action="selecionar-tag-receita"]').forEach(b => b.classList.remove('active'));
+    abrirModal('modalNovaReceita');
+    document.getElementById('receitaNome')?.focus();
+  }
+
+  function fecharModalNovaReceita() { fecharModal('modalNovaReceita'); }
+  function fecharModalNovaReceitaFora(e) {
+    if (e.target === document.getElementById('modalNovaReceita')) fecharModalNovaReceita();
+  }
+
+  function selecionarTagReceita(btn) {
+    const tag = btn.dataset.tag;
+    if (_tagSelecionadaReceita === tag) {
+      _tagSelecionadaReceita = null;
+      btn.classList.remove('active');
+    } else {
+      _tagSelecionadaReceita = tag;
+      document.querySelectorAll('[data-action="selecionar-tag-receita"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  }
+
+  async function salvarReceita() {
+    const titulo = document.getElementById('receitaNome')?.value.trim();
+    let link     = document.getElementById('receitaLink')?.value.trim();
+    if (!titulo) { mostrarToast('dê um nome à receita'); return; }
+    if (link) {
+      if (!link.startsWith('http')) link = 'https://' + link;
+      if (!link.includes('instagram.com') && !link.includes('instagr.am')) {
+        mostrarToast('use um link do Instagram'); return;
+      }
+    }
+    const receita = { titulo, link: link || null, tag: _tagSelecionadaReceita };
+    try {
+      if (_fbCasalId) await adicionarReceitaDB(_fbCasalId, _fbUid, receita);
+      else            await adicionarReceitaSoloDB(_fbUid, receita);
+      fecharModalNovaReceita();
+      mostrarToast('receita adicionada!');
+    } catch (err) { mostrarToast('erro: ' + err.message); }
+  }
+
+  function excluirReceita(receitaId) {
+    const r = _receitasLista.find(r => r.id === receitaId);
+    if (!r) return;
+    abrirModalConfirmar(
+      'remover receita?',
+      `"${r.titulo}" será removida da lista.`,
+      async () => {
+        try {
+          if (_fbCasalId) await excluirReceitaDB(_fbCasalId, receitaId);
+          else            await excluirReceitaSoloDB(_fbUid, receitaId);
+        } catch (err) { console.error(err); }
+      }
+    );
+  }
+
+  // ════════════════════════════════════════════════════════
+  // TELA DE FILMES
+  // ════════════════════════════════════════════════════════
+
+  let _filmesLista      = [];
+  let _filmesAbaAtiva   = 'assistir';
+  let _filmeAvaliandoId = null;
+  let _notaSelecionada  = 0;
+  let _generoSelecionado = null;
+
+  function irParaFilmes() {
+    if (!_autenticado()) return;
+    navegar('filmes');
+    _renderFilmesLista();
+  }
+
+  function _filmesAtualizarAba(aba) {
+    _filmesAbaAtiva = aba;
+    document.querySelectorAll('.filmes-tab').forEach(t => {
+      const bate = t.dataset.aba === aba;
+      t.classList.toggle('active', bate);
+      t.setAttribute('aria-selected', bate);
+    });
+    _renderFilmesLista();
+  }
+
+  function _renderEstrelas(nota, cssClass) {
+    let html = '';
+    for (let i = 1; i <= 5; i++) {
+      html += `<span class="${i <= nota ? 'estrela--on' : 'estrela--off'}">★</span>`;
+    }
+    return `<span class="estrelas ${cssClass}">${html}</span>`;
+  }
+
+  function _renderFilmeItem(f) {
+    const minhaAvaliacao    = f.avaliacoes?.[_fbUid];
+    const parceiroUid       = _dadosPerfilAtual?.parceiroUid;
+    const parceiroAvaliacao = parceiroUid ? f.avaliacoes?.[parceiroUid] : null;
+    const generoHtml = f.genero ? `<span class="filme-item__genero">${f.genero}</span>` : '';
+    const autorLabel = f.adicionadoPor === _fbUid ? 'você'
+      : (parceiroUid && f.adicionadoPor === parceiroUid ? 'parceiro' : '');
+    const autorHtml  = autorLabel ? `<span class="filme-item__autor">por ${autorLabel}</span>` : '';
+
+    let avaliacaoHtml = '';
+    if (f.assistido) {
+      const voceEst     = minhaAvaliacao    != null ? _renderEstrelas(minhaAvaliacao, 'estrelas--voce')     : '';
+      const parceiroEst = parceiroAvaliacao != null ? _renderEstrelas(parceiroAvaliacao, 'estrelas--parceiro') : '';
+      if (voceEst || parceiroEst) {
+        avaliacaoHtml = `<div class="filme-item__avaliacoes">${voceEst}${parceiroEst}</div>`;
+      }
+    }
+
+    let acaoHtml = '';
+    if (!f.assistido) {
+      acaoHtml = `<button class="filme-item__btn" data-action="marcar-assistido" data-id="${f.id}">
+        <i class="ph ph-eye" aria-hidden="true"></i> marcar
+      </button>`;
+    } else if (minhaAvaliacao == null) {
+      acaoHtml = `<button class="filme-item__btn filme-item__btn--rate" data-action="avaliar-filme" data-id="${f.id}">
+        <i class="ph ph-star" aria-hidden="true"></i> avaliar
+      </button>`;
+    } else {
+      acaoHtml = `<button class="filme-item__btn filme-item__btn--rated" data-action="avaliar-filme" data-id="${f.id}">
+        <i class="ph ph-pencil" aria-hidden="true"></i> editar
+      </button>`;
+    }
+
+    return `
+      <li class="filme-item ${f.assistido ? 'filme-item--assistido' : ''}" data-id="${f.id}">
+        <div class="filme-item__main">
+          <div class="filme-item__titulo">${f.titulo}</div>
+          <div class="filme-item__meta">${generoHtml}${autorHtml}</div>
+          ${avaliacaoHtml}
+        </div>
+        <div class="filme-item__actions">
+          ${acaoHtml}
+          <button class="filme-item__del" data-action="excluir-filme" data-id="${f.id}" aria-label="Excluir">
+            <i class="ph ph-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </li>`;
+  }
+
+  function _renderFilmesLista() {
+    const listaEl  = document.getElementById('filmesListaEl');
+    const vazioEl  = document.getElementById('filmesVazio');
+    const sortBtn  = document.getElementById('filmesSortearBtn');
+    if (!listaEl) return;
+
+    const filtrado  = _filmesLista.filter(f => _filmesAbaAtiva === 'assistir' ? !f.assistido : f.assistido);
+    const pendentes = _filmesLista.filter(f => !f.assistido);
+
+    if (sortBtn) sortBtn.style.display = (pendentes.length > 0 && _filmesAbaAtiva === 'assistir') ? '' : 'none';
+
+    if (filtrado.length === 0) {
+      if (vazioEl) vazioEl.style.display = '';
+      listaEl.innerHTML = '';
+      return;
+    }
+    if (vazioEl) vazioEl.style.display = 'none';
+    listaEl.innerHTML = filtrado.map(f => _renderFilmeItem(f)).join('');
+  }
+
+  function abrirModalNovoFilme() {
+    _generoSelecionado = null;
+    const nomeEl = document.getElementById('filmeNome');
+    if (nomeEl) nomeEl.value = '';
+    document.querySelectorAll('.genero-opt').forEach(b => b.classList.remove('active'));
+    abrirModal('modalNovoFilme');
+    document.getElementById('filmeNome')?.focus();
+  }
+
+  function fecharModalNovoFilme() { fecharModal('modalNovoFilme'); }
+  function fecharModalNovoFilmeFora(e) {
+    if (e.target === document.getElementById('modalNovoFilme')) fecharModalNovoFilme();
+  }
+
+  function selecionarGenero(btn) {
+    const genero = btn.dataset.genero;
+    if (_generoSelecionado === genero) {
+      _generoSelecionado = null;
+      btn.classList.remove('active');
+    } else {
+      _generoSelecionado = genero;
+      document.querySelectorAll('.genero-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  }
+
+  async function salvarFilme() {
+    const titulo = document.getElementById('filmeNome')?.value.trim();
+    if (!titulo) { mostrarToast('dê um título ao filme'); return; }
+    const filme = { titulo, genero: _generoSelecionado };
+    try {
+      if (_fbCasalId) await adicionarFilmeDB(_fbCasalId, _fbUid, filme);
+      else            await adicionarFilmeSoloDB(_fbUid, filme);
+      fecharModalNovoFilme();
+      mostrarToast('filme adicionado!');
+    } catch (err) { mostrarToast('erro: ' + err.message); }
+  }
+
+  async function marcarAssistido(filmeId) {
+    try {
+      if (_fbCasalId) await marcarFilmeAssistidoDB(_fbCasalId, filmeId);
+      else            await marcarFilmeAssistidoSoloDB(_fbUid, filmeId);
+      const filme = _filmesLista.find(f => f.id === filmeId);
+      if (filme) _abrirAvaliarFilme(filmeId, filme.titulo);
+    } catch (err) { mostrarToast('erro: ' + err.message); }
+  }
+
+  function _abrirAvaliarFilme(filmeId, titulo) {
+    _filmeAvaliandoId = filmeId;
+    const filme = _filmesLista.find(f => f.id === filmeId);
+    _notaSelecionada = filme?.avaliacoes?.[_fbUid] || 0;
+    const tituloEl = document.getElementById('avaliarFilmeTitulo');
+    if (tituloEl) tituloEl.textContent = titulo;
+    _atualizarEstrelasPicker(_notaSelecionada);
+    abrirModal('modalAvaliarFilme');
+  }
+
+  function _atualizarEstrelasPicker(nota) {
+    document.querySelectorAll('#estrelasPicker .estrela-btn').forEach((btn, i) => {
+      btn.classList.toggle('ativa', i < nota);
+    });
+  }
+
+  function selecionarNota(nota) {
+    _notaSelecionada = nota;
+    _atualizarEstrelasPicker(nota);
+  }
+
+  async function confirmarAvaliacao() {
+    if (!_filmeAvaliandoId || _notaSelecionada === 0) { mostrarToast('selecione uma nota'); return; }
+    try {
+      if (_fbCasalId) await avaliarFilmeDB(_fbCasalId, _filmeAvaliandoId, _fbUid, _notaSelecionada);
+      else            await avaliarFilmeSoloDB(_fbUid, _filmeAvaliandoId, _notaSelecionada);
+      fecharModal('modalAvaliarFilme');
+      mostrarToast('avaliação salva!');
+      _filmeAvaliandoId = null;
+    } catch (err) { mostrarToast('erro: ' + err.message); }
+  }
+
+  function pularAvaliacao() {
+    fecharModal('modalAvaliarFilme');
+    _filmeAvaliandoId = null;
+  }
+
+  function excluirFilme(filmeId) {
+    const filme = _filmesLista.find(f => f.id === filmeId);
+    if (!filme) return;
+    abrirModalConfirmar(
+      'remover filme?',
+      `"${filme.titulo}" será removido da lista.`,
+      async () => {
+        try {
+          if (_fbCasalId) await excluirFilmeDB(_fbCasalId, filmeId);
+          else            await excluirFilmeSoloDB(_fbUid, filmeId);
+        } catch (err) { console.error(err); }
+      }
+    );
+  }
+
+  function sortearFilme() {
+    const pendentes = _filmesLista.filter(f => !f.assistido);
+    if (pendentes.length === 0) { mostrarToast('nenhum filme para sortear'); return; }
+    const sorteado = pendentes[Math.floor(Math.random() * pendentes.length)];
+    const tituloEl = document.getElementById('sorteioTitulo');
+    const generoEl = document.getElementById('sorteioGenero');
+    if (tituloEl) tituloEl.textContent = sorteado.titulo;
+    if (generoEl) {
+      generoEl.textContent  = sorteado.genero || '';
+      generoEl.style.display = sorteado.genero ? '' : 'none';
+    }
+    abrirModal('modalSorteio');
+  }
+
+  function fecharSorteio() { fecharModal('modalSorteio'); }
 
   function irParaHome() {
     if (!_autenticado()) return;
@@ -1106,40 +1725,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 async function toggleTaskHome(item) {
-  const check = item.querySelector('.task-check');
-  const name  = item.querySelector('.task-item__name');
-  const pts   = parseInt(item.dataset.pts) || 0;
-  const done  = check.classList.contains('done');
+  const check  = item.querySelector('.task-check');
+  const name   = item.querySelector('.task-item__name');
+  const pts    = parseInt(item.dataset.pts) || 0;
+  const taskId = item.dataset.taskId;
+  const done   = check.classList.contains('done');
 
-  if (done) {
-    check.classList.remove('done');
-    check.innerHTML = '';
-    name.classList.remove('done');
-    if (_fbUid) {
-      try {
-        if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, -pts, 'desfeito: ' + name.textContent);
-        else            await atualizarSaldoUsuarioDB(_fbUid, -pts);
-      } catch (err) { console.error(err); }
-    } else {
-      saldoAtual = Math.max(0, saldoAtual - pts);
-      atualizarSaldo();
-    }
-  } else {
-    check.classList.add('done');
-    check.innerHTML = '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>';
-    name.classList.add('done');
-    if (_fbUid) {
-      try {
-        if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, pts, name.textContent);
-        else            await atualizarSaldoUsuarioDB(_fbUid, pts);
-      } catch (err) { console.error(err); }
-    } else {
-      saldoAtual += pts;
-      atualizarSaldo();
-    }
-    mostrarToast('+' + pts + ' moedas');
-  }
+  // Atualização otimista da UI
+  check.classList.toggle('done', !done);
+  check.innerHTML = !done ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : '';
+  name.classList.toggle('done', !done);
+
+  // Sincronizar o outro elemento com o mesmo taskId (home ↔ tarefas)
+  document.querySelectorAll(`[data-task-id="${taskId}"]`).forEach(el => {
+    if (el === item) return;
+    const c = el.querySelector('.task-check');
+    const n = el.querySelector('.task-item__name');
+    if (c) { c.classList.toggle('done', !done); c.innerHTML = !done ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''; }
+    if (n) n.classList.toggle('done', !done);
+  });
+
+  atualizarProgressoHome();
   if (item.dataset.grupo) atualizarBadgeGrupo(item.dataset.grupo);
+
+  if (_fbUid) {
+    try {
+      if (!done) mostrarToast('+' + pts + ' moedas');
+      if (_fbCasalId) {
+        await Promise.all([
+          marcarTarefaDB(_fbCasalId, taskId, _fbUid, !done),
+          done
+            ? adicionarSaldoDB(_fbCasalId, _fbUid, -pts, 'desfeito: ' + name.textContent)
+            : adicionarSaldoDB(_fbCasalId, _fbUid,  pts, name.textContent),
+        ]);
+      } else {
+        await Promise.all([
+          marcarTarefaSoloDB(_fbUid, taskId, !done),
+          atualizarSaldoUsuarioDB(_fbUid, done ? -pts : pts),
+        ]);
+      }
+    } catch (err) { console.error(err); }
+  }
 }
 
 
@@ -1204,70 +1830,36 @@ async function toggleTaskHome(item) {
     pontosSelecionados = parseInt(btn.dataset.pts);
   }
 
-  function criarTarefa() {
+  async function criarTarefa() {
+    if (!_fbUid) { mostrarToast('faça login para criar tarefas'); return; }
     const nome  = document.getElementById('novaTarefaNome').value.trim();
     const grupo = document.getElementById('novaTarefaGrupo').value;
-
     if (!nome) { mostrarToast('dê um nome para a tarefa'); return; }
 
     const cicloDias = tipoSelecionado === 'pontual'
       ? parseInt(document.getElementById('cicloDias').value) || 1
       : null;
 
-    // Cria item da tarefa
-    const item = document.createElement('div');
-    item.className     = 'task-item';
-    item.dataset.pts   = pontosSelecionados;
-    item.dataset.grupo = grupo;
-    item.dataset.tipo  = tipoSelecionado;
-    item.dataset.action = 'toggle-task';
+    const tarefa = {
+      nome, grupo,
+      tipo: tipoSelecionado,
+      pontos: pontosSelecionados,
+      ciclo: cicloDias,
+      proxData: cicloDias ? calcularProxData(cicloDias).toISOString() : null,
+    };
 
-    if (tipoSelecionado === 'pontual') {
-      item.dataset.ciclo = cicloDias;
-      item.dataset.criadaEm = new Date().toISOString();
-      item.dataset.proxData = calcularProxData(cicloDias).toISOString();
-    }
-
-    const tagTexto = tipoSelecionado === 'pontual'
-      ? `a cada ${cicloDias} dia${cicloDias > 1 ? 's' : ''}`
-      : 'diária';
-
-    const taskId = 'task-' + Date.now();
-    item.dataset.taskId = taskId;
-    item.innerHTML = `
-      <div class="task-check"></div>
-      <div class="task-item__info">
-        <div class="task-item__name">${nome}</div>
-        <div class="task-item__tag">${tagTexto}</div>
-      </div>
-      <span class="task-item__pts">+${pontosSelecionados}</span>
-      <button class="task-item__del" data-action="excluir-tarefa"
-              data-task-id="${taskId}" aria-label="Excluir tarefa">
-        <i class="ph ph-trash" aria-hidden="true"></i>
-      </button>
-    `;
-
-    const body = document.getElementById('body-' + grupo);
-    if (body) {
-      body.appendChild(item);
-      body.classList.add('open');
-      document.getElementById('chevron-' + grupo)?.classList.add('open');
-    }
-
-    atualizarBadgeGrupo(grupo);
-    atualizarResumoDia();
-    verificarAtrasadas();
     fecharModalNovaTarefa();
     mostrarToast('tarefa criada');
-    // Salvar no Firestore
-    if (_fbCasalId) {
-      criarTarefaDB(_fbCasalId, {
-        nome, grupo,
-        tipo: tipoSelecionado,
-        pontos: pontosSelecionados,
-        ciclo: tipoSelecionado === 'pontual' ? cicloDias : null,
-        proxData: tipoSelecionado === 'pontual' ? calcularProxData(cicloDias).toISOString() : null,
-      }).catch(console.error);
+
+    try {
+      if (_fbCasalId) {
+        await criarTarefaDB(_fbCasalId, tarefa);
+      } else {
+        await criarTarefaSoloDB(_fbUid, tarefa);
+      }
+    } catch (err) {
+      console.error('Erro ao salvar tarefa:', err);
+      mostrarToast('erro ao salvar tarefa');
     }
   }
 
@@ -1281,11 +1873,17 @@ async function toggleTaskHome(item) {
     abrirModalConfirmar(
       'remover tarefa?',
       `"${nome}" será removida da lista.`,
-      () => {
-        item.remove();
+      async () => {
+        // Remove todos os elementos com esse task-id (home + tarefas)
+        document.querySelectorAll(`[data-task-id="${taskId}"]`).forEach(el => el.remove());
         atualizarBadgeGrupo(grupo);
         atualizarResumoDia();
+        atualizarProgressoHome();
         mostrarToast(`"${nome}" excluída`);
+        try {
+          if (_fbCasalId) await excluirTarefaDB(_fbCasalId, taskId);
+          else if (_fbUid) await excluirTarefaSoloDB(_fbUid, taskId);
+        } catch (err) { console.error('Erro ao excluir tarefa:', err); }
       }
     );
   }
@@ -1393,12 +1991,16 @@ function renderizarCalendarioSemanal() {
         ? '<i class="ph-bold ph-check" aria-hidden="true"></i>'
         : dia.getDate();
     } else {
-      // dias anteriores — checar no histórico simplificado
       const idx = exEstado.historico[dia.getDate() - 1];
-      dotClass += idx === false ? ' ex-cal-day__dot--miss' : ' ex-cal-day__dot--done';
-      conteudo = idx === false
-        ? '<i class="ph-bold ph-x" aria-hidden="true"></i>'
-        : '<i class="ph-bold ph-check" aria-hidden="true"></i>';
+      if (idx === true) {
+        dotClass += ' ex-cal-day__dot--done';
+        conteudo  = '<i class="ph-bold ph-check" aria-hidden="true"></i>';
+      } else if (idx === false) {
+        dotClass += ' ex-cal-day__dot--miss';
+        conteudo  = '<i class="ph-bold ph-x" aria-hidden="true"></i>';
+      } else {
+        dotClass += ' ex-cal-day__dot--future'; // sem dados
+      }
     }
  
     container.innerHTML += `
@@ -1426,36 +2028,51 @@ function renderizarHistoricoMensal() {
     const isFuturo = d > diaAtual;
     const feito    = exEstado.historico[d - 1];
     let cls = 'ex-history-dot';
-    if (isFuturo)       cls += ' ex-history-dot--future';
-    else if (feito)     cls += ' ex-history-dot--done';
-    else                cls += ' ex-history-dot--miss';
+    if (isFuturo)        cls += ' ex-history-dot--future';
+    else if (feito === true)  cls += ' ex-history-dot--done';
+    else if (feito === false) cls += ' ex-history-dot--miss';
+    else                      cls += ' ex-history-dot--future'; // sem dados
     grid.innerHTML += `<div class="${cls}" title="dia ${d}"></div>`;
   }
 }
  
 function atualizarBotaoCheckin() {
-  const btn  = document.getElementById('exCheckinBtn');
-  const done = document.getElementById('exCheckinDone');
+  const btn    = document.getElementById('exCheckinBtn');
+  const done   = document.getElementById('exCheckinDone');
+  const status = document.getElementById('streakVoceStatus');
   if (!btn || !done) return;
   btn.classList.toggle('is-hidden', exEstado.feitoHoje);
   done.classList.toggle('is-hidden', !exEstado.feitoHoje);
+  if (status) {
+    if (exEstado.feitoHoje) {
+      status.className = 'ex-streak-card__status';
+      status.innerHTML = '<i class="ph ph-check-circle icon-xs" aria-hidden="true"></i> feito hoje';
+    } else {
+      status.className = 'ex-streak-card__status ex-streak-card__status--pending';
+      status.innerHTML = '<i class="ph ph-clock icon-xs" aria-hidden="true"></i> pendente';
+    }
+  }
 }
  
 function fazerCheckin() {
   if (exEstado.feitoHoje) return;
- 
+
   exEstado.feitoHoje = true;
   exEstado.streakVoce++;
- 
-  // Atualiza histórico do dia atual
-  const diaAtual = new Date().getDate();
-  exEstado.historico[diaAtual - 1] = true;
- 
+
+  const hoje     = new Date();
+  const hojeISO  = hoje.toISOString().split('T')[0];
+  exEstado.historico[hoje.getDate() - 1] = true;
+
   atualizarStreaks();
   atualizarMeta();
   renderizarCalendarioSemanal();
   renderizarHistoricoMensal();
   atualizarBotaoCheckin();
+
+  if (_fbUid) {
+    fazerCheckinDB(_fbUid, exEstado.streakVoce, hojeISO).catch(err => console.error(err));
+  }
  
   // Atualizar status na tela
   const status = document.getElementById('streakVoceStatus');
@@ -1575,8 +2192,9 @@ function salvarMeta() {
     'selecionar-cor':               (el) => selecionarCor(el),
 
     // Home / navegação
-    'ver-parceiro':                 () => verParceiro(),
+    'ver-parceiro':                 () => irParaParceiro(),
     'ir-home':                      () => irParaHome(),
+    'ir-parceiro':                  () => irParaParceiro(),
     'ir-tarefas':                   () => irParaTarefas(),
     'ir-exercicios':                () => irParaExercicios(),
     'ir-loja':                      () => irParaLoja(),
@@ -1607,6 +2225,42 @@ function salvarMeta() {
     'confirmar-logout':             () => abrirModal('modalLogout'),
     'fechar-logout':                () => fecharModal('modalLogout'),
     'fazer-logout':                 () => fazerLogout(),
+
+    // Parceiro
+    'verificar-parceiro-tela':      () => verificarParceiroCodigo(),
+    'confirmar-conexao-parceiro':   () => confirmarConexaoParceiro(),
+
+    // Receitas
+    'ir-receitas':                  () => irParaReceitas(),
+    'receitas-tag':                 (el) => _receitasAtualizarTag(el.dataset.tag),
+    'abrir-nova-receita':           () => abrirModalNovaReceita(),
+    'fechar-nova-receita':          () => fecharModalNovaReceita(),
+    'fechar-nova-receita-fora':     (el, e) => fecharModalNovaReceitaFora(e),
+    'selecionar-tag-receita':       (el) => selecionarTagReceita(el),
+    'salvar-receita':               () => salvarReceita(),
+    'excluir-receita':              (el) => excluirReceita(el.dataset.id),
+    'sortear-receita':              () => sortearReceita(),
+    'fechar-sorteio-receita':       () => fecharSorteioReceita(),
+
+    // Filmes
+    'ir-filmes':                    () => irParaFilmes(),
+    'filmes-aba':                   (el) => _filmesAtualizarAba(el.dataset.aba),
+    'abrir-novo-filme':             () => abrirModalNovoFilme(),
+    'fechar-novo-filme':            () => fecharModalNovoFilme(),
+    'fechar-novo-filme-fora':       (el, e) => fecharModalNovoFilmeFora(e),
+    'selecionar-genero':            (el) => selecionarGenero(el),
+    'salvar-filme':                 () => salvarFilme(),
+    'marcar-assistido':             (el) => marcarAssistido(el.dataset.id),
+    'avaliar-filme':                (el) => {
+      const f = _filmesLista.find(f => f.id === el.dataset.id);
+      if (f) _abrirAvaliarFilme(f.id, f.titulo);
+    },
+    'selecionar-nota':              (el) => selecionarNota(parseInt(el.dataset.nota)),
+    'confirmar-avaliacao':          () => confirmarAvaliacao(),
+    'pular-avaliacao':              () => pularAvaliacao(),
+    'excluir-filme':                (el) => excluirFilme(el.dataset.id),
+    'sortear-filme':                () => sortearFilme(),
+    'fechar-sorteio':               () => fecharSorteio(),
 
     // Excluir tarefa
     'excluir-tarefa':               (el) => excluirTarefa(el.dataset.taskId),

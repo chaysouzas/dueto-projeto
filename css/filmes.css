@@ -1,0 +1,266 @@
+/* ============================================================
+   DUETO — filmes.css
+============================================================ */
+
+/* ── Tabs ─────────────────────────────────────────────────── */
+.filmes-tabs {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+.filmes-tab {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-tertiary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.filmes-tab.active {
+  background: var(--color-primary-subtle);
+  border-color: var(--color-border-default);
+  color: var(--color-primary);
+}
+
+/* ── Botão sortear ────────────────────────────────────────── */
+.filmes-sortear-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-secondary-subtle);
+  border: 1px solid rgba(212, 149, 106, 0.3);
+  border-radius: var(--radius-lg);
+  color: var(--color-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: var(--space-4);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.filmes-sortear-btn .ph { font-size: 18px; }
+.filmes-sortear-btn:hover {
+  background: rgba(212, 149, 106, 0.15);
+  border-color: rgba(212, 149, 106, 0.5);
+}
+
+/* ── Estado vazio ─────────────────────────────────────────── */
+.filmes-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-12) var(--space-4);
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+.filmes-vazio .ph { font-size: 40px; margin-bottom: var(--space-2); }
+.filmes-vazio__sub { font-size: var(--text-sm); }
+
+/* ── Lista ────────────────────────────────────────────────── */
+.filmes-lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.filme-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+}
+.filme-item--assistido { opacity: 0.8; }
+.filme-item--assistido .filme-item__titulo {
+  text-decoration: line-through;
+  color: var(--color-text-tertiary);
+}
+
+.filme-item__main { flex: 1; min-width: 0; }
+
+.filme-item__titulo {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filme-item__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+}
+
+.filme-item__genero {
+  padding: 2px var(--space-2);
+  background: var(--color-primary-subtle);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+}
+
+.filme-item__autor {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ── Estrelas no item ─────────────────────────────────────── */
+.filme-item__avaliacoes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: var(--space-1);
+}
+.estrelas { font-size: 13px; letter-spacing: 1px; }
+.estrelas--voce     { color: var(--color-primary); }
+.estrelas--parceiro { color: var(--color-secondary); }
+.estrela--off { opacity: 0.2; }
+
+/* ── Ações do item ────────────────────────────────────────── */
+.filme-item__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.filme-item__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-primary-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+.filme-item__btn .ph { font-size: 13px; }
+.filme-item__btn:hover { background: rgba(232, 132, 154, 0.2); }
+
+.filme-item__btn--rate {
+  background: var(--color-secondary-subtle);
+  border-color: rgba(212, 149, 106, 0.3);
+  color: var(--color-secondary);
+}
+.filme-item__btn--rate:hover { background: rgba(212, 149, 106, 0.15); }
+
+.filme-item__btn--rated {
+  background: transparent;
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-tertiary);
+}
+
+.filme-item__del {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.filme-item__del .ph { font-size: 15px; }
+.filme-item__del:hover { color: var(--color-error); }
+
+/* ── Picker de gênero (modal) ────────────────────────────── */
+.genero-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.genero-opt {
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.genero-opt.active {
+  background: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ── Picker de estrelas (modal avaliar) ──────────────────── */
+.filmes-avaliar-titulo {
+  font-size: var(--text-md) !important;
+  font-weight: 600;
+  color: var(--color-text-primary) !important;
+  text-align: center;
+}
+.estrelas-picker {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5) 0;
+}
+.estrela-btn {
+  font-size: 36px;
+  color: var(--color-text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  transition: color var(--transition-fast), transform 0.1s;
+}
+.estrela-btn.ativa {
+  color: var(--color-secondary);
+  transform: scale(1.15);
+}
+
+/* ── Modal sorteio ───────────────────────────────────────── */
+.sorteio-icon {
+  text-align: center;
+  color: var(--color-secondary);
+  margin-bottom: var(--space-3);
+}
+.sorteio-icon .ph { font-size: 48px; }
+
+.sorteio-titulo {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-align: center;
+  margin-bottom: var(--space-3);
+  line-height: var(--leading-tight);
+}
+.sorteio-genero {
+  text-align: center;
+  margin-bottom: var(--space-6);
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+}

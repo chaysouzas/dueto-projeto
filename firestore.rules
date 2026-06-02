@@ -5,6 +5,16 @@ service cloud.firestore {
     match /usuarios/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
       allow read: if request.auth != null;
+
+      match /tarefas/{id} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+      match /filmes/{id} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+      match /receitas/{id} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
     }
 
     match /casais/{casalId} {
@@ -20,6 +30,8 @@ service cloud.firestore {
       match /exercicios/{id} { allow read, write: if isMember(); }
       match /loja/{id}       { allow read, write: if isMember(); }
       match /transacoes/{id} { allow read, write: if isMember(); }
+      match /filmes/{id}     { allow read, write: if isMember(); }
+      match /receitas/{id}   { allow read, write: if isMember(); }
     }
   }
 }

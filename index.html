@@ -23,6 +23,9 @@
   <link rel="stylesheet" href="css/exercicios.css">
   <link rel="stylesheet" href="css/loja.css">
   <link rel="stylesheet" href="css/perfil.css">
+  <link rel="stylesheet" href="css/parceiro.css">
+  <link rel="stylesheet" href="css/filmes.css">
+  <link rel="stylesheet" href="css/receitas.css">
 </head>
 <body>
 
@@ -395,6 +398,8 @@
           <div class="progress-bar__fill" id="progressFill"></div>
         </div>
  
+        <div id="homeTarefasList"></div>
+
         <div class="tasks-card__footer">
           <span class="tasks-card__footer-label" id="homePendentes"></span>
           <button class="btn-ver-todas" data-action="ir-tarefas">ver todas as tarefas</button>
@@ -448,7 +453,7 @@
           </div>
         </div>
  
-        <div class="module-card" data-action="toast" data-msg="em breve: filmes">
+        <div class="module-card" data-action="ir-filmes">
           <div class="module-card__icon module-card__icon--purple">
             <i class="ph ph-film-strip icon-lg" aria-hidden="true"></i>
           </div>
@@ -456,21 +461,15 @@
             <div class="module-card__title">filmes</div>
             <div class="module-card__sub">lista para assistir juntos</div>
           </div>
-          <div class="module-card__badge module-card__badge--purple">
-            em breve
-          </div>
         </div>
  
-        <div class="module-card" data-action="toast" data-msg="em breve: receitas">
+        <div class="module-card" data-action="ir-receitas">
           <div class="module-card__icon module-card__icon--green">
             <i class="ph ph-cooking-pot icon-lg" aria-hidden="true"></i>
           </div>
           <div>
             <div class="module-card__title">receitas</div>
             <div class="module-card__sub">o que cozinhar juntos</div>
-          </div>
-          <div class="module-card__badge module-card__badge--green">
-            em breve
           </div>
         </div>
  
@@ -740,9 +739,9 @@
           <div class="ex-streak-card__label">você</div>
           <div class="ex-streak-card__num" id="streakVoce">0</div>
           <div class="ex-streak-card__sub">dias seguidos</div>
-          <div class="ex-streak-card__status" id="streakVoceStatus">
-            <i class="ph ph-check-circle icon-xs" aria-hidden="true"></i>
-            feito hoje
+          <div class="ex-streak-card__status ex-streak-card__status--pending" id="streakVoceStatus">
+            <i class="ph ph-clock icon-xs" aria-hidden="true"></i>
+            pendente
           </div>
         </div>
 
@@ -968,6 +967,330 @@
       </div>
 
     </div><!-- fim tela-loja -->
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA DO PARCEIRO
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela" id="tela-parceiro">
+    <div class="screen" role="main" aria-labelledby="parceiro-titulo">
+
+      <header class="top-bar">
+        <button class="btn-back" data-action="ir-home" aria-label="Voltar">
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="top-bar__title" id="parceiro-titulo">parceiro</h1>
+      </header>
+
+      <!-- Estado: sem parceiro conectado -->
+      <div class="screen__body" id="parceiro-sem-conexao">
+
+        <div class="invite-box">
+          <div class="invite-box__label">seu código</div>
+          <div class="invite-code" id="parceiroMeuCodigo">DU·----</div>
+          <div class="invite-desc">Compartilhe com seu parceiro para se conectar.</div>
+          <button class="btn-copy" data-action="copiar-codigo-perfil">
+            <i class="ph ph-copy" aria-hidden="true"></i>
+            copiar código
+          </button>
+        </div>
+
+        <div class="or-row">
+          <div class="or-line"></div>
+          <span class="or-text">ou insira o código do parceiro</span>
+          <div class="or-line"></div>
+        </div>
+
+        <div class="input-invite-row">
+          <input class="input-code" type="text" id="parceiroCodigoInput"
+                 placeholder="ex: DU·XXXX" maxlength="7" autocomplete="off">
+          <button class="btn-check" data-action="verificar-parceiro-tela">verificar</button>
+        </div>
+
+        <div class="partner-found" id="parceiroEncontrado" style="display:none">
+          <div class="partner-found__dot"></div>
+          <div class="partner-found__name" id="parceiroNomeEncontrado"></div>
+        </div>
+
+        <button class="btn-primary" id="btnConectarParceiro" style="display:none; margin-top:16px"
+                data-action="confirmar-conexao-parceiro">
+          conectar
+        </button>
+
+      </div>
+
+      <!-- Estado: parceiro conectado -->
+      <div class="screen__body" id="parceiro-com-conexao" style="display:none">
+
+        <div class="parceiro-profile-card">
+          <div class="parceiro-avatar" id="parceiroAvatar">
+            <i class="ph ph-user" aria-hidden="true"></i>
+          </div>
+          <div class="parceiro-profile-card__info">
+            <div class="parceiro-profile-card__nome" id="parceiroNome">---</div>
+            <div class="parceiro-profile-card__saldo">
+              <i class="ph ph-coin" aria-hidden="true"></i>
+              <span id="parceiroSaldo">0</span>
+              <span>moedas</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-header">
+            <span class="section-title">tarefas de hoje</span>
+          </div>
+          <div class="tasks-card">
+            <div class="tasks-progress">
+              <span class="tasks-progress__label">progresso do dia</span>
+              <span class="tasks-progress__count" id="parceiroProgressCount">— de —</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar__fill" id="parceiroProgressFill"></div>
+            </div>
+            <div class="tasks-card__footer">
+              <span class="tasks-card__footer-label" id="parceiroPendentes"></span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-header">
+            <span class="section-title">exercícios</span>
+          </div>
+          <div class="streak-card">
+            <div class="streak-card__num" id="parceiroStreak">0</div>
+            <div class="streak-card__info">
+              <div class="streak-card__label">dias em sequência</div>
+              <div class="streak-card__sub" id="parceiroStreakSub"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div><!-- fim tela-parceiro -->
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA DE FILMES
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela" id="tela-filmes">
+    <div class="screen" role="main" aria-labelledby="filmes-titulo">
+
+      <header class="top-bar">
+        <button class="btn-back" data-action="ir-home" aria-label="Voltar">
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="top-bar__title" id="filmes-titulo">filmes</h1>
+      </header>
+
+      <nav class="filmes-tabs" role="tablist" aria-label="Filtrar filmes">
+        <button class="filmes-tab active" role="tab" aria-selected="true"
+                data-aba="assistir" data-action="filmes-aba">para assistir</button>
+        <button class="filmes-tab" role="tab" aria-selected="false"
+                data-aba="assistidos" data-action="filmes-aba">assistidos</button>
+      </nav>
+
+      <div class="screen__body">
+
+        <button class="filmes-sortear-btn" id="filmesSortearBtn"
+                data-action="sortear-filme" style="display:none">
+          <i class="ph ph-shuffle" aria-hidden="true"></i>
+          sortear filme
+        </button>
+
+        <div class="filmes-vazio" id="filmesVazio" style="display:none">
+          <i class="ph ph-film-strip" aria-hidden="true"></i>
+          <span>nenhum filme aqui</span>
+          <span class="filmes-vazio__sub">toque em + para adicionar</span>
+        </div>
+
+        <ul class="filmes-lista" id="filmesListaEl" aria-label="Lista de filmes"></ul>
+
+      </div>
+    </div>
+
+    <button class="fab" data-action="abrir-novo-filme" aria-label="Adicionar filme">
+      <i class="ph-bold ph-plus icon-xl" aria-hidden="true"></i>
+    </button>
+
+    <!-- Modal: adicionar filme -->
+    <div class="modal-backdrop" id="modalNovoFilme" role="dialog"
+         aria-modal="true" aria-labelledby="novoFilmeTitulo"
+         data-action="fechar-novo-filme-fora">
+      <div class="modal modal--bottom">
+        <div class="modal__handle"></div>
+        <h2 class="modal__title" id="novoFilmeTitulo">adicionar filme</h2>
+
+        <div class="field">
+          <label class="field-label" for="filmeNome">título</label>
+          <input class="input" type="text" id="filmeNome"
+                 placeholder="ex: Inception, Divertidamente…" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <div class="field-label">gênero (opcional)</div>
+          <div class="genero-picker">
+            <button class="genero-opt" data-genero="ação"     data-action="selecionar-genero">ação</button>
+            <button class="genero-opt" data-genero="comédia"  data-action="selecionar-genero">comédia</button>
+            <button class="genero-opt" data-genero="drama"    data-action="selecionar-genero">drama</button>
+            <button class="genero-opt" data-genero="terror"   data-action="selecionar-genero">terror</button>
+            <button class="genero-opt" data-genero="romance"  data-action="selecionar-genero">romance</button>
+            <button class="genero-opt" data-genero="animação" data-action="selecionar-genero">animação</button>
+            <button class="genero-opt" data-genero="ficção"   data-action="selecionar-genero">ficção</button>
+            <button class="genero-opt" data-genero="suspense" data-action="selecionar-genero">suspense</button>
+            <button class="genero-opt" data-genero="aventura" data-action="selecionar-genero">aventura</button>
+          </div>
+        </div>
+
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-novo-filme">cancelar</button>
+          <button class="btn-modal-send" data-action="salvar-filme">adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: avaliar filme -->
+    <div class="modal-backdrop" id="modalAvaliarFilme" role="dialog"
+         aria-modal="true" aria-labelledby="avaliarFilmeTituloLabel">
+      <div class="modal">
+        <h2 class="modal__title" id="avaliarFilmeTituloLabel">como foi?</h2>
+        <p class="modal__desc filmes-avaliar-titulo" id="avaliarFilmeTitulo"></p>
+        <div class="estrelas-picker" id="estrelasPicker" role="group" aria-label="Nota de 1 a 5">
+          <button class="estrela-btn" data-nota="1" data-action="selecionar-nota" aria-label="1 estrela">★</button>
+          <button class="estrela-btn" data-nota="2" data-action="selecionar-nota" aria-label="2 estrelas">★</button>
+          <button class="estrela-btn" data-nota="3" data-action="selecionar-nota" aria-label="3 estrelas">★</button>
+          <button class="estrela-btn" data-nota="4" data-action="selecionar-nota" aria-label="4 estrelas">★</button>
+          <button class="estrela-btn" data-nota="5" data-action="selecionar-nota" aria-label="5 estrelas">★</button>
+        </div>
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="pular-avaliacao">pular</button>
+          <button class="btn-modal-send" data-action="confirmar-avaliacao">avaliar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: resultado do sorteio -->
+    <div class="modal-backdrop" id="modalSorteio" role="dialog"
+         aria-modal="true" aria-labelledby="sorteioLabel">
+      <div class="modal">
+        <div class="sorteio-icon">
+          <i class="ph-fill ph-film-clapperboard" aria-hidden="true"></i>
+        </div>
+        <h2 class="modal__title" id="sorteioLabel">filme sorteado!</h2>
+        <div class="sorteio-titulo" id="sorteioTitulo"></div>
+        <div class="sorteio-genero" id="sorteioGenero"></div>
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-sorteio">fechar</button>
+          <button class="btn-modal-send" data-action="sortear-filme">sortear outro</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- fim tela-filmes -->
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA DE RECEITAS
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela" id="tela-receitas">
+    <div class="screen" role="main" aria-labelledby="receitas-titulo">
+
+      <header class="top-bar">
+        <button class="btn-back" data-action="ir-home" aria-label="Voltar">
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="top-bar__title" id="receitas-titulo">receitas</h1>
+      </header>
+
+      <div class="receitas-tags" role="group" aria-label="Filtrar por refeição">
+        <button class="receita-tag-btn active" data-tag="todas"     data-action="receitas-tag">todas</button>
+        <button class="receita-tag-btn" data-tag="cafe"             data-action="receitas-tag">café da manhã</button>
+        <button class="receita-tag-btn" data-tag="almoco"           data-action="receitas-tag">almoço</button>
+        <button class="receita-tag-btn" data-tag="jantar"           data-action="receitas-tag">jantar</button>
+        <button class="receita-tag-btn" data-tag="lanche"           data-action="receitas-tag">lanche</button>
+        <button class="receita-tag-btn" data-tag="sobremesa"        data-action="receitas-tag">sobremesa</button>
+        <button class="receita-tag-btn" data-tag="saudavel"         data-action="receitas-tag">saudável</button>
+      </div>
+
+      <div class="screen__body">
+
+        <button class="filmes-sortear-btn" id="receitasSortearBtn"
+                data-action="sortear-receita" style="display:none">
+          <i class="ph ph-shuffle" aria-hidden="true"></i>
+          sortear receita
+        </button>
+
+        <div class="receitas-vazio" id="receitasVazio" style="display:none">
+          <i class="ph ph-cooking-pot" aria-hidden="true"></i>
+          <span>nenhuma receita aqui</span>
+          <span class="receitas-vazio__sub">toque em + para adicionar</span>
+        </div>
+        <ul class="receitas-lista" id="receitasListaEl" aria-label="Lista de receitas"></ul>
+      </div>
+    </div>
+
+    <button class="fab" data-action="abrir-nova-receita" aria-label="Adicionar receita">
+      <i class="ph-bold ph-plus icon-xl" aria-hidden="true"></i>
+    </button>
+
+    <!-- Modal: adicionar receita -->
+    <div class="modal-backdrop" id="modalNovaReceita" role="dialog"
+         aria-modal="true" aria-labelledby="novaReceitaTitulo"
+         data-action="fechar-nova-receita-fora">
+      <div class="modal modal--bottom">
+        <div class="modal__handle"></div>
+        <h2 class="modal__title" id="novaReceitaTitulo">adicionar receita</h2>
+
+        <div class="field">
+          <label class="field-label" for="receitaNome">nome da receita</label>
+          <input class="input" type="text" id="receitaNome"
+                 placeholder="ex: Bolo de cenoura, Frango grelhado…" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="receitaLink">link do Instagram (opcional)</label>
+          <input class="input" type="url" id="receitaLink"
+                 placeholder="https://www.instagram.com/p/…" autocomplete="off" inputmode="url">
+          <div class="receita-link-hint">cole o link do post ou reel com a receita</div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">refeição (opcional)</div>
+          <div class="genero-picker">
+            <button class="genero-opt" data-tag="cafe"      data-action="selecionar-tag-receita">café da manhã</button>
+            <button class="genero-opt" data-tag="almoco"    data-action="selecionar-tag-receita">almoço</button>
+            <button class="genero-opt" data-tag="jantar"    data-action="selecionar-tag-receita">jantar</button>
+            <button class="genero-opt" data-tag="lanche"    data-action="selecionar-tag-receita">lanche</button>
+            <button class="genero-opt" data-tag="sobremesa" data-action="selecionar-tag-receita">sobremesa</button>
+            <button class="genero-opt" data-tag="saudavel"  data-action="selecionar-tag-receita">saudável</button>
+          </div>
+        </div>
+
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-nova-receita">cancelar</button>
+          <button class="btn-modal-send" data-action="salvar-receita">adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: resultado do sorteio de receita -->
+    <div class="modal-backdrop" id="modalSorteioReceita" role="dialog"
+         aria-modal="true" aria-labelledby="sorteioReceitaLabel">
+      <div class="modal">
+        <div class="sorteio-icon" style="color: var(--color-success)">
+          <i class="ph-fill ph-cooking-pot" aria-hidden="true"></i>
+        </div>
+        <h2 class="modal__title" id="sorteioReceitaLabel">receita sorteada!</h2>
+        <div class="sorteio-titulo" id="sorteioReceitaTitulo"></div>
+        <div class="sorteio-genero" id="sorteioReceitaTag"></div>
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-sorteio-receita">fechar</button>
+          <button class="btn-modal-send" data-action="sortear-receita">sortear outra</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- fim tela-receitas -->
 
   <!-- Modal: adicionar item -->
   <div class="modal-backdrop" id="modalNovoItem" role="dialog" aria-modal="true" aria-labelledby="novoItemTitulo" data-action="fechar-novo-item-fora">

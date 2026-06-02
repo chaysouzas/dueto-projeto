@@ -134,6 +134,28 @@ export function ouvirTarefas(cId, callback) {
   return onSnapshot(collection(db, 'casais', cId, 'tarefas'), callback);
 }
 
+// ── Tarefas solo (sem parceiro) ──────────────────────────────
+export async function criarTarefaSoloDB(uid, tarefa) {
+  return await addDoc(collection(db, 'usuarios', uid, 'tarefas'), {
+    ...tarefa, concluidaPor: {}, criadoEm: serverTimestamp()
+  });
+}
+
+export async function excluirTarefaSoloDB(uid, tarefaId) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'tarefas', tarefaId));
+}
+
+export async function marcarTarefaSoloDB(uid, tarefaId, feito) {
+  const hoje = new Date().toISOString().split('T')[0];
+  await updateDoc(doc(db, 'usuarios', uid, 'tarefas', tarefaId), {
+    [`concluidaPor.${uid}`]: feito ? hoje : null
+  });
+}
+
+export function ouvirTarefasSolo(uid, callback) {
+  return onSnapshot(collection(db, 'usuarios', uid, 'tarefas'), callback);
+}
+
 // ── Exercícios ───────────────────────────────────────────────
 
 export async function salvarExercicioDB(cId, uid, dados) {
@@ -162,7 +184,7 @@ export async function excluirItemLojaDB(cId, itemId) {
 }
 
 export async function resgatarItemDB(cId, uid, itemId, custo) {
-  await updateDoc(doc(db, 'casais', cId, 'loja', itemId), { resgatadoPor: uid });
+  await updateDoc(doc(db, 'casais', cId, 'loja', itemId), { resgatadoPor: uid, resgatadoEm: Date.now() });
   await updateDoc(doc(db, 'usuarios', uid), { saldo: increment(-custo) });
 }
 
@@ -195,6 +217,102 @@ export function ouvirSaldo(uid, callback) {
   return onSnapshot(doc(db, 'usuarios', uid), (snap) => {
     if (snap.exists()) callback(snap.data().saldo ?? 0);
   });
+}
+
+// ── Receitas (casal) ─────────────────────────────────────────
+
+export async function adicionarReceitaDB(cId, uid, receita) {
+  return await addDoc(collection(db, 'casais', cId, 'receitas'), {
+    ...receita, adicionadoPor: uid, criadoEm: serverTimestamp()
+  });
+}
+export async function excluirReceitaDB(cId, receitaId) {
+  await deleteDoc(doc(db, 'casais', cId, 'receitas', receitaId));
+}
+export function ouvirReceitas(cId, callback) {
+  return onSnapshot(collection(db, 'casais', cId, 'receitas'), callback);
+}
+
+// ── Receitas (solo) ───────────────────────────────────────────
+
+export async function adicionarReceitaSoloDB(uid, receita) {
+  return await addDoc(collection(db, 'usuarios', uid, 'receitas'), {
+    ...receita, adicionadoPor: uid, criadoEm: serverTimestamp()
+  });
+}
+export async function excluirReceitaSoloDB(uid, receitaId) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'receitas', receitaId));
+}
+export function ouvirReceitasSolo(uid, callback) {
+  return onSnapshot(collection(db, 'usuarios', uid, 'receitas'), callback);
+}
+
+// ── Filmes (casal) ───────────────────────────────────────────
+
+export async function adicionarFilmeDB(cId, uid, filme) {
+  return await addDoc(collection(db, 'casais', cId, 'filmes'), {
+    ...filme, adicionadoPor: uid, assistido: false,
+    assistidoEm: null, avaliacoes: {}, criadoEm: serverTimestamp()
+  });
+}
+export async function marcarFilmeAssistidoDB(cId, filmeId) {
+  await updateDoc(doc(db, 'casais', cId, 'filmes', filmeId), {
+    assistido: true, assistidoEm: new Date().toISOString().split('T')[0]
+  });
+}
+export async function avaliarFilmeDB(cId, filmeId, uid, nota) {
+  await updateDoc(doc(db, 'casais', cId, 'filmes', filmeId), { [`avaliacoes.${uid}`]: nota });
+}
+export async function excluirFilmeDB(cId, filmeId) {
+  await deleteDoc(doc(db, 'casais', cId, 'filmes', filmeId));
+}
+export function ouvirFilmes(cId, callback) {
+  return onSnapshot(collection(db, 'casais', cId, 'filmes'), callback);
+}
+
+// ── Filmes (solo) ─────────────────────────────────────────────
+
+export async function adicionarFilmeSoloDB(uid, filme) {
+  return await addDoc(collection(db, 'usuarios', uid, 'filmes'), {
+    ...filme, adicionadoPor: uid, assistido: false,
+    assistidoEm: null, avaliacoes: {}, criadoEm: serverTimestamp()
+  });
+}
+export async function marcarFilmeAssistidoSoloDB(uid, filmeId) {
+  await updateDoc(doc(db, 'usuarios', uid, 'filmes', filmeId), {
+    assistido: true, assistidoEm: new Date().toISOString().split('T')[0]
+  });
+}
+export async function avaliarFilmeSoloDB(uid, filmeId, nota) {
+  await updateDoc(doc(db, 'usuarios', uid, 'filmes', filmeId), { [`avaliacoes.${uid}`]: nota });
+}
+export async function excluirFilmeSoloDB(uid, filmeId) {
+  await deleteDoc(doc(db, 'usuarios', uid, 'filmes', filmeId));
+}
+export function ouvirFilmesSolo(uid, callback) {
+  return onSnapshot(collection(db, 'usuarios', uid, 'filmes'), callback);
+}
+
+// ── Exercícios (checkin) ─────────────────────────────────────
+
+export async function fazerCheckinDB(uid, streak, ultimoCheckin) {
+  await updateDoc(doc(db, 'usuarios', uid), { streakAtual: streak, ultimoCheckin });
+}
+
+// ── Parceiro ─────────────────────────────────────────────────
+
+export function ouvirParceiro(uid, callback) {
+  return onSnapshot(doc(db, 'usuarios', uid), (snap) => {
+    if (snap.exists()) callback({ uid, ...snap.data() });
+  });
+}
+
+export async function buscarProgressoParceiroHoje(casalId, parceiroUid) {
+  const hoje = new Date().toISOString().split('T')[0];
+  const snap = await getDocs(collection(db, 'casais', casalId, 'tarefas'));
+  const total = snap.size;
+  const concluidas = snap.docs.filter(d => d.data().concluidaPor?.[parceiroUid] === hoje).length;
+  return { total, concluidas };
 }
 
 // ── Auth listener ────────────────────────────────────────────
