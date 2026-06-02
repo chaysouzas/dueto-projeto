@@ -11,8 +11,6 @@ import { getAuth, onAuthStateChanged,
          signInWithPopup, GoogleAuthProvider,
          sendPasswordResetEmail, signOut }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc,
          collection, addDoc, onSnapshot, query, where,
          serverTimestamp, deleteDoc, arrayUnion, increment, getDocs }
@@ -28,11 +26,10 @@ const firebaseConfig = {
   appId:             "1:410032498976:web:a7cc2c81d576d392ef4f45"
 };
 
-const app     = initializeApp(firebaseConfig);
-const auth    = getAuth(app);
-const db      = getFirestore(app);
-const storage = getStorage(app);
-const google  = new GoogleAuthProvider();
+const app    = initializeApp(firebaseConfig);
+const auth   = getAuth(app);
+const db     = getFirestore(app);
+const google = new GoogleAuthProvider();
 
 // ── Estado global ─────────────────────────────────────────────
 export let usuarioAtual = null;
@@ -75,13 +72,8 @@ export function gerarCodigo() {
   return code;
 }
 
-export async function uploadAvatar(uid, file) {
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-  const sRef = storageRef(storage, `avatars/${uid}/avatar.${ext}`);
-  const snap = await uploadBytes(sRef, file);
-  const url  = await getDownloadURL(snap.ref);
-  await updateDoc(doc(db, 'usuarios', uid), { avatar: url });
-  return url;
+export async function atualizarAvatar(uid, dataUrl) {
+  await updateDoc(doc(db, 'usuarios', uid), { avatar: dataUrl });
 }
 
 export async function criarPerfil(uid, { nome, avatar, cor }) {

@@ -12,7 +12,7 @@ import {
   criarItemLojaDB, excluirItemLojaDB,
   resgatarItemDB, confirmarResgateCasalDB, ouvirLoja,
   adicionarSaldoDB, atualizarSaldoUsuarioDB, ouvirSaldo,
-  uploadAvatar,
+  atualizarAvatar,
   ouvirParceiro, buscarProgressoParceiroHoje,
   fazerCheckinDB,
   adicionarLugarDB, adicionarLugarSoloDB,
@@ -53,7 +53,7 @@ let _parceiroUidEncontrado = null;
 
 // ── Avatar helper ─────────────────────────────────────────────
 function _htmlAvatar(avatar) {
-  if (avatar && (avatar.startsWith('https://') || avatar.startsWith('http://'))) {
+  if (avatar && (avatar.startsWith('https://') || avatar.startsWith('http://') || avatar.startsWith('data:'))) {
     return `<img src="${avatar}" alt="avatar" class="avatar-foto">`;
   }
   return `<i class="ph ${avatar || 'ph-user'}" aria-hidden="true"></i>`;
@@ -1188,27 +1188,50 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('avatarFileInput')?.click();
   }
 
+  function _comprimirAvatar(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = ({ target: { result } }) => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const MAX = 220;
+          let w = img.width, h = img.height;
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else       { w = Math.round(w * MAX / h); h = MAX; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function _handleAvatarFile(file) {
     const uid = _fbUid || window._uidCadastro;
     if (!uid) { mostrarToast('conclua o cadastro primeiro'); return; }
     if (!file?.type.startsWith('image/')) { mostrarToast('selecione uma imagem'); return; }
-    if (file.size > 5 * 1024 * 1024) { mostrarToast('imagem muito grande (máx. 5 MB)'); return; }
 
-    // Preview imediato com blob URL
+    // Preview imediato
     const blobUrl = URL.createObjectURL(file);
     _aplicarAvatarUI(blobUrl);
     avatarSelecionado = blobUrl;
     document.querySelectorAll('.avatar-opt').forEach(o => o.classList.remove('selected'));
 
-    mostrarToast('enviando foto...');
+    mostrarToast('salvando foto...');
     try {
-      const fotoUrl = await uploadAvatar(uid, file);
-      avatarSelecionado = fotoUrl;
-      _aplicarAvatarUI(fotoUrl);
-      if (_dadosPerfilAtual) _dadosPerfilAtual.avatar = fotoUrl;
-      mostrarToast('foto atualizada!');
+      const dataUrl = await _comprimirAvatar(file);
+      avatarSelecionado = dataUrl;
+      _aplicarAvatarUI(dataUrl);
+      await atualizarAvatar(uid, dataUrl);
+      if (_dadosPerfilAtual) _dadosPerfilAtual.avatar = dataUrl;
+      mostrarToast('foto salva!');
     } catch (err) {
-      mostrarToast('erro ao enviar: ' + err.message);
+      mostrarToast('erro ao salvar: ' + err.message);
       console.error(err);
     }
   }
