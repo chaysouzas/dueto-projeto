@@ -45,17 +45,30 @@ let _unsubFilmes     = null;
 let _unsubReceitas   = null;
 let _parceiroUidEncontrado = null;
 
+// ── Histórico interno de navegação (botão voltar) ───────────
+let _navStack     = [];
+let _poppingState = false;
+
 // ── 3. Navegação entre telas ───────────────────────────────
 function navegar(id) {
   const tela = document.getElementById('tela-' + id);
   if (!tela) { mostrarToast('em breve'); return; }
   document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
   tela.classList.add('ativa');
-  // Atualizar nav-bar
   document.querySelectorAll('.nav-item').forEach(b => {
     b.classList.toggle('active', b.dataset.action === 'ir-' + id);
     b.setAttribute('aria-current', b.dataset.action === 'ir-' + id ? 'page' : 'false');
   });
+
+  if (!_poppingState) {
+    // Telas raiz resetam o histórico; demais empilham
+    if (id === 'home' || id === 'login' || id === 'cadastro') {
+      _navStack = [id];
+    } else {
+      _navStack.push(id);
+    }
+    history.pushState({ dueto: id }, '');
+  }
 }
 
 // ── Constantes globais ─────────────────────────────────────
@@ -2311,5 +2324,27 @@ function salvarMeta() {
   // Form do login — submit dedicado
   const formLogin = document.getElementById('form-login');
   if (formLogin) formLogin.addEventListener('submit', handleLogin);
+
+  // ── Botão voltar do dispositivo (Android / PWA) ─────────────
+  window.addEventListener('popstate', () => {
+    // 1. Se há modal aberto, fecha-o em vez de navegar
+    const modalAberto = document.querySelector('.modal-backdrop.open');
+    if (modalAberto) {
+      fecharModal(modalAberto.id);
+      history.pushState({ dueto: _navStack[_navStack.length - 1] || 'home' }, '');
+      return;
+    }
+
+    // 2. Navegar para a tela anterior no histórico interno
+    if (_navStack.length > 1) {
+      _poppingState = true;
+      _navStack.pop();
+      const anterior = _navStack[_navStack.length - 1];
+      navegar(anterior);
+      history.pushState({ dueto: anterior }, '');
+      _poppingState = false;
+    }
+    // Se _navStack.length <= 1 (raiz), o browser minimiza/fecha o PWA — comportamento correto
+  });
 
 });

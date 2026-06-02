@@ -6,6 +6,12 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid;
       allow read: if request.auth != null;
 
+      // Permite que outro usuário autenticado atualize apenas parceiroUid e casalId
+      // — necessário para a conexão entre parceiros
+      allow update: if request.auth != null &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['parceiroUid', 'casalId']);
+
       match /tarefas/{id} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
@@ -18,13 +24,23 @@ service cloud.firestore {
     }
 
     match /casais/{casalId} {
+      // Verifica membership lendo o documento do casal (usado em subcolecoes)
       function isMember() {
+        let casal = get(/databases/$(database)/documents/casais/$(casalId));
         return request.auth != null &&
-          (request.auth.uid == resource.data.uid1 ||
-           request.auth.uid == resource.data.uid2);
+          (request.auth.uid == casal.data.uid1 ||
+           request.auth.uid == casal.data.uid2);
       }
 
-      allow read, write: if isMember();
+      // Criacao: o usuario logado deve ser uid1 ou uid2 do novo documento
+      allow create: if request.auth != null &&
+        (request.auth.uid == request.resource.data.uid1 ||
+         request.auth.uid == request.resource.data.uid2);
+
+      // Leitura e escrita no proprio documento do casal
+      allow read, update, delete: if request.auth != null &&
+        (request.auth.uid == resource.data.uid1 ||
+         request.auth.uid == resource.data.uid2);
 
       match /tarefas/{id}    { allow read, write: if isMember(); }
       match /exercicios/{id} { allow read, write: if isMember(); }
