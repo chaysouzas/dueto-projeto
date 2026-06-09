@@ -77,6 +77,77 @@ let _poppingState = false;
 const _notificacoesEnviadas = new Set();
 let   _lembreteInterval     = null;
 
+// ── Sistema de notificações in-app ─────────────────────────
+const _notificacoes = [];
+let   _notifIdCounter = 0;
+
+const _notifIcons = {
+  tarefa:      'ph-check-circle',
+  loja:        'ph-storefront',
+  'loja-compra': 'ph-shopping-cart',
+  filme:       'ph-film-slate',
+  receita:     'ph-fork-knife',
+  lugar:       'ph-map-pin',
+};
+
+function _pushNotificacao(tipo, titulo, texto) {
+  _notificacoes.unshift({ id: ++_notifIdCounter, tipo, titulo, texto, lida: false, ts: Date.now() });
+  _atualizarBadgeSino();
+  mostrarNotificacaoPush(titulo, texto);
+}
+
+function _atualizarBadgeSino() {
+  const badge = document.getElementById('sinoBadge');
+  if (!badge) return;
+  const n = _notificacoes.filter(x => !x.lida).length;
+  badge.textContent = n > 9 ? '9+' : String(n);
+  badge.classList.toggle('is-hidden', n === 0);
+}
+
+function _notifTempo(ts) {
+  const min = Math.floor((Date.now() - ts) / 60000);
+  if (min < 1) return 'agora';
+  if (min < 60) return min + 'min';
+  const h = Math.floor(min / 60);
+  if (h < 24) return h + 'h';
+  return Math.floor(h / 24) + 'd';
+}
+
+function _renderNotificacoes() {
+  const lista = document.getElementById('notificacoesLista');
+  if (!lista) return;
+  if (_notificacoes.length === 0) {
+    lista.innerHTML = `<div class="notif-empty"><i class="ph ph-bell-slash" aria-hidden="true"></i><span>nenhuma notificação ainda</span></div>`;
+    return;
+  }
+  lista.innerHTML = _notificacoes.map(n => {
+    const icon = _notifIcons[n.tipo] || 'ph-bell';
+    return `<div class="notif-item ${n.lida ? '' : 'notif-item--nova'}" role="listitem">
+      <div class="notif-item__icone"><i class="ph-bold ${icon}" aria-hidden="true"></i></div>
+      <div class="notif-item__corpo">
+        <div class="notif-item__titulo">${n.titulo}</div>
+        <div class="notif-item__texto">${n.texto}</div>
+        <div class="notif-item__tempo">${_notifTempo(n.ts)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirModalNotificacoes() {
+  _notificacoes.forEach(n => { n.lida = true; });
+  _atualizarBadgeSino();
+  _renderNotificacoes();
+  abrirModal('modalNotificacoes');
+}
+
+function fecharModalNotificacoes() { fecharModal('modalNotificacoes'); }
+
+function limparNotificacoes() {
+  _notificacoes.length = 0;
+  _atualizarBadgeSino();
+  _renderNotificacoes();
+}
+
 function _ocultarLoading() {
   document.getElementById('appLoading')?.classList.add('hidden');
 }
@@ -769,8 +840,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function atualizarProgressoHome() {
     const lista = document.getElementById('homeTarefasList');
-    const total  = lista ? lista.querySelectorAll('.task-item').length : 0;
-    const feitas = lista ? lista.querySelectorAll('.task-check.done').length : 0;
+    const total  = lista ? lista.querySelectorAll('.task-item:not(.is-hidden)').length : 0;
+    const feitas = lista ? lista.querySelectorAll('.task-item:not(.is-hidden) .task-check.done').length : 0;
     totalTarefas      = total;
     tarefasConcluidas = feitas;
     atualizarProgresso();
@@ -787,7 +858,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Loja em tempo real (só para casais)
     if (casalId) {
+      let _lojaInicializada = false;
+      const _lojaResgatadosVistos = new Set();
       _unsubLoja = ouvirLoja(casalId, (snap) => {
+        if (!_lojaInicializada) {
+          snap.docs.forEach(d => {
+            const data = d.data();
+            if (data.resgatadoPor) _lojaResgatadosVistos.add(d.id + '-resg');
+            (data.confirmadoPor || []).forEach(u => _lojaResgatadosVistos.add(d.id + '-conf-' + u));
+          });
+          _lojaInicializada = true;
+        } else {
+          const parceiroUid = _dadosPerfilAtual?.parceiroUid;
+          snap.docChanges().forEach(change => {
+            const data = change.doc.data();
+            const did  = change.doc.id;
+            if (change.type === 'added' && parceiroUid && data.criadoPor !== uid) {
+              _pushNotificacao('loja', 'nova recompensa na loja', `parceiro adicionou "${data.nome}"`);
+            } else if (change.type === 'modified' && parceiroUid) {
+              const keyResg = did + '-resg';
+              if (data.resgatadoPor === parceiroUid && !_lojaResgatadosVistos.has(keyResg)) {
+                _lojaResgatadosVistos.add(keyResg);
+                _pushNotificacao('loja-compra', 'recompensa resgatada', `parceiro resgatou "${data.nome}"`);
+              }
+              const keyConf = did + '-conf-' + parceiroUid;
+              if (data.confirmadoPor?.includes(parceiroUid) && !_lojaResgatadosVistos.has(keyConf)) {
+                _lojaResgatadosVistos.add(keyConf);
+                _pushNotificacao('loja-compra', 'compra confirmada', `parceiro confirmou "${data.nome}"`);
+              }
+            }
+          });
+        }
         _renderLojaFirestore(snap);
       });
     }
@@ -808,26 +909,41 @@ document.addEventListener('DOMContentLoaded', () => {
           document.querySelectorAll(`[data-task-id="${doc.id}"]`).forEach(el => el.remove());
         } else if (type === 'modified') {
           const hoje        = new Date().toISOString().split('T')[0];
-          const concluidaPor = doc.data().concluidaPor || {};
+          const docData     = doc.data();
+          const concluidaPor = docData.concluidaPor || {};
           const parceiroUid = _dadosPerfilAtual?.parceiroUid;
           const euFiz       = concluidaPor[uid] === hoje;
           const alguemFez   = euFiz || (parceiroUid && concluidaPor[parceiroUid] === hoje);
+
+          // Para pontual: verificar se está dentro do prazo
+          const proxDataStr = docData.proxData ? new Date(docData.proxData).toISOString().split('T')[0] : hoje;
+          const pontualDue  = docData.tipo !== 'pontual' || proxDataStr <= hoje;
 
           // Notificar quando o parceiro concluir (apenas após carga inicial)
           if (tarefasInicializadas && parceiroUid && concluidaPor[parceiroUid] === hoje && !euFiz) {
             const notifKey = `${doc.id}-${parceiroUid}-${hoje}`;
             if (!_notificacoesEnviadas.has(notifKey)) {
               _notificacoesEnviadas.add(notifKey);
-              mostrarNotificacaoPush('✅ Tarefa concluída', `Parceiro concluiu "${doc.data().nome}"`);
+              _pushNotificacao('tarefa', 'tarefa concluída', `parceiro concluiu "${docData.nome}"`);
             }
           }
 
           document.querySelectorAll(`[data-task-id="${doc.id}"]`).forEach(el => {
+            // Atualiza proxData no data attribute
+            el.dataset.proxData = docData.proxData || '';
+
             const check = el.querySelector('.task-check');
             const name  = el.querySelector('.task-item__name');
             if (!check || !name) return;
-            // Home: done se qualquer um completou; Tarefas: done só se EU completei
+
             const isHome = !!el.closest('#homeTarefasList');
+
+            // Visibilidade no home para tarefas pontuais
+            if (isHome && docData.tipo === 'pontual') {
+              el.classList.toggle('is-hidden', !pontualDue);
+            }
+
+            // Home: done se qualquer um completou; Tarefas: done só se EU completei
             const feito  = isHome ? alguemFez : euFiz;
             check.classList.toggle('done', feito);
             check.innerHTML = feito ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : '';
@@ -846,7 +962,19 @@ document.addEventListener('DOMContentLoaded', () => {
       ? (cb) => ouvirFilmes(casalId, cb)
       : (cb) => ouvirFilmesSolo(uid, cb);
 
+    let _filmesInicializado = false;
     _unsubFilmes = ouvirFilmesFn((snap) => {
+      if (_filmesInicializado && casalId) {
+        snap.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            if (data.adicionadoPor !== uid) {
+              _pushNotificacao('filme', 'novo filme na lista', `parceiro adicionou "${data.titulo}"`);
+            }
+          }
+        });
+      }
+      _filmesInicializado = true;
       _filmesLista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (document.querySelector('#tela-filmes.ativa')) _renderFilmesLista();
     });
@@ -856,7 +984,19 @@ document.addEventListener('DOMContentLoaded', () => {
       ? (cb) => ouvirReceitas(casalId, cb)
       : (cb) => ouvirReceitasSolo(uid, cb);
 
+    let _receitasInicializado = false;
     _unsubReceitas = ouvirReceitasFn((snap) => {
+      if (_receitasInicializado && casalId) {
+        snap.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            if (data.adicionadoPor !== uid) {
+              _pushNotificacao('receita', 'nova receita adicionada', `parceiro adicionou "${data.nome}"`);
+            }
+          }
+        });
+      }
+      _receitasInicializado = true;
       _receitasLista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (document.querySelector('#tela-receitas.ativa')) _renderReceitasLista();
     });
@@ -866,7 +1006,19 @@ document.addEventListener('DOMContentLoaded', () => {
       ? (cb) => ouvirLugares(casalId, cb)
       : (cb) => ouvirLugaresSolo(uid, cb);
 
+    let _lugaresInicializado = false;
     _unsubLugares = ouvirLugaresFn((snap) => {
+      if (_lugaresInicializado && casalId) {
+        snap.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            if (data.adicionadoPor !== uid) {
+              _pushNotificacao('lugar', 'novo lugar na lista', `parceiro adicionou "${data.nome}"`);
+            }
+          }
+        });
+      }
+      _lugaresInicializado = true;
       _lugaresLista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (document.querySelector('#tela-lugares.ativa')) _renderLugaresLista();
     });
@@ -896,6 +1048,10 @@ document.addEventListener('DOMContentLoaded', () => {
       ? `a cada ${dados.ciclo} dia${dados.ciclo > 1 ? 's' : ''}`
       : 'diária';
 
+    // Tarefa pontual está pendente apenas se proxData <= hoje
+    const proxDataStr = dados.proxData ? new Date(dados.proxData).toISOString().split('T')[0] : hoje;
+    const pontualDue  = dados.tipo !== 'pontual' || proxDataStr <= hoje;
+
     // ── Tela de tarefas ────────────────────────────────────────
     const body = document.getElementById('body-' + dados.grupo);
     if (body && !body.querySelector(`[data-task-id="${id}"]`)) {
@@ -904,6 +1060,9 @@ document.addEventListener('DOMContentLoaded', () => {
       item.dataset.taskId = id;
       item.dataset.grupo  = dados.grupo;
       item.dataset.pts    = dados.pontos;
+      item.dataset.tipo   = dados.tipo;
+      item.dataset.ciclo  = dados.ciclo || '';
+      item.dataset.proxData = dados.proxData || '';
       item.dataset.action = 'toggle-task';
       item.innerHTML = `
         <div class="task-check ${euFiz ? 'done' : ''}">${euFiz ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
@@ -930,7 +1089,11 @@ document.addEventListener('DOMContentLoaded', () => {
       homeItem.dataset.taskId = id;
       homeItem.dataset.grupo  = dados.grupo;
       homeItem.dataset.pts    = dados.pontos;
+      homeItem.dataset.tipo   = dados.tipo;
+      homeItem.dataset.ciclo  = dados.ciclo || '';
+      homeItem.dataset.proxData = dados.proxData || '';
       homeItem.dataset.action = 'toggle-task';
+      if (!pontualDue) homeItem.classList.add('is-hidden');
       homeItem.innerHTML = `
         <div class="task-check ${alguemFez ? 'done' : ''}">${alguemFez ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
         <div class="task-item__info">
@@ -2217,6 +2380,8 @@ async function toggleTaskHome(item) {
   const name   = item.querySelector('.task-item__name');
   const pts    = parseInt(item.dataset.pts) || 0;
   const taskId = item.dataset.taskId;
+  const tipo   = item.dataset.tipo || 'diaria';
+  const ciclo  = parseInt(item.dataset.ciclo) || 0;
   const done   = check.classList.contains('done');
 
   // Atualização otimista da UI
@@ -2241,14 +2406,14 @@ async function toggleTaskHome(item) {
       if (!done) mostrarToast('+' + pts + ' moedas');
       if (_fbCasalId) {
         await Promise.all([
-          marcarTarefaDB(_fbCasalId, taskId, _fbUid, !done),
+          marcarTarefaDB(_fbCasalId, taskId, _fbUid, !done, tipo, ciclo),
           done
             ? adicionarSaldoDB(_fbCasalId, _fbUid, -pts, 'desfeito: ' + name.textContent)
             : adicionarSaldoDB(_fbCasalId, _fbUid,  pts, name.textContent),
         ]);
       } else {
         await Promise.all([
-          marcarTarefaSoloDB(_fbUid, taskId, !done),
+          marcarTarefaSoloDB(_fbUid, taskId, !done, tipo, ciclo),
           atualizarSaldoUsuarioDB(_fbUid, done ? -pts : pts),
         ]);
       }
@@ -2333,7 +2498,7 @@ async function toggleTaskHome(item) {
       tipo: tipoSelecionado,
       pontos: pontosSelecionados,
       ciclo: cicloDias,
-      proxData: cicloDias ? calcularProxData(cicloDias).toISOString() : null,
+      proxData: cicloDias ? new Date().toISOString() : null,
     };
 
     fecharModalNovaTarefa();
@@ -2405,6 +2570,37 @@ async function toggleTaskHome(item) {
     atualizarResumoDia();
     verificarAtrasadas();
   }
+
+  // ── Reset de meia-noite ────────────────────────────────────
+  let _ultimoDia = new Date().toISOString().split('T')[0];
+
+  function _verificarMudancaDia() {
+    const hoje = new Date().toISOString().split('T')[0];
+    if (_ultimoDia === hoje) return;
+    _ultimoDia = hoje;
+
+    // Reseta o estado visual das tarefas diárias
+    document.querySelectorAll('.task-item[data-tipo="diaria"]').forEach(item => {
+      const check = item.querySelector('.task-check');
+      const name  = item.querySelector('.task-item__name');
+      if (check) { check.classList.remove('done'); check.innerHTML = ''; }
+      if (name)  name.classList.remove('done');
+    });
+
+    // Reavalia visibilidade das tarefas pontuais no home
+    document.querySelectorAll('#homeTarefasList .task-item[data-tipo="pontual"]').forEach(item => {
+      const proxDataStr = item.dataset.proxData
+        ? new Date(item.dataset.proxData).toISOString().split('T')[0]
+        : hoje;
+      item.classList.toggle('is-hidden', proxDataStr > hoje);
+    });
+
+    atualizarProgressoHome();
+    inicializarBadges();
+    atualizarResumoDia();
+  }
+
+  setInterval(_verificarMudancaDia, 60000);
 
   const exEstado = {
   streakVoce:     0,
@@ -2681,6 +2877,12 @@ function salvarMeta() {
     'avancar':                      (el) => avancar(parseInt(el.dataset.etapa), el.dataset.pular === 'true'),
     'selecionar-avatar':            (el) => selecionarAvatar(el),
     'selecionar-cor':               (el) => selecionarCor(el),
+
+    // Notificações
+    'abrir-notificacoes':           () => abrirModalNotificacoes(),
+    'fechar-notificacoes':          () => fecharModalNotificacoes(),
+    'fechar-notificacoes-fora':     (el, e) => { if (e.target === document.getElementById('modalNotificacoes')) fecharModalNotificacoes(); },
+    'limpar-notificacoes':          () => limparNotificacoes(),
 
     // Home / navegação
     'ver-parceiro':                 () => irParaParceiro(),

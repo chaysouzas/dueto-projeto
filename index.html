@@ -366,11 +366,17 @@
       <span class="home-header__sub">bom dia</span>
       <h1 class="home-header__name" id="homeNome"></h1>
     </div>
-    <button class="partner-btn" data-action="ver-parceiro">
-      <div class="partner-avatar"><i class="ph ph-moon" aria-hidden="true"></i></div>
-      <span class="partner-btn__label">parceiro</span>
-      <i class="ph ph-caret-right" aria-hidden="true"></i>
-    </button>
+    <div class="home-header__actions">
+      <button class="sino-btn" data-action="abrir-notificacoes" aria-label="Notificações">
+        <i class="ph ph-bell" aria-hidden="true"></i>
+        <span class="sino-badge is-hidden" id="sinoBadge" aria-hidden="true"></span>
+      </button>
+      <button class="partner-btn" data-action="ver-parceiro">
+        <div class="partner-avatar"><i class="ph ph-moon" aria-hidden="true"></i></div>
+        <span class="partner-btn__label">parceiro</span>
+        <i class="ph ph-caret-right" aria-hidden="true"></i>
+      </button>
+    </div>
   </header>
  
   <div class="home-body">
@@ -1554,6 +1560,18 @@
   </div>
 
 
+
+<!-- Modal: notificações -->
+<div class="modal-backdrop" id="modalNotificacoes" role="dialog" aria-modal="true" aria-labelledby="notifTitulo" data-action="fechar-notificacoes-fora">
+  <div class="modal modal--bottom modal--notif">
+    <div class="modal__handle" aria-hidden="true"></div>
+    <div class="notif-header">
+      <h2 class="modal__title" id="notifTitulo">notificações</h2>
+      <button class="notif-limpar" data-action="limpar-notificacoes" aria-label="Limpar tudo">limpar tudo</button>
+    </div>
+    <div class="notif-lista" id="notificacoesLista" role="list" aria-live="polite"></div>
+  </div>
+</div>
 
 <!-- Modal: confirmar exclusão -->
 <div class="modal-backdrop" id="modalConfirmar" role="dialog" aria-modal="true" aria-labelledby="confirmarTitulo">

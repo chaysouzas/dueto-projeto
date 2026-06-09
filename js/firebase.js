@@ -127,11 +127,15 @@ export async function excluirTarefaDB(cId, tarefaId) {
   await deleteDoc(doc(db, 'casais', cId, 'tarefas', tarefaId));
 }
 
-export async function marcarTarefaDB(cId, tarefaId, uid, feito) {
+export async function marcarTarefaDB(cId, tarefaId, uid, feito, tipo, ciclo) {
   const hoje = new Date().toISOString().split('T')[0];
-  await updateDoc(doc(db, 'casais', cId, 'tarefas', tarefaId), {
-    [`concluidaPor.${uid}`]: feito ? hoje : null
-  });
+  const dados = { [`concluidaPor.${uid}`]: feito ? hoje : null };
+  if (tipo === 'pontual' && ciclo) {
+    const prox = new Date();
+    prox.setDate(prox.getDate() + (feito ? Number(ciclo) : 0));
+    dados.proxData = prox.toISOString();
+  }
+  await updateDoc(doc(db, 'casais', cId, 'tarefas', tarefaId), dados);
 }
 
 export function ouvirTarefas(cId, callback) {
@@ -149,11 +153,15 @@ export async function excluirTarefaSoloDB(uid, tarefaId) {
   await deleteDoc(doc(db, 'usuarios', uid, 'tarefas', tarefaId));
 }
 
-export async function marcarTarefaSoloDB(uid, tarefaId, feito) {
+export async function marcarTarefaSoloDB(uid, tarefaId, feito, tipo, ciclo) {
   const hoje = new Date().toISOString().split('T')[0];
-  await updateDoc(doc(db, 'usuarios', uid, 'tarefas', tarefaId), {
-    [`concluidaPor.${uid}`]: feito ? hoje : null
-  });
+  const dados = { [`concluidaPor.${uid}`]: feito ? hoje : null };
+  if (tipo === 'pontual' && ciclo) {
+    const prox = new Date();
+    prox.setDate(prox.getDate() + (feito ? Number(ciclo) : 0));
+    dados.proxData = prox.toISOString();
+  }
+  await updateDoc(doc(db, 'usuarios', uid, 'tarefas', tarefaId), dados);
 }
 
 export function ouvirTarefasSolo(uid, callback) {
