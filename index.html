@@ -367,6 +367,9 @@
       <h1 class="home-header__name" id="homeNome"></h1>
     </div>
     <div class="home-header__actions">
+      <button class="stats-btn" data-action="ir-estatisticas" aria-label="Estatísticas">
+        <i class="ph ph-chart-pie-slice" aria-hidden="true"></i>
+      </button>
       <button class="sino-btn" data-action="abrir-notificacoes" aria-label="Notificações">
         <i class="ph ph-bell" aria-hidden="true"></i>
         <span class="sino-badge is-hidden" id="sinoBadge" aria-hidden="true"></span>
@@ -1089,6 +1092,71 @@
 
     </div>
   </div><!-- fim tela-parceiro -->
+
+  <!-- ════════════════════════════════════════════════════════
+       TELA DE ESTATÍSTICAS
+  ═════════════════════════════════════════════════════════ -->
+  <div class="tela" id="tela-estatisticas">
+    <div class="screen" role="main" aria-labelledby="stats-titulo">
+
+      <header class="top-bar">
+        <button class="btn-back" data-action="ir-home" aria-label="Voltar">
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
+        </button>
+        <h1 class="top-bar__title" id="stats-titulo">estatísticas</h1>
+      </header>
+
+      <div class="screen__body stats-body">
+
+        <!-- Seletor de período -->
+        <div class="stats-periodo">
+          <button class="stats-periodo__nav" data-action="stats-mes-anterior" aria-label="Mês anterior">
+            <i class="ph ph-caret-left" aria-hidden="true"></i>
+          </button>
+          <span class="stats-periodo__label" id="statsPeriodoLabel">junho 2026</span>
+          <button class="stats-periodo__nav" data-action="stats-mes-proximo" aria-label="Próximo mês">
+            <i class="ph ph-caret-right" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <!-- Cards de quantidade -->
+        <div class="stats-duo">
+          <div class="stats-duo__card stats-duo__card--voce">
+            <div class="stats-duo__avatar" id="statsAvatarVoce">
+              <i class="ph ph-user" aria-hidden="true"></i>
+            </div>
+            <div class="stats-duo__nome" id="statsNomeVoce">você</div>
+            <div class="stats-duo__num" id="statsNumVoce">0</div>
+            <div class="stats-duo__label">tarefas</div>
+          </div>
+          <div class="stats-duo__sep" id="statsDuoSep">
+            <i class="ph-fill ph-heart" aria-hidden="true"></i>
+          </div>
+          <div class="stats-duo__card stats-duo__card--parceiro" id="statsDuoParceiro">
+            <div class="stats-duo__avatar" id="statsAvatarParceiro">
+              <i class="ph ph-user" aria-hidden="true"></i>
+            </div>
+            <div class="stats-duo__nome" id="statsNomeParceiro">parceiro</div>
+            <div class="stats-duo__num" id="statsNumParceiro">0</div>
+            <div class="stats-duo__label">tarefas</div>
+          </div>
+        </div>
+
+        <!-- Gráfico em pizza -->
+        <div class="stats-chart-section" id="statsChartSection" style="display:none">
+          <canvas id="statsChart" width="220" height="220" aria-label="Gráfico de tarefas por pessoa"></canvas>
+          <div class="stats-chart-legend" id="statsChartLegend"></div>
+        </div>
+
+        <!-- Estado vazio -->
+        <div class="stats-vazio" id="statsVazio">
+          <i class="ph ph-chart-pie" aria-hidden="true"></i>
+          <span>nenhuma tarefa concluída neste mês</span>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- fim tela-estatisticas -->
 
   <!-- ════════════════════════════════════════════════════════
        TELA DE FILMES

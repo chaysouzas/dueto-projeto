@@ -438,6 +438,182 @@
 .saldo-box__val [class^="ph-"] { font-size: 14px; color: var(--color-secondary); }
 
 
+/* ── Botão de estatísticas ── */
+.stats-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: 18px;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.stats-btn:hover { background: var(--color-bg-surface-raised); color: var(--color-primary); }
+
+/* ── Tela de Estatísticas ── */
+.stats-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.stats-periodo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.stats-periodo__nav {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+.stats-periodo__nav:hover { background: var(--color-bg-surface-raised); }
+
+.stats-periodo__label {
+  font-size: var(--text-md);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+  min-width: 150px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.stats-duo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-4);
+}
+
+.stats-duo__card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stats-duo__sep {
+  color: var(--color-primary);
+  font-size: 18px;
+  opacity: 0.45;
+  flex-shrink: 0;
+}
+
+.stats-duo__avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  overflow: hidden;
+}
+.stats-duo__avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.stats-duo__card--voce .stats-duo__avatar {
+  background: var(--color-primary-subtle);
+  border: 2px solid rgba(217, 119, 137, 0.4);
+  color: var(--color-primary);
+}
+.stats-duo__card--parceiro .stats-duo__avatar {
+  background: var(--color-secondary-subtle);
+  border: 2px solid rgba(219, 142, 2, 0.4);
+  color: var(--color-secondary);
+}
+
+.stats-duo__nome {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  max-width: 80px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-duo__num {
+  font-size: 36px;
+  font-weight: var(--font-medium);
+  line-height: 1;
+}
+.stats-duo__card--voce     .stats-duo__num { color: var(--color-primary); }
+.stats-duo__card--parceiro .stats-duo__num { color: var(--color-secondary); }
+
+.stats-duo__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.stats-chart-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-4);
+}
+
+#statsChart { display: block; }
+
+.stats-chart-legend {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stats-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.stats-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stats-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.stats-vazio i { font-size: 40px; opacity: 0.35; }
+
 /* ── Loja: saldo no header da loja ── */
 .loja-saldo {
   display: flex;

@@ -50,6 +50,13 @@ let _unsubFilmes     = null;
 let _unsubReceitas   = null;
 let _unsubLugares    = null;
 let _parceiroUidEncontrado = null;
+let _tarefasSnapshot = null;
+let _nomePartner     = 'parceiro';
+let _avatarPartner   = null;
+
+const MESES_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+let _statsAno = new Date().getFullYear();
+let _statsMes = new Date().getMonth() + 1;
 
 // ── Avatar helper ─────────────────────────────────────────────
 function _htmlAvatar(avatar) {
@@ -901,6 +908,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let tarefasInicializadas = false;
 
     _unsubTarefas = ouvirFn((snap) => {
+      _tarefasSnapshot = snap;
       snap.docChanges().forEach(change => {
         const { doc, type } = change;
         if (type === 'added') {
@@ -1488,6 +1496,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function _renderDadosParceiro(dados) {
+    _nomePartner   = dados.nome   || 'parceiro';
+    _avatarPartner = dados.avatar || null;
     const avatarEl = document.getElementById('parceiroAvatar');
     if (avatarEl) avatarEl.innerHTML = _htmlAvatar(dados.avatar || 'ph-user');
 
@@ -2247,6 +2257,157 @@ document.addEventListener('DOMContentLoaded', () => {
     atualizarProgresso();
   }
 
+  // ════════════════════════════════════════════════════════
+  // TELA DE ESTATÍSTICAS
+  // ════════════════════════════════════════════════════════
+
+  function irParaEstatisticas() {
+    if (!_autenticado()) return;
+    navegar('estatisticas');
+    _renderEstatisticas();
+  }
+
+  function _statsMesAnterior() {
+    _statsMes--;
+    if (_statsMes < 1) { _statsMes = 12; _statsAno--; }
+    _renderEstatisticas();
+  }
+
+  function _statsMesProximo() {
+    const agora = new Date();
+    if (_statsAno === agora.getFullYear() && _statsMes >= agora.getMonth() + 1) return;
+    _statsMes++;
+    if (_statsMes > 12) { _statsMes = 1; _statsAno++; }
+    _renderEstatisticas();
+  }
+
+  function _renderEstatisticas() {
+    const labelEl = document.getElementById('statsPeriodoLabel');
+    if (labelEl) labelEl.textContent = `${MESES_PT[_statsMes - 1]} ${_statsAno}`;
+
+    const meuNome     = _dadosPerfilAtual?.nome || 'você';
+    const parceiroUid = _dadosPerfilAtual?.parceiroUid;
+    const mesStr      = `${_statsAno}-${String(_statsMes).padStart(2, '0')}`;
+
+    const nomeVoceEl  = document.getElementById('statsNomeVoce');
+    const nomeParcEl  = document.getElementById('statsNomeParceiro');
+    if (nomeVoceEl) nomeVoceEl.textContent = meuNome;
+    if (nomeParcEl) nomeParcEl.textContent = _nomePartner;
+
+    const avatarVoceEl = document.getElementById('statsAvatarVoce');
+    const avatarParcEl = document.getElementById('statsAvatarParceiro');
+    if (avatarVoceEl && _dadosPerfilAtual?.avatar) avatarVoceEl.innerHTML = _htmlAvatar(_dadosPerfilAtual.avatar);
+    if (avatarParcEl && _avatarPartner) avatarParcEl.innerHTML = _htmlAvatar(_avatarPartner);
+
+    // Ocultar coluna parceiro se usuário for solo
+    const duoCardParceiro = document.getElementById('statsDuoParceiro');
+    const duoSep          = document.getElementById('statsDuoSep');
+    const hasParceiro     = !!parceiroUid;
+    if (duoCardParceiro) duoCardParceiro.style.display = hasParceiro ? '' : 'none';
+    if (duoSep)          duoSep.style.display          = hasParceiro ? '' : 'none';
+
+    // Contabilizar tarefas concluídas no mês a partir do snapshot
+    let qtdVoce = 0, qtdParceiro = 0;
+    if (_tarefasSnapshot) {
+      _tarefasSnapshot.forEach(docSnap => {
+        const concluidaPor = docSnap.data().concluidaPor || {};
+        if (_fbUid      && concluidaPor[_fbUid]?.startsWith(mesStr))      qtdVoce++;
+        if (parceiroUid && concluidaPor[parceiroUid]?.startsWith(mesStr)) qtdParceiro++;
+      });
+    }
+
+    const numVoceEl = document.getElementById('statsNumVoce');
+    const numParcEl = document.getElementById('statsNumParceiro');
+    if (numVoceEl) numVoceEl.textContent = qtdVoce;
+    if (numParcEl) numParcEl.textContent = hasParceiro ? qtdParceiro : '—';
+
+    const total       = qtdVoce + (hasParceiro ? qtdParceiro : 0);
+    const chartSec    = document.getElementById('statsChartSection');
+    const vazioEl     = document.getElementById('statsVazio');
+    const canvas      = document.getElementById('statsChart');
+    const legendEl    = document.getElementById('statsChartLegend');
+
+    if (total === 0) {
+      if (chartSec) chartSec.style.display = 'none';
+      if (vazioEl)  vazioEl.classList.remove('is-hidden');
+    } else {
+      if (chartSec) chartSec.style.display = '';
+      if (vazioEl)  vazioEl.classList.add('is-hidden');
+
+      if (canvas) _desenharGraficoPizza(canvas, qtdVoce, hasParceiro ? qtdParceiro : 0, total);
+
+      if (legendEl) {
+        legendEl.innerHTML =
+          `<div class="stats-legend-item">
+            <div class="stats-legend-dot" style="background:#D97789"></div>
+            <span>${meuNome}: ${qtdVoce}</span>
+          </div>` +
+          (hasParceiro ? `<div class="stats-legend-item">
+            <div class="stats-legend-dot" style="background:#DB8E02"></div>
+            <span>${_nomePartner}: ${qtdParceiro}</span>
+          </div>` : '');
+      }
+    }
+  }
+
+  function _desenharGraficoPizza(canvas, voce, parceiro, total) {
+    const dpr  = window.devicePixelRatio || 1;
+    const size = 220;
+    canvas.width        = size * dpr;
+    canvas.height       = size * dpr;
+    canvas.style.width  = size + 'px';
+    canvas.style.height = size + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, size, size);
+
+    const cx   = size / 2;
+    const cy   = size / 2;
+    const rExt = size / 2 - 8;
+    const rInt = rExt * 0.58;
+
+    const getCssVar = (v, fallback) =>
+      getComputedStyle(document.documentElement).getPropertyValue(v).trim() || fallback;
+    const bgColor   = getCssVar('--color-bg-surface',    '#F5EDD5');
+    const textPrim  = getCssVar('--color-text-primary',  '#1C1003');
+    const textTert  = getCssVar('--color-text-tertiary', '#8A7060');
+
+    const slices = [];
+    if (voce    > 0) slices.push({ v: voce,    cor: '#D97789' });
+    if (parceiro > 0) slices.push({ v: parceiro, cor: '#DB8E02' });
+
+    let ang = -Math.PI / 2;
+    slices.forEach(({ v, cor }) => {
+      const delta = (v / total) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, rExt, ang, ang + delta);
+      ctx.closePath();
+      ctx.fillStyle = cor;
+      ctx.fill();
+      ang += delta;
+    });
+
+    // Furo central
+    ctx.beginPath();
+    ctx.arc(cx, cy, rInt, 0, Math.PI * 2);
+    ctx.fillStyle = bgColor;
+    ctx.fill();
+
+    // Número total
+    ctx.fillStyle    = textPrim;
+    ctx.font         = `700 ${Math.round(rInt * 0.5)}px Manrope, sans-serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(String(total), cx, cy - rInt * 0.14);
+
+    // Label "tarefas"
+    ctx.fillStyle = textTert;
+    ctx.font      = `${Math.round(rInt * 0.27)}px Manrope, sans-serif`;
+    ctx.fillText('tarefas', cx, cy + rInt * 0.27);
+  }
+
   async function cadastroGoogle() {
     try {
       await loginComGoogle();
@@ -2887,6 +3048,9 @@ function salvarMeta() {
     // Home / navegação
     'ver-parceiro':                 () => irParaParceiro(),
     'ir-home':                      () => irParaHome(),
+    'ir-estatisticas':              () => irParaEstatisticas(),
+    'stats-mes-anterior':           () => _statsMesAnterior(),
+    'stats-mes-proximo':            () => _statsMesProximo(),
     'ir-parceiro':                  () => irParaParceiro(),
     'ir-tarefas':                   () => irParaTarefas(),
     'ir-exercicios':                () => irParaExercicios(),
