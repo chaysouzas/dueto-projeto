@@ -58,6 +58,12 @@ const MESES_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho',
 let _statsAno = new Date().getFullYear();
 let _statsMes = new Date().getMonth() + 1;
 
+// Retorna 'YYYY-MM-DD' no fuso local do dispositivo (evita bug UTC em UTC-x)
+function _dataLocal() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 // ── Avatar helper ─────────────────────────────────────────────
 function _htmlAvatar(avatar) {
   if (avatar && (avatar.startsWith('https://') || avatar.startsWith('http://') || avatar.startsWith('data:'))) {
@@ -733,7 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarSaldo();
 
         // Carregar estado de exercícios persistido
-        const hojeISO = new Date().toISOString().split('T')[0];
+        const hojeISO = _dataLocal();
         exEstado.feitoHoje  = dados.ultimoCheckin === hojeISO;
         let streakBase      = dados.streakAtual || 0;
         if (!exEstado.feitoHoje && dados.ultimoCheckin) {
@@ -916,7 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (type === 'removed') {
           document.querySelectorAll(`[data-task-id="${doc.id}"]`).forEach(el => el.remove());
         } else if (type === 'modified') {
-          const hoje        = new Date().toISOString().split('T')[0];
+          const hoje        = _dataLocal();
           const docData     = doc.data();
           const concluidaPor = docData.concluidaPor || {};
           const parceiroUid = _dadosPerfilAtual?.parceiroUid;
@@ -924,7 +930,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const alguemFez   = euFiz || (parceiroUid && concluidaPor[parceiroUid] === hoje);
 
           // Para pontual: verificar se está dentro do prazo
-          const proxDataStr = docData.proxData ? new Date(docData.proxData).toISOString().split('T')[0] : hoje;
+          const proxDataStr = docData.proxData ? docData.proxData.substring(0, 10) : hoje;
           const pontualDue  = docData.tipo !== 'pontual' || proxDataStr <= hoje;
 
           // Notificar quando o parceiro concluir (apenas após carga inicial)
@@ -1048,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dados = docSnap.data();
     const id    = docSnap.id;
 
-    const hoje        = new Date().toISOString().split('T')[0];
+    const hoje        = _dataLocal();
     const parceiroUid = _dadosPerfilAtual?.parceiroUid;
     const euFiz       = dados.concluidaPor?.[uid] === hoje;
     const alguemFez   = euFiz || (parceiroUid && dados.concluidaPor?.[parceiroUid] === hoje);
@@ -1057,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
       : 'diária';
 
     // Tarefa pontual está pendente apenas se proxData <= hoje
-    const proxDataStr = dados.proxData ? new Date(dados.proxData).toISOString().split('T')[0] : hoje;
+    const proxDataStr = dados.proxData ? dados.proxData.substring(0, 10) : hoje;
     const pontualDue  = dados.tipo !== 'pontual' || proxDataStr <= hoje;
 
     // ── Tela de tarefas ────────────────────────────────────────
@@ -1067,7 +1073,6 @@ document.addEventListener('DOMContentLoaded', () => {
       item.className      = 'task-item';
       item.dataset.taskId = id;
       item.dataset.grupo  = dados.grupo;
-      item.dataset.pts    = dados.pontos;
       item.dataset.tipo   = dados.tipo;
       item.dataset.ciclo  = dados.ciclo || '';
       item.dataset.proxData = dados.proxData || '';
@@ -1078,7 +1083,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="task-item__name ${euFiz ? 'done' : ''}">${dados.nome}</div>
           <div class="task-item__tag">${tagTexto}</div>
         </div>
-        <span class="task-item__pts">+${dados.pontos}</span>
         <button class="task-item__del" data-action="excluir-tarefa"
                 data-task-id="${id}" aria-label="Excluir tarefa">
           <i class="ph ph-trash" aria-hidden="true"></i>
@@ -1096,7 +1100,6 @@ document.addEventListener('DOMContentLoaded', () => {
       homeItem.className      = 'task-item';
       homeItem.dataset.taskId = id;
       homeItem.dataset.grupo  = dados.grupo;
-      homeItem.dataset.pts    = dados.pontos;
       homeItem.dataset.tipo   = dados.tipo;
       homeItem.dataset.ciclo  = dados.ciclo || '';
       homeItem.dataset.proxData = dados.proxData || '';
@@ -1108,7 +1111,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="task-item__name ${alguemFez ? 'done' : ''}">${dados.nome}</div>
           <div class="task-item__tag">${tagTexto}</div>
         </div>
-        <span class="task-item__pts">+${dados.pontos}</span>
       `;
       homeLista.appendChild(homeItem);
     }
@@ -1535,7 +1537,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="parceiro-tarefa-item">
           <i class="ph ph-check-circle parceiro-tarefa-item__check" aria-hidden="true"></i>
           <span class="parceiro-tarefa-item__nome">${t.nome}</span>
-          <span class="parceiro-tarefa-item__pts">+${t.pontos}</span>
         </div>`).join('');
     }
   }
@@ -2348,6 +2349,22 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>` : '');
       }
     }
+
+    // Card de conteúdo: filmes, receitas, viagens
+    const filmesAssistidos = _filmesLista.filter(f => f.assistido).length;
+    const filmesTotal      = _filmesLista.length;
+    const receitasTotal    = _receitasLista.length;
+    const viagensTotal     = _lugaresLista.filter(l => l.categoria === 'viagem').length;
+
+    const filmesNumEl  = document.getElementById('statsFilmesNum');
+    const filmesSub    = document.getElementById('statsFilmesSub');
+    const receitasNumEl = document.getElementById('statsReceitasNum');
+    const viagensNumEl  = document.getElementById('statsViagensNum');
+
+    if (filmesNumEl)   filmesNumEl.textContent   = filmesAssistidos;
+    if (filmesSub)     filmesSub.textContent     = filmesTotal > 0 ? `de ${filmesTotal}` : '';
+    if (receitasNumEl) receitasNumEl.textContent = receitasTotal;
+    if (viagensNumEl)  viagensNumEl.textContent  = viagensTotal;
   }
 
   function _desenharGraficoPizza(canvas, voce, parceiro, total) {
@@ -2440,7 +2457,6 @@ document.addEventListener('DOMContentLoaded', () => {
   async function toggleTask(item) {
     const check = item.querySelector('.task-check');
     const name  = item.querySelector('.task-item__name');
-    const pts   = parseInt(item.dataset.pts) || 0;
     const done  = check.classList.contains('done');
 
     if (done) {
@@ -2448,24 +2464,11 @@ document.addEventListener('DOMContentLoaded', () => {
       check.innerHTML = '';
       name.classList.remove('done');
       tarefasConcluidas = Math.max(0, tarefasConcluidas - 1);
-      if (_fbUid) {
-        try {
-          if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, -pts, 'desfeito: ' + name.textContent);
-          else            await atualizarSaldoUsuarioDB(_fbUid, -pts);
-        } catch (err) { console.error(err); }
-      }
     } else {
       check.classList.add('done');
       check.innerHTML = '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>';
       name.classList.add('done');
       tarefasConcluidas = Math.min(totalTarefas, tarefasConcluidas + 1);
-      if (_fbUid) {
-        try {
-          if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, pts, name.textContent);
-          else            await atualizarSaldoUsuarioDB(_fbUid, pts);
-        } catch (err) { console.error(err); }
-      }
-      mostrarToast('+' + pts + ' moedas');
     }
     atualizarProgresso();
   }
@@ -2499,7 +2502,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // TELA DE TAREFAS
   // ════════════════════════════════════════════════════════
 
-  let pontosSelecionados = 10;
   let tipoSelecionado = 'diaria';
 
   function selecionarTipo(btn) {
@@ -2623,12 +2625,6 @@ async function toggleTaskHome(item) {
     const ciclo = document.getElementById('cicloDias');
     if (ciclo) ciclo.value = 3;
 
-    // Reset pontos
-    document.querySelectorAll('.pts-opt').forEach(o => o.classList.remove('active'));
-    const ptsDefault = document.querySelector('.pts-opt[data-pts="10"]');
-    if (ptsDefault) ptsDefault.classList.add('active');
-    pontosSelecionados = 10;
-
     // Reset grupo
     const select = document.getElementById('novaTarefaGrupo');
     if (select) select.value = 'limpeza';
@@ -2636,12 +2632,6 @@ async function toggleTaskHome(item) {
 
   function fecharModalNovaTarefaFora(e) {
     if (e.target === document.getElementById('modalNovaTarefa')) fecharModalNovaTarefa();
-  }
-
-  function selecionarPontos(btn) {
-    document.querySelectorAll('.pts-opt').forEach(o => o.classList.remove('active'));
-    btn.classList.add('active');
-    pontosSelecionados = parseInt(btn.dataset.pts);
   }
 
   async function criarTarefa() {
@@ -2657,7 +2647,6 @@ async function toggleTaskHome(item) {
     const tarefa = {
       nome, grupo,
       tipo: tipoSelecionado,
-      pontos: pontosSelecionados,
       ciclo: cicloDias,
       proxData: cicloDias ? new Date().toISOString() : null,
     };
@@ -2733,10 +2722,10 @@ async function toggleTaskHome(item) {
   }
 
   // ── Reset de meia-noite ────────────────────────────────────
-  let _ultimoDia = new Date().toISOString().split('T')[0];
+  let _ultimoDia = _dataLocal();
 
   function _verificarMudancaDia() {
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = _dataLocal();
     if (_ultimoDia === hoje) return;
     _ultimoDia = hoje;
 
@@ -2751,7 +2740,7 @@ async function toggleTaskHome(item) {
     // Reavalia visibilidade das tarefas pontuais no home
     document.querySelectorAll('#homeTarefasList .task-item[data-tipo="pontual"]').forEach(item => {
       const proxDataStr = item.dataset.proxData
-        ? new Date(item.dataset.proxData).toISOString().split('T')[0]
+        ? item.dataset.proxData.substring(0, 10)
         : hoje;
       item.classList.toggle('is-hidden', proxDataStr > hoje);
     });
@@ -3064,7 +3053,6 @@ function salvarMeta() {
     'abrir-nova-tarefa':            () => abrirModalNovaTarefa(),
     'fechar-nova-tarefa':           () => fecharModalNovaTarefa(),
     'fechar-nova-tarefa-fora':      (el, e) => fecharModalNovaTarefaFora(e),
-    'selecionar-pontos':            (el) => selecionarPontos(el),
     'criar-tarefa':                 () => criarTarefa(),
 
     // Exercícios

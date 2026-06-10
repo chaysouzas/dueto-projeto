@@ -31,6 +31,12 @@ const auth   = getAuth(app);
 const db     = getFirestore(app);
 const google = new GoogleAuthProvider();
 
+// Retorna 'YYYY-MM-DD' no fuso local do dispositivo (evita bug UTC em UTC-x)
+function _dataLocal() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 // ── Estado global ─────────────────────────────────────────────
 export let usuarioAtual = null;
 export let dadosUsuario = null;
@@ -128,7 +134,7 @@ export async function excluirTarefaDB(cId, tarefaId) {
 }
 
 export async function marcarTarefaDB(cId, tarefaId, uid, feito, tipo, ciclo) {
-  const hoje = new Date().toISOString().split('T')[0];
+  const hoje = _dataLocal();
   const dados = { [`concluidaPor.${uid}`]: feito ? hoje : null };
   if (tipo === 'pontual' && ciclo) {
     const prox = new Date();
@@ -154,7 +160,7 @@ export async function excluirTarefaSoloDB(uid, tarefaId) {
 }
 
 export async function marcarTarefaSoloDB(uid, tarefaId, feito, tipo, ciclo) {
-  const hoje = new Date().toISOString().split('T')[0];
+  const hoje = _dataLocal();
   const dados = { [`concluidaPor.${uid}`]: feito ? hoje : null };
   if (tipo === 'pontual' && ciclo) {
     const prox = new Date();
@@ -358,7 +364,7 @@ export function ouvirParceiro(uid, callback) {
 }
 
 export async function buscarProgressoParceiroHoje(casalId, parceiroUid) {
-  const hoje = new Date().toISOString().split('T')[0];
+  const hoje = _dataLocal();
   const snap = await getDocs(collection(db, 'casais', casalId, 'tarefas'));
   const total = snap.size;
   const docsFeitos = snap.docs.filter(d => d.data().concluidaPor?.[parceiroUid] === hoje);
