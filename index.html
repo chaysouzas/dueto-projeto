@@ -708,6 +708,24 @@
         <span class="field-hint">ex: a cada 7 dias = uma vez por semana</span>
       </div>
 
+      <div class="field">
+        <label class="field-label">moedas ao concluir</label>
+        <div class="pts-picker" id="ptsPicker">
+          <button class="pts-opt active" data-pts="20" data-action="selecionar-pontos">
+            <span class="pts-opt__val">20</span>
+            <span class="pts-opt__label">fácil</span>
+          </button>
+          <button class="pts-opt" data-pts="50" data-action="selecionar-pontos">
+            <span class="pts-opt__val">50</span>
+            <span class="pts-opt__label">média</span>
+          </button>
+          <button class="pts-opt" data-pts="100" data-action="selecionar-pontos">
+            <span class="pts-opt__val">100</span>
+            <span class="pts-opt__label">pesada</span>
+          </button>
+        </div>
+      </div>
+
       <div class="modal__actions">
         <button class="btn-ghost" data-action="fechar-nova-tarefa">cancelar</button>
         <button class="btn-modal-send" data-action="criar-tarefa">criar tarefa</button>

@@ -1085,6 +1085,7 @@ document.addEventListener('DOMContentLoaded', () => {
       item.className      = 'task-item';
       item.dataset.taskId = id;
       item.dataset.grupo  = dados.grupo;
+      item.dataset.pts    = dados.pontos || 10;
       item.dataset.tipo   = dados.tipo;
       item.dataset.ciclo  = dados.ciclo || '';
       item.dataset.proxData = dados.proxData || '';
@@ -1112,6 +1113,7 @@ document.addEventListener('DOMContentLoaded', () => {
       homeItem.className      = 'task-item';
       homeItem.dataset.taskId = id;
       homeItem.dataset.grupo  = dados.grupo;
+      homeItem.dataset.pts    = dados.pontos || 10;
       homeItem.dataset.tipo   = dados.tipo;
       homeItem.dataset.ciclo  = dados.ciclo || '';
       homeItem.dataset.proxData = dados.proxData || '';
@@ -2469,6 +2471,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function toggleTask(item) {
     const check = item.querySelector('.task-check');
     const name  = item.querySelector('.task-item__name');
+    const pts   = parseInt(item.dataset.pts) || 10;
     const done  = check.classList.contains('done');
 
     if (done) {
@@ -2476,11 +2479,23 @@ document.addEventListener('DOMContentLoaded', () => {
       check.innerHTML = '';
       name.classList.remove('done');
       tarefasConcluidas = Math.max(0, tarefasConcluidas - 1);
+      if (_fbUid) {
+        try {
+          if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, -pts, 'desfeito: ' + name.textContent);
+          else            await atualizarSaldoUsuarioDB(_fbUid, -pts);
+        } catch (err) { console.error(err); }
+      }
     } else {
       check.classList.add('done');
       check.innerHTML = '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>';
       name.classList.add('done');
       tarefasConcluidas = Math.min(totalTarefas, tarefasConcluidas + 1);
+      if (_fbUid) {
+        try {
+          if (_fbCasalId) await adicionarSaldoDB(_fbCasalId, _fbUid, pts, name.textContent);
+          else            await atualizarSaldoUsuarioDB(_fbUid, pts);
+        } catch (err) { console.error(err); }
+      }
     }
     atualizarProgresso();
   }
@@ -2514,6 +2529,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // TELA DE TAREFAS
   // ════════════════════════════════════════════════════════
 
+  let pontosSelecionados = 20;
   let tipoSelecionado = 'diaria';
 
   function selecionarTipo(btn) {
@@ -2637,9 +2653,21 @@ async function toggleTaskHome(item) {
     const ciclo = document.getElementById('cicloDias');
     if (ciclo) ciclo.value = 3;
 
+    // Reset pontos
+    document.querySelectorAll('.pts-opt').forEach(o => o.classList.remove('active'));
+    const ptsDefault = document.querySelector('.pts-opt[data-pts="20"]');
+    if (ptsDefault) ptsDefault.classList.add('active');
+    pontosSelecionados = 20;
+
     // Reset grupo
     const select = document.getElementById('novaTarefaGrupo');
     if (select) select.value = 'limpeza';
+  }
+
+  function selecionarPontos(btn) {
+    document.querySelectorAll('.pts-opt').forEach(o => o.classList.remove('active'));
+    btn.classList.add('active');
+    pontosSelecionados = parseInt(btn.dataset.pts);
   }
 
   function fecharModalNovaTarefaFora(e) {
@@ -2659,6 +2687,7 @@ async function toggleTaskHome(item) {
     const tarefa = {
       nome, grupo,
       tipo: tipoSelecionado,
+      pontos: pontosSelecionados,
       ciclo: cicloDias,
       proxData: cicloDias ? new Date().toISOString() : null,
     };
@@ -3065,6 +3094,7 @@ function salvarMeta() {
     'abrir-nova-tarefa':            () => abrirModalNovaTarefa(),
     'fechar-nova-tarefa':           () => fecharModalNovaTarefa(),
     'fechar-nova-tarefa-fora':      (el, e) => fecharModalNovaTarefaFora(e),
+    'selecionar-pontos':            (el) => selecionarPontos(el),
     'criar-tarefa':                 () => criarTarefa(),
 
     // Exercícios
