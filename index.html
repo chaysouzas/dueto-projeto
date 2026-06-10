@@ -964,6 +964,10 @@
 
         <!-- Ações -->
         <div class="perfil-actions">
+          <button class="btn-reset" data-action="confirmar-reset">
+            <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i>
+            <span>resetar progresso</span>
+          </button>
           <button class="btn-logout" data-action="confirmar-logout">
             <i class="ph ph-sign-out" aria-hidden="true"></i>
             <span>sair da conta</span>
@@ -1667,6 +1671,18 @@
 </div>
 
 <!-- ── Nav bar ── -->
+
+    <!-- Modal: confirmar reset -->
+    <div class="modal-backdrop" id="modalReset" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+      <div class="modal">
+        <h2 class="modal__title" id="resetTitle">resetar progresso?</h2>
+        <p class="modal__desc">isso vai zerar as tarefas concluídas e o saldo de moedas de todos os usuários. essa ação não pode ser desfeita.</p>
+        <div class="modal__actions">
+          <button class="btn-ghost" data-action="fechar-reset">cancelar</button>
+          <button class="btn-modal-send btn-modal-send--danger" data-action="fazer-reset">resetar</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Modal: confirmar logout -->
     <div class="modal-backdrop" id="modalLogout" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">

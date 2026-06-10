@@ -27,6 +27,7 @@ import {
   avaliarFilmeDB, avaliarFilmeSoloDB,
   excluirFilmeDB, excluirFilmeSoloDB,
   ouvirFilmes, ouvirFilmesSolo,
+  resetarProgressoDB,
   logout
 } from './firebase.js';
 
@@ -673,6 +674,17 @@ async function copiarCodigoPerfil() {
     mostrarToast('código copiado!');
   } catch {
     mostrarToast('erro ao copiar');
+  }
+}
+
+async function resetarProgresso() {
+  fecharModal('modalReset');
+  try {
+    const parceiroUid = _dadosPerfilAtual?.parceiroUid || null;
+    await resetarProgressoDB(_fbCasalId, _fbUid, parceiroUid);
+    mostrarToast('progresso zerado!');
+  } catch (err) {
+    mostrarToast('erro ao resetar: ' + err.message);
   }
 }
 
@@ -2330,10 +2342,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (total === 0) {
       if (chartSec) chartSec.style.display = 'none';
-      if (vazioEl)  vazioEl.classList.remove('is-hidden');
+      if (vazioEl)  vazioEl.style.display = '';
     } else {
       if (chartSec) chartSec.style.display = '';
-      if (vazioEl)  vazioEl.classList.add('is-hidden');
+      if (vazioEl)  vazioEl.style.display = 'none';
 
       if (canvas) _desenharGraficoPizza(canvas, qtdVoce, hasParceiro ? qtdParceiro : 0, total);
 
@@ -3067,6 +3079,9 @@ function salvarMeta() {
     // Perfil e logout
     'ir-perfil':                    () => irParaPerfil(),
     'copiar-codigo-perfil':         () => copiarCodigoPerfil(),
+    'confirmar-reset':              () => abrirModal('modalReset'),
+    'fechar-reset':                 () => fecharModal('modalReset'),
+    'fazer-reset':                  () => resetarProgresso(),
     'confirmar-logout':             () => abrirModal('modalLogout'),
     'fechar-logout':                () => fecharModal('modalLogout'),
     'fazer-logout':                 () => fazerLogout(),

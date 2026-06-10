@@ -121,6 +121,21 @@ export async function conectarParceiro(meuUid, parceiroUid) {
 
 async function inicializarLojaCasal(_cId) {}
 
+// ── Reset de progresso ────────────────────────────────────────
+
+export async function resetarProgressoDB(casalId, uid, parceiroUid) {
+  if (casalId) {
+    const snap = await getDocs(collection(db, 'casais', casalId, 'tarefas'));
+    await Promise.all(snap.docs.map(d => updateDoc(d.ref, { concluidaPor: {} })));
+    await updateDoc(doc(db, 'usuarios', uid), { saldo: 0 });
+    if (parceiroUid) await updateDoc(doc(db, 'usuarios', parceiroUid), { saldo: 0 });
+  } else {
+    const snap = await getDocs(collection(db, 'usuarios', uid, 'tarefas'));
+    await Promise.all(snap.docs.map(d => updateDoc(d.ref, { concluidaPor: {} })));
+    await updateDoc(doc(db, 'usuarios', uid), { saldo: 0 });
+  }
+}
+
 // ── Tarefas ──────────────────────────────────────────────────
 
 export async function criarTarefaDB(cId, tarefa) {
