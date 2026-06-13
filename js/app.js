@@ -969,8 +969,7 @@ document.addEventListener('DOMContentLoaded', () => {
               el.classList.toggle('is-hidden', !pontualDue);
             }
 
-            // Home: done se qualquer um completou; Tarefas: done só se EU completei
-            const feito  = isHome ? alguemFez : euFiz;
+            const feito  = alguemFez;
             check.classList.toggle('done', feito);
             check.innerHTML = feito ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : '';
             name.classList.toggle('done', feito);
@@ -1091,9 +1090,9 @@ document.addEventListener('DOMContentLoaded', () => {
       item.dataset.proxData = dados.proxData || '';
       item.dataset.action = 'toggle-task';
       item.innerHTML = `
-        <div class="task-check ${euFiz ? 'done' : ''}">${euFiz ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
+        <div class="task-check ${alguemFez ? 'done' : ''}">${alguemFez ? '<i class="ph-bold ph-check icon-xs" aria-hidden="true"></i>' : ''}</div>
         <div class="task-item__info">
-          <div class="task-item__name ${euFiz ? 'done' : ''}">${dados.nome}</div>
+          <div class="task-item__name ${alguemFez ? 'done' : ''}">${dados.nome}</div>
           <div class="task-item__tag">${tagTexto}</div>
         </div>
         <button class="task-item__del" data-action="excluir-tarefa"
